@@ -1,0 +1,11 @@
+*.prg
+*.sym
+*.vs
+*.dbg
+*.jar
+*.bin
+*.log
+node_modules
+Session.vim
+.source.txt
+.idea

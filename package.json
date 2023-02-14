@@ -1,0 +1,12 @@
+{
+  "name": "stayingAlive",
+  "version": "1.0.0",
+  "main": "convert_image.js",
+  "author": "Michel de Bree <michel@micheldebree.nl>",
+  "license": "MIT",
+  "devDependencies": {
+    "c64jasm": "0.9.2",
+    "sharp": "0.31.3",
+    "standard": "17.0.0"
+  }
+}

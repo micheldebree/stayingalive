@@ -1,0 +1,19 @@
+[Version]
+ConfigVersion=3.7.1
+
+[C64SC]
+ConfirmOnExit=0
+MonitorXPos=797
+MonitorYPos=84
+MonitorWidth=623
+MonitorHeight=635
+MonitorFont="Iosevka Medium 11"
+Window0Height=635
+Window0Width=720
+Window0Xpos=67
+Window0Ypos=83
+VICIIFilter=0
+AutostartPrgMode=1
+KeepMonitorOpen=0
+MonitorServer=1
+
