@@ -9,6 +9,7 @@
 * = $0801
 
 !let firstRasterY = $33
+!let nrFrames = 18
 !let frameRate = 5
 
 +kernal::basicstart(start)
@@ -50,48 +51,14 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-drawKeyframe: {
-  ldx #0
-for:
-  !for i in range(4) {
-    lda keyframe + i * $100,x
-    sta $0400 + i * $100,x
-    lda keyframe + 1000 + i * $100,x
-    sta $d800 + i * $100,x
-  }
-  inx
-  bne for
-}
-
+  jsr drawKeyframe
   rts
 }
 
 mainIrq:  {
   inc $d020
-
-!let frameNr = * +1
-
-  ldx #0
-  lda framesLo,x 
-  sta frameCall + 1
-  lda framesHi,x
-  sta frameCall + 2
-
-frameCall:
-  jsr screen_035
-  dec frameDelay
-  bne keepCurrentFrame
-  lda #frameRate
-  sta frameDelay
-  inc frameNr
-  lda frameNr
-  cmp #17
-  bne keepCurrentFrame
-  lda #0
-  sta frameNr
-keepCurrentFrame:
+  jsr advanceAnimation
   dec $d020
-
 
 ; ack and return
   asl $d019
@@ -99,17 +66,53 @@ return:
   rti
 }
 
+drawKeyframe: {
+  ldx #0
+for:
+  !for i in range(4) {
+    !let offset = i * $100
+    lda keyframe + offset,x
+    sta $0400 + offset,x
+    lda keyframe + (40 * 25) + offset,x
+    sta $d800 + offset,x
+  }
+  inx
+  bne for
+  rts
+}
+
+advanceAnimation: {
+
+  !let frameNr = * +1
+    ldx #0
+    lda heartFramesLo,x 
+    sta frameCall + 1
+    lda heartFramesHi,x
+    sta frameCall + 2
+
+  frameCall:
+    jsr screen_035
+    dec frameDelay
+    bne keepCurrentFrame
+      lda #frameRate
+      sta frameDelay
+      inc frameNr
+      lda frameNr
+      cmp #nrFrames
+      bne keepCurrentFrame
+        lda #0
+        sta frameNr
+
+  keepCurrentFrame:
+    rts
+}
+
 frameDelay:
-    !byte frameRate
-  
+  !byte frameRate
+
+!include "res/pulse.heart.petmate.gen.asm"
+
+* = $4000
 
 keyframe:
   !binary "res/pulse.heart.petmate.bin"
-
-!include "res/pulse.heart.petmate.asm"
-
-; framesHi:
-;   !byte b.hi(screen_028)
-
-; framesLo:
-;   !byte b.lo(screen_028)
