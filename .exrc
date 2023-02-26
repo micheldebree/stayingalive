@@ -19,11 +19,12 @@ set expandtab
 " set autochdir
 au BufNewFile,BufRead *.asm set ft=c64jasm
 au BufNewFile,BufRead *.dbg set ft=xml
+au BufNewFile,BufRead *.petmate set ft=json
 au BufNewFile,BufRead *.asm setlocal foldmarker={,}
 au FileType asm set commentstring=;%s
 au FileType asm set errorformat=%f:%l:%c:\ %m
 au FileType asm set foldmethod=marker
-au VimLeave *.asm mks!
+au VimLeave *.asm,*.js,Makefile mks!
 
 let g:ale_linters = {'javascript': ['standard']}
-let g:ale_fixers = {'javascript': ['standard']}
+let g:ale_fixers = {'javascript': ['standard'], 'json': ['jq'] }

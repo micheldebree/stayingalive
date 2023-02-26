@@ -1,17 +1,16 @@
 ; vim:set ft=c64jasm:
-!filescope vic
+!filescope vicmacro
 
-!use "vic.js" as vicjs
-!let js = vicjs
+!use "vic.js" as js
 
-  ; 63 cycles in one line
-  ; 23 cycles on bad line
+; 63 cycles in one line
+; 23 cycles on bad line
 
 ; Set the vic bank to start at
 !macro selectBank(startAddress) {
   lda $dd00
   and #%11111100
-  ora #%11 - startAddress / vicjs.size.bank
+  ora #%11 - startAddress / js.size.bank
   sta $dd00
 }
 
