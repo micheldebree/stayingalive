@@ -66,7 +66,7 @@ return:
   rti
 }
 
-drawKeyframe: {
+drawKeyframe: { ; draw the first frame completely
   ldx #0
 for:
   !for i in range(4) {
@@ -83,28 +83,34 @@ for:
 
 advanceAnimation: {
 
-  !let frameNr = * +1
-    ldx #0
-    lda heartFramesLo,x 
-    sta frameCall + 1
-    lda heartFramesHi,x
-    sta frameCall + 2
+; self-modifying code variables
+!let frameCallLo = frameCall + 1
+!let frameCallHi = frameCall + 2
+!let frameNr = frameIndex + 1
 
-  frameCall:
-    jsr screen_035
-    dec frameDelay
-    bne keepCurrentFrame
-      lda #frameRate
-      sta frameDelay
-      inc frameNr
-      lda frameNr
-      cmp #nrFrames
-      bne keepCurrentFrame
-        lda #0
-        sta frameNr
+  dec frameDelay
+  bne return
+  lda #frameRate
+  sta frameDelay
 
-  keepCurrentFrame:
-    rts
+frameIndex:
+  ldx #0
+  lda heartFramesLo,x 
+  sta frameCallLo
+  lda heartFramesHi,x
+  sta frameCallHi
+
+frameCall:
+  jsr screen_035
+  inc frameNr
+  lda frameNr
+  cmp #nrFrames
+  bne return
+    lda #0
+    sta frameNr
+
+return:
+  rts
 }
 
 frameDelay:
