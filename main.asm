@@ -10,7 +10,7 @@
 
 !let firstRasterY = $33
 !let nrFrames = 18
-!let frameRate = 5
+!let frameRate = 4
 
 +kernal::basicstart(start)
 
@@ -57,7 +57,8 @@ init: {
 
 mainIrq:  {
   inc $d020
-  jsr advanceAnimation
+  jsr heartAnimation
+  jsr monitorAnimation
   dec $d020
 
 ; ack and return
@@ -81,27 +82,29 @@ for:
   rts
 }
 
-advanceAnimation: {
+!macro advanceAnimation(loPointers, hiPointers) {
 
 ; self-modifying code variables
 !let frameCallLo = frameCall + 1
 !let frameCallHi = frameCall + 2
 !let frameNr = frameIndex + 1
+!let delayCounter = frameDelay + 1
 
-  dec frameDelay
+frameDelay:
+  lda #frameRate
   bne return
   lda #frameRate
-  sta frameDelay
+  sta delayCounter
 
 frameIndex:
   ldx #0
-  lda heartFramesLo,x 
+  lda loPointers,x 
   sta frameCallLo
-  lda heartFramesHi,x
+  lda hiPointers,x
   sta frameCallHi
 
 frameCall:
-  jsr screen_035
+  jsr $0000
   inc frameNr
   lda frameNr
   cmp #nrFrames
@@ -110,13 +113,24 @@ frameCall:
     sta frameNr
 
 return:
+  dec delayCounter
   rts
+
 }
 
-frameDelay:
-  !byte frameRate
+heartAnimation:
++advanceAnimation(heart::heartFramesLo, heart::heartFramesHi)
 
-!include "res/pulse.heart.petmate.gen.asm"
+monitorAnimation:
++advanceAnimation(monitor::monitorFramesLo, monitor::monitorFramesHi)
+
+
+heart: {
+  !include "res/pulse.heart.petmate.gen.asm"
+}
+monitor: {
+  !include "res/pulse.monitor.petmate.gen.asm"
+}
 
 * = $4000
 

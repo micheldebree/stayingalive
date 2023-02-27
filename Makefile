@@ -24,7 +24,8 @@ RES=$(shell find ./res -name "*.bin" )
 %.debug: %.prg
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
-main.prg: $(SRC_ASM) $(LIB_JS) $(RES) res/pulse.heart.petmate.gen.asm
+
+main.prg: $(SRC_ASM) $(LIB_JS) $(RES) res/pulse.heart.petmate.gen.asm res/pulse.monitor.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg
@@ -36,6 +37,9 @@ lint:
 
 res/pulse.heart.petmate.gen.asm: res/pulse.heart.petmate lib/petmate2asm.js
 	node lib/petmate2asm.js "$<" heart
+
+res/pulse.monitor.petmate.gen.asm: res/pulse.monitor.petmate lib/petmate2asm.js
+	node lib/petmate2asm.js "$<" monitor
 
 node_modules: package.json yarn.lock
 	yarn install
