@@ -9,3 +9,4 @@ node_modules
 Session.vim
 .source.txt
 .idea
+*.gen.asm

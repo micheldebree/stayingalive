@@ -5,12 +5,15 @@
 !include "lib/irq.asm"
 !use "lib/vic.js" as vic
 !use "lib/bytes.js" as b
+!use "lib/sid.js" as sid
 
 * = $0801
 
+!let music = sid("res/heartbeat.sid")
+
 !let firstRasterY = $33
 !let nrFrames = 18
-!let frameRate = 4
+!let frameRate = 3
 
 +kernal::basicstart(start)
 
@@ -51,15 +54,18 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-  jsr drawKeyframe
+  ; jsr drawKeyframe
+  jsr drawRandomJunk
+  jsr music.init
   rts
 }
 
 mainIrq:  {
-  inc $d020
+  ; inc $d020
   jsr heartAnimation
+  jsr music.play
   jsr monitorAnimation
-  dec $d020
+  ; dec $d020
 
 ; ack and return
   asl $d019
@@ -80,6 +86,31 @@ for:
   inx
   bne for
   rts
+}
+
+initRandom: {
+  lda #$ff  ; maximum frequency value
+  sta $d40e ; voice 3 frequency low byte
+  sta $d40f ; voice 3 frequency high byte
+  lda #$80  ; noise waveform, gate bit off
+  sta $d412 ; voice 3 control register
+  rts
+}
+
+drawRandomJunk: {
+  jsr initRandom
+  ldx #0
+for:
+  !for i in range(4) {
+    lda $d41b
+    sta $0400 + i * $100,x
+    and #%11
+    sta $d800 + i * $100,x
+  }
+  inx
+  bne for
+  rts
+
 }
 
 !macro advanceAnimation(loPointers, hiPointers) {
@@ -119,20 +150,24 @@ return:
 }
 
 heartAnimation:
-+advanceAnimation(heart::heartFramesLo, heart::heartFramesHi)
++advanceAnimation(heart::framesLo, heart::framesHi)
 
 monitorAnimation:
-+advanceAnimation(monitor::monitorFramesLo, monitor::monitorFramesHi)
-
++advanceAnimation(monitor::framesLo, monitor::framesHi)
 
 heart: {
   !include "res/pulse.heart.petmate.gen.asm"
+  ; !include "res/pulse.nocred.petmate.gen.asm"
 }
 monitor: {
-  !include "res/pulse.monitor.petmate.gen.asm"
+  !include "res/pulse.green.petmate.gen.asm"
 }
 
 * = $4000
 
 keyframe:
   !binary "res/pulse.heart.petmate.bin"
+
+*  = music.location
+
+!byte music.data
