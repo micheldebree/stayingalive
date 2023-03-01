@@ -12,7 +12,6 @@
 !let music = sid("res/heartbeat.sid")
 
 !let firstRasterY = $33
-!let nrFrames = 18
 !let frameRate = 3
 
 +kernal::basicstart(start)
@@ -56,36 +55,35 @@ init: {
 
   ; jsr drawKeyframe
   jsr drawRandomJunk
+  lda #0
   jsr music.init
+
+  rts
+}
+
+; the first frame is the keyframe, this is drawn beforehand
+drawKeyframe: {
+  lda heart::framesLo
+  sta keyframe + 1
+  lda heart::framesHi
+  sta keyframe + 2
+keyframe:
+  jsr $0000
   rts
 }
 
 mainIrq:  {
-  ; inc $d020
+  inc $d020
   jsr heartAnimation
-  jsr music.play
   jsr monitorAnimation
-  ; dec $d020
+  jsr deadAnimation
+  dec $d020
+  jsr music.play
 
 ; ack and return
   asl $d019
 return:
   rti
-}
-
-drawKeyframe: { ; draw the first frame completely
-  ldx #0
-for:
-  !for i in range(4) {
-    !let offset = i * $100
-    lda keyframe + offset,x
-    sta $0400 + offset,x
-    lda keyframe + (40 * 25) + offset,x
-    sta $d800 + offset,x
-  }
-  inx
-  bne for
-  rts
 }
 
 initRandom: {
@@ -113,7 +111,7 @@ for:
 
 }
 
-!macro advanceAnimation(loPointers, hiPointers) {
+!macro advanceAnimation(loPointers, hiPointers, nrFrames) {
 
 ; self-modifying code variables
 !let frameCallLo = frameCall + 1
@@ -129,9 +127,10 @@ frameDelay:
 
 frameIndex:
   ldx #0
-  lda loPointers,x 
+  ; skip the first frame (keyframe) so it is only drawn on initialization
+  lda loPointers + 1,x 
   sta frameCallLo
-  lda hiPointers,x
+  lda hiPointers + 1,x
   sta frameCallHi
 
 frameCall:
@@ -150,10 +149,14 @@ return:
 }
 
 heartAnimation:
-+advanceAnimation(heart::framesLo, heart::framesHi)
++advanceAnimation(heart::framesLo, heart::framesHi, 17)
 
 monitorAnimation:
-+advanceAnimation(monitor::framesLo, monitor::framesHi)
++advanceAnimation(monitor::framesLo, monitor::framesHi, 17)
+
+deadAnimation:
++advanceAnimation(dead::framesLo, dead::framesHi, 6)
+
 
 heart: {
   !include "res/pulse.heart.petmate.gen.asm"
@@ -162,11 +165,9 @@ heart: {
 monitor: {
   !include "res/pulse.green.petmate.gen.asm"
 }
-
-* = $4000
-
-keyframe:
-  !binary "res/pulse.heart.petmate.bin"
+dead: {
+  !include "res/dead.petmate.gen.asm"
+}
 
 *  = music.location
 

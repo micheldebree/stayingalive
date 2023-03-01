@@ -6,6 +6,8 @@ BIN=./node_modules/.bin
 SRC_ASM=$(shell find . -name "*.asm")
 LIB_JS=$(shell find ./lib -name "*.js")
 RES=$(shell find ./res -name "*.bin" )
+PETMATE=$(shell find ./res -name "*.petmate")
+GENASM=$(PETMATE:.petmate=.petmate.genasm)
 
 %.prg: %.asm node_modules
 	@$(BIN)/c64jasm --out "$@" \
@@ -24,8 +26,10 @@ RES=$(shell find ./res -name "*.bin" )
 %.debug: %.prg
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
+%.petmate.genasm: %.petmate
+	node lib/petmate2asm.js "$<"
 
-main.prg: $(SRC_ASM) $(LIB_JS) $(RES) res/pulse.heart.petmate.gen.asm res/pulse.monitor.petmate.gen.asm res/pulse.nocred.petmate.gen.asm res/pulse.green.petmate.gen.asm
+main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM)
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg
@@ -34,18 +38,6 @@ main.prg: $(SRC_ASM) $(LIB_JS) $(RES) res/pulse.heart.petmate.gen.asm res/pulse.
 .PHONY: lint
 lint:
 	@$(BIN)/standard
-
-res/pulse.heart.petmate.gen.asm: res/pulse.heart.petmate lib/petmate2asm.js
-	node lib/petmate2asm.js "$<"
-
-res/pulse.monitor.petmate.gen.asm: res/pulse.monitor.petmate lib/petmate2asm.js
-	node lib/petmate2asm.js "$<"
-
-res/pulse.nocred.petmate.gen.asm: res/pulse.nocred.petmate lib/petmate2asm.js
-	node lib/petmate2asm.js "$<"
-
-res/pulse.green.petmate.gen.asm: res/pulse.green.petmate lib/petmate2asm.js
-	node lib/petmate2asm.js "$<"
 
 node_modules: package.json yarn.lock
 	yarn install
