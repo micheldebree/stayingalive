@@ -53,8 +53,8 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-  ; jsr drawKeyframe
-  jsr drawRandomJunk
+  jsr drawKeyframe
+  ; jsr drawRandomJunk
   lda #0
   jsr music.init
 
