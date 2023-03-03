@@ -7,7 +7,7 @@ SRC_ASM=$(shell find . -name "*.asm")
 LIB_JS=$(shell find ./lib -name "*.js")
 RES=$(shell find ./res -name "*.bin" )
 PETMATE=$(shell find ./res -name "*.petmate")
-GENASM=$(PETMATE:.petmate=.petmate.genasm)
+GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 
 %.prg: %.asm node_modules
 	@$(BIN)/c64jasm --out "$@" \
@@ -26,7 +26,7 @@ GENASM=$(PETMATE:.petmate=.petmate.genasm)
 %.debug: %.prg
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
-%.petmate.genasm: %.petmate
+%.petmate.gen.asm: %.petmate
 	node lib/petmate2asm.js "$<"
 
 main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM)
