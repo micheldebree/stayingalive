@@ -1,5 +1,7 @@
 packadd vim-c64jasm
 set makeprg=make
+noremap <F1> :!./doc/opcode.sh <cword><CR>
+noremap <F2> :!open https://c64os.com/post/6502instructions
 noremap <F5> :wa<CR>:silent! make %<.prg<CR>
 noremap <F6> :wa<CR>:silent! make main.run<bar>vertical botright cwindow 80<CR>:redraw!<CR>
 noremap <F7> :wa<CR>:make main.debug<bar>cwindow<CR>:redraw!<CR>
