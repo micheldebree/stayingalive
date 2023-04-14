@@ -14,7 +14,11 @@
 !let firstRasterY = $33
 !let frameRate = 3
 
++debug::reserveRange("screen matrix", $400, $400 + 1000)
+
+basic:
 +kernal::basicstart(start)
++debug::registerRange("basic start", basic)
 
 start:
 
@@ -108,8 +112,9 @@ for:
   inx
   bne for
   rts
-
 }
+
++debug::registerRange("main code", start)
 
 !macro advanceAnimation(loPointers, hiPointers, nrFrames) {
 
@@ -157,18 +162,63 @@ monitorAnimation:
 deadAnimation:
 +advanceAnimation(dead::framesLo, dead::framesHi, 6)
 
++debug::registerRange("animation code", heartAnimation)
 
 heart: {
   !include "res/pulse.heart.petmate.gen.asm"
   ; !include "res/pulse.nocred.petmate.gen.asm"
 }
+
++debug::registerRange("heart", heart)
+
 monitor: {
   !include "res/pulse.green.petmate.gen.asm"
 }
+
++debug::registerRange("monitor", monitor)
+
 dead: {
   !include "res/dead.petmate.gen.asm"
 }
 
++debug::registerRange("dead", dead)
+
+advancePlayhead: {
+  inc playhead
+  bne return
+    inc playhead + 1
+
+check:
+
+  ldx #0
+  lda timelineLo,x
+  cmp playhead
+  bne return
+    lda timelineHi,x
+    cmp playhead + 1
+    bne return
+
+return:
+  rts
+}
+
+timelineHi:
+  !byte 0
+
+timelineLo:
+  !byte 0
+
+playhead:
+  !byte 0,0
+
 *  = music.location
 
+musicData:
 !byte music.data
+
++debug::registerRange("music", musicData)
+
+!! debug::js.outputMemoryMap()
+
+; +debug::registerPass()
+

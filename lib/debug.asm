@@ -1,8 +1,8 @@
 ; vim:set ft=c64jasm:
 !filescope debug
 
-!use "debug" as js
-!use "bytes" as bytes
+!use "./debug.js" as js
+!use "./bytes.js" as bytes
 
 ; Debugging
 
@@ -12,4 +12,12 @@
 
 !macro logRange(label, from) {
   !! js.log(label, ": ", bytes.hex(from), "-", bytes.hex(*))
+}
+
+!macro registerRange(label, from) {
+  !! js.registerRange(label, from, *)
+}
+
+!macro reserveRange(label, from, to) {
+  !! js.registerRange(label, from, to)
 }
