@@ -19,5 +19,5 @@
 }
 
 !macro reserveRange(label, from, to) {
-  !! js.registerRange(label, from, to)
+  !! js.registerRange(label + " (reserved)", from, to)
 }

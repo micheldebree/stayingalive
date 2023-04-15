@@ -9,9 +9,9 @@
 
 * = $0801
 
-!let music = sid("res/heartbeat.sid")
+!let music = sid("res/staying.sid")
 
-!let firstRasterY = $33
+!let firstRasterY = $ff
 !let frameRate = 3
 
 +debug::reserveRange("screen matrix", $400, $400 + 1000)
@@ -43,7 +43,7 @@ start:
   jmp *
 
 init: {
-  ; +kernal::clearScreen()
+  +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
   !let d011value = vic.initD011({})
@@ -67,9 +67,11 @@ init: {
 
 ; the first frame is the keyframe, this is drawn beforehand
 drawKeyframe: {
-  lda heart::framesLo
+  lda dance::framesLo
+  ; lda heart::framesLo
   sta keyframe + 1
-  lda heart::framesHi
+  ; lda heart::framesHi
+  lda dance::framesHi
   sta keyframe + 2
 keyframe:
   jsr $0000
@@ -77,11 +79,12 @@ keyframe:
 }
 
 mainIrq:  {
-  inc $d020
-  jsr heartAnimation
-  jsr monitorAnimation
-  jsr deadAnimation
-  dec $d020
+  ; inc $d020
+  jsr danceAnimation
+  ; jsr heartAnimation
+  ; jsr monitorAnimation
+  ; jsr deadAnimation
+  ; dec $d020
   jsr music.play
 
 ; ack and return
@@ -118,39 +121,39 @@ for:
 
 !macro advanceAnimation(loPointers, hiPointers, nrFrames) {
 
-; self-modifying code variables
-!let frameCallLo = frameCall + 1
-!let frameCallHi = frameCall + 2
-!let frameNr = frameIndex + 1
-!let delayCounter = frameDelay + 1
+  ; self-modifying code variables
+  !let frameCallLo = frameCall + 1
+  !let frameCallHi = frameCall + 2
+  !let frameNr = frameIndex + 1
+  !let delayCounter = frameDelay + 1
 
-frameDelay:
-  lda #frameRate
-  bne return
-  lda #frameRate
-  sta delayCounter
+  frameDelay:
+    lda #frameRate
+    bne return
+    lda #frameRate
+    sta delayCounter
 
-frameIndex:
-  ldx #0
-  ; skip the first frame (keyframe) so it is only drawn on initialization
-  lda loPointers + 1,x 
-  sta frameCallLo
-  lda hiPointers + 1,x
-  sta frameCallHi
+  frameIndex:
+    ldx #1
+    ; skip the first frame (keyframe) so it is only drawn on initialization
+    lda loPointers,x 
+    sta frameCallLo
+    lda hiPointers,x
+    sta frameCallHi
 
-frameCall:
-  jsr $0000
-  inc frameNr
-  lda frameNr
-  cmp #nrFrames
-  bne return
-    lda #0
-    sta frameNr
+  frameCall:
+  ; !break
+    jsr $0000
+    inc frameNr
+    lda frameNr
+    cmp #nrFrames
+    bne return
+      lda #1
+      sta frameNr
 
-return:
-  dec delayCounter
-  rts
-
+  return:
+    dec delayCounter
+    rts
 }
 
 heartAnimation:
@@ -161,6 +164,9 @@ monitorAnimation:
 
 deadAnimation:
 +advanceAnimation(dead::framesLo, dead::framesHi, 6)
+
+danceAnimation:
++advanceAnimation(dance::framesLo, dance::framesHi, 29)
 
 +debug::registerRange("animation code", heartAnimation)
 
@@ -182,6 +188,11 @@ dead: {
 }
 
 +debug::registerRange("dead", dead)
+
+dance: {
+  !include "res/dance.petmate.gen.asm"
+}
++debug::registerRange("dance", dance)
 
 advancePlayhead: {
   inc playhead
@@ -222,3 +233,4 @@ musicData:
 
 ; +debug::registerPass()
 
++debug::reserveRange("color memory", $d800, $d800 + 1000)
