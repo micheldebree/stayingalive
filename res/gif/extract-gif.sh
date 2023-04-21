@@ -1,5 +1,5 @@
 #!/bin/sh
-rm *.png
+rm -f *.png
 # convert -coalesce "$1" out%05d.png
 convert \
   -resize 320x200 \

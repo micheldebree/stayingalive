@@ -7,14 +7,44 @@
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
 
-* = $0801
-
 !let music = sid("res/staying.sid")
-
 !let firstRasterY = $ff
 !let frameRate = 3
+!let screenMatrix = $400
+!let spritePointer = $ff
+!let spriteData = spritePointer * $40
 
-+debug::reserveRange("screen matrix", $400, $400 + 1000)
+!segment musicSegment(start = music.location, end = music.location + $1400)
+!segment spriteSegment(start = spriteData, end = spriteData + $40)
+!segment default
+
+; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
+; so we can use it and also use the VIC and SID registers
+!macro copyRomChar(charIndex, toAddress) {
+
+        lda $01
+        pha
+        ; make rom characters visible
+        lda #%00110011
+        sta $01
+        !for i in range(8) {
+          lda $d000 + charIndex * 8 + i
+          sta toAddress + i * 3
+          sta toAddress + (i + 8) * 3
+          sta toAddress + i * 3 + 1
+          sta toAddress + (i + 8) * 3 + 1
+          sta toAddress + i * 3 + 2
+          sta toAddress + (i + 8) * 3 + 2
+        }
+
+        pla
+        sta $01
+}
+
+* = $0801
+
+
++debug::reserveRange("screen matrix", screenMatrix, screenMatrix + 1000)
 
 basic:
 +kernal::basicstart(start)
@@ -46,16 +76,37 @@ init: {
   +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
-  !let d011value = vic.initD011({})
-  lda #d011value
+  lda #vic.initD011({})
   sta $d011
 
-  !let d018value = vic.initD018({})
-  lda #d018value
+  lda #vic.initD018({})
   sta $d018
 
   lda #vic.initD016({})
   sta $d016
+
++copyRomChar(1, spriteData)
+
+setupSprites: {
+  lda #0
+  sta vic.sprites.prio
+  lda #%11111111
+  sta vic.sprites.enabled
+  sta vic.sprites.doubleHeight
+  sta vic.sprites.doubleWidth
+  tay
+  lda #%11100000
+  sta vic.sprites.xHibits
+  ldx #$50
+  !for i in range(vic.size.nrSprites) {
+    lda #24 + (i * 2 * 24)
+    sta vic.sprites.x(i)
+    lda #i
+    sta vic.sprites.color(i)
+    stx vic.sprites.y(i)
+    sty vic.sprites.pointer(screenMatrix, i)
+  }
+}
 
   jsr drawKeyframe
   ; jsr drawRandomJunk
@@ -64,6 +115,8 @@ init: {
 
   rts
 }
+
+
 
 ; the first frame is the keyframe, this is drawn beforehand
 drawKeyframe: {
@@ -119,7 +172,9 @@ for:
 
 +debug::registerRange("main code", start)
 
-!macro advanceAnimation(loPointers, hiPointers, nrFrames) {
+!macro advanceAnimation(loPointers, hiPointers) {
+
+  !let nrFrames = loPointers - hiPointers
 
   ; self-modifying code variables
   !let frameCallLo = frameCall + 1
@@ -157,16 +212,16 @@ for:
 }
 
 heartAnimation:
-+advanceAnimation(heart::framesLo, heart::framesHi, 17)
++advanceAnimation(heart::framesLo, heart::framesHi)
 
 monitorAnimation:
-+advanceAnimation(monitor::framesLo, monitor::framesHi, 17)
++advanceAnimation(monitor::framesLo, monitor::framesHi)
 
 deadAnimation:
-+advanceAnimation(dead::framesLo, dead::framesHi, 6)
++advanceAnimation(dead::framesLo, dead::framesHi)
 
 danceAnimation:
-+advanceAnimation(dance::framesLo, dance::framesHi, 29)
++advanceAnimation(dance::framesLo, dance::framesHi)
 
 +debug::registerRange("animation code", heartAnimation)
 
@@ -188,6 +243,8 @@ dead: {
 }
 
 +debug::registerRange("dead", dead)
+
+* = $8000
 
 dance: {
   !include "res/dance.petmate.gen.asm"
@@ -222,7 +279,14 @@ timelineLo:
 playhead:
   !byte 0,0
 
-*  = music.location
+
+!segment spriteSegment
+
+theSprite:
+!fill $40,0
++debug::registerRange("sprites", theSprite)
+
+!segment musicSegment
 
 musicData:
 !byte music.data

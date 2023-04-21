@@ -5,6 +5,7 @@
 
 - [ ] Crop GIFs when extracting to 320x200
 - [ ] Optimized format (not code) as alternative, use for keyframe
+- [ ] store nrOfFrames with generated code
 
 
 ### Optimized format
