@@ -7,21 +7,17 @@
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
 
+!let screenMatrix = $400
+
 !let music = sid("res/staying.sid")
 !let firstRasterY = $ff
 !let frameRate = 3
-!let screenMatrix = $400
-!let spritePointer = $ff
-!let spriteData = spritePointer * $40
 
 !segment musicSegment(start = music.location, end = music.location + $1400)
-!segment spriteSegment(start = spriteData, end = spriteData + $40)
-!segment default
 
 ; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
 ; so we can use it and also use the VIC and SID registers
 !macro copyRomChar(charIndex, toAddress) {
-
         lda $01
         pha
         ; make rom characters visible
@@ -36,19 +32,23 @@
           sta toAddress + i * 3 + 2
           sta toAddress + (i + 8) * 3 + 2
         }
-
         pla
         sta $01
 }
 
 * = $0801
 
-
 +debug::reserveRange("screen matrix", screenMatrix, screenMatrix + 1000)
 
 basic:
 +kernal::basicstart(start)
 +debug::registerRange("basic start", basic)
+
+!include "typer.asm"
+!include "animation.asm"
+!include "animationDance.asm"
+
+!segment default
 
 start:
 
@@ -85,30 +85,11 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-+copyRomChar(1, spriteData)
+  jsr typer::setupSprites
 
-setupSprites: {
-  lda #0
-  sta vic.sprites.prio
-  lda #%11111111
-  sta vic.sprites.enabled
-  sta vic.sprites.doubleHeight
-  sta vic.sprites.doubleWidth
-  tay
-  lda #%11100000
-  sta vic.sprites.xHibits
-  ldx #$50
-  !for i in range(vic.size.nrSprites) {
-    lda #24 + (i * 2 * 24)
-    sta vic.sprites.x(i)
-    lda #i
-    sta vic.sprites.color(i)
-    stx vic.sprites.y(i)
-    sty vic.sprites.pointer(screenMatrix, i)
-  }
-}
+; +copyRomChar(1, spriteData)
 
-  jsr drawKeyframe
+  jsr animationDance::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
   jsr music.init
@@ -116,24 +97,9 @@ setupSprites: {
   rts
 }
 
-
-
-; the first frame is the keyframe, this is drawn beforehand
-drawKeyframe: {
-  lda dance::framesLo
-  ; lda heart::framesLo
-  sta keyframe + 1
-  ; lda heart::framesHi
-  lda dance::framesHi
-  sta keyframe + 2
-keyframe:
-  jsr $0000
-  rts
-}
-
 mainIrq:  {
   ; inc $d020
-  jsr danceAnimation
+  jsr animationDance::advance
   ; jsr heartAnimation
   ; jsr monitorAnimation
   ; jsr deadAnimation
@@ -172,56 +138,14 @@ for:
 
 +debug::registerRange("main code", start)
 
-!macro advanceAnimation(loPointers, hiPointers) {
-
-  !let nrFrames = loPointers - hiPointers
-
-  ; self-modifying code variables
-  !let frameCallLo = frameCall + 1
-  !let frameCallHi = frameCall + 2
-  !let frameNr = frameIndex + 1
-  !let delayCounter = frameDelay + 1
-
-  frameDelay:
-    lda #frameRate
-    bne return
-    lda #frameRate
-    sta delayCounter
-
-  frameIndex:
-    ldx #1
-    ; skip the first frame (keyframe) so it is only drawn on initialization
-    lda loPointers,x 
-    sta frameCallLo
-    lda hiPointers,x
-    sta frameCallHi
-
-  frameCall:
-  ; !break
-    jsr $0000
-    inc frameNr
-    lda frameNr
-    cmp #nrFrames
-    bne return
-      lda #1
-      sta frameNr
-
-  return:
-    dec delayCounter
-    rts
-}
-
 heartAnimation:
-+advanceAnimation(heart::framesLo, heart::framesHi)
++animation::advance(heart::framesLo, heart::framesHi)
 
 monitorAnimation:
-+advanceAnimation(monitor::framesLo, monitor::framesHi)
++animation::advance(monitor::framesLo, monitor::framesHi)
 
 deadAnimation:
-+advanceAnimation(dead::framesLo, dead::framesHi)
-
-danceAnimation:
-+advanceAnimation(dance::framesLo, dance::framesHi)
++animation::advance(dead::framesLo, dead::framesHi)
 
 +debug::registerRange("animation code", heartAnimation)
 
@@ -244,47 +168,33 @@ dead: {
 
 +debug::registerRange("dead", dead)
 
-* = $8000
+; advancePlayhead: {
+;   inc playhead
+;   bne return
+;     inc playhead + 1
+;
+; check:
+;
+;   ldx #0
+;   lda timelineLo,x
+;   cmp playhead
+;   bne return
+;     lda timelineHi,x
+;     cmp playhead + 1
+;     bne return
+;
+; return:
+;   rts
+; }
 
-dance: {
-  !include "res/dance.petmate.gen.asm"
-}
-+debug::registerRange("dance", dance)
-
-advancePlayhead: {
-  inc playhead
-  bne return
-    inc playhead + 1
-
-check:
-
-  ldx #0
-  lda timelineLo,x
-  cmp playhead
-  bne return
-    lda timelineHi,x
-    cmp playhead + 1
-    bne return
-
-return:
-  rts
-}
-
-timelineHi:
-  !byte 0
-
-timelineLo:
-  !byte 0
-
-playhead:
-  !byte 0,0
-
-
-!segment spriteSegment
-
-theSprite:
-!fill $40,0
-+debug::registerRange("sprites", theSprite)
+; timelineHi:
+;   !byte 0
+;
+; timelineLo:
+;   !byte 0
+;
+; playhead:
+;   !byte 0,0
 
 !segment musicSegment
 
@@ -294,7 +204,5 @@ musicData:
 +debug::registerRange("music", musicData)
 
 !! debug::js.outputMemoryMap()
-
-; +debug::registerPass()
 
 +debug::reserveRange("color memory", $d800, $d800 + 1000)
