@@ -3,7 +3,7 @@ set makeprg=make
 noremap <F1> :!./doc/opcode.sh <cword><CR>
 noremap <F2> :!open https://c64os.com/post/6502instructions
 noremap <F5> :wa<CR>:silent! make %<.prg<CR>
-noremap <F6> :wa<CR>:silent! make main.run<bar>vertical botright cwindow 80<CR>:redraw!<CR>
+noremap <F6> :wa<CR>:silent! make test<bar>vertical botright cwindow 80<CR>:redraw!<CR>
 noremap <F7> :wa<CR>:make main.debug<bar>cwindow<CR>:redraw!<CR>
 noremap <F8> :wa<CR>:silent! make clean main.prg<bar>vertical botright copen 80<CR>:redraw!<CR>
 noremap <F9> :vert term ++close telnet 127.0.0.1 6510<CR>

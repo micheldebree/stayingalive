@@ -6,7 +6,7 @@
   "license": "MIT",
   "devDependencies": {
     "c64jasm": "0.9.2",
-    "sharp": "0.31.3",
+    "sharp": "0.32.0",
     "standard": "17.0.0"
   }
 }

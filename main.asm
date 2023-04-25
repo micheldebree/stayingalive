@@ -18,22 +18,22 @@
 ; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
 ; so we can use it and also use the VIC and SID registers
 !macro copyRomChar(charIndex, toAddress) {
-        lda $01
-        pha
-        ; make rom characters visible
-        lda #%00110011
-        sta $01
-        !for i in range(8) {
-          lda $d000 + charIndex * 8 + i
-          sta toAddress + i * 3
-          sta toAddress + (i + 8) * 3
-          sta toAddress + i * 3 + 1
-          sta toAddress + (i + 8) * 3 + 1
-          sta toAddress + i * 3 + 2
-          sta toAddress + (i + 8) * 3 + 2
-        }
-        pla
-        sta $01
+    lda $01
+    pha
+    ; make rom characters visible
+    lda #%00110011
+    sta $01
+    !for i in range(8) {
+      lda $d000 + charIndex * 8 + i
+      sta toAddress + i * 3
+      sta toAddress + (i + 8) * 3
+      sta toAddress + i * 3 + 1
+      sta toAddress + (i + 8) * 3 + 1
+      sta toAddress + i * 3 + 2
+      sta toAddress + (i + 8) * 3 + 2
+    }
+    pla
+    sta $01
 }
 
 * = $0801
@@ -47,6 +47,8 @@ basic:
 !include "typer.asm"
 !include "animation.asm"
 !include "animationDance.asm"
+!include "animationHeart.asm"
+!include "animationWalker.asm"
 
 !segment default
 
@@ -76,6 +78,23 @@ init: {
   +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
+  lda #1
+  sta $d020
+  sta $d021
+
+initColorRam: {
+  ldx #0
+  lda #0
+  sta $d020
+loop:
+  sta $d800,x
+  sta $d900,x
+  sta $da00,x
+  sta $db00,x
+  inx
+  bne loop
+}
+
   lda #vic.initD011({})
   sta $d011
 
@@ -85,10 +104,11 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-  jsr typer::setupSprites
+  ; jsr typer::setupSprites
 
 ; +copyRomChar(1, spriteData)
 
+  ; jsr animationWalker::drawKeyframe
   jsr animationDance::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
@@ -99,10 +119,9 @@ init: {
 
 mainIrq:  {
   ; inc $d020
+  jsr animationWalker::advance
   jsr animationDance::advance
-  ; jsr heartAnimation
-  ; jsr monitorAnimation
-  ; jsr deadAnimation
+  ; jsr animationHeart::advance
   ; dec $d020
   jsr music.play
 
@@ -137,36 +156,6 @@ for:
 }
 
 +debug::registerRange("main code", start)
-
-heartAnimation:
-+animation::advance(heart::framesLo, heart::framesHi)
-
-monitorAnimation:
-+animation::advance(monitor::framesLo, monitor::framesHi)
-
-deadAnimation:
-+animation::advance(dead::framesLo, dead::framesHi)
-
-+debug::registerRange("animation code", heartAnimation)
-
-heart: {
-  !include "res/pulse.heart.petmate.gen.asm"
-  ; !include "res/pulse.nocred.petmate.gen.asm"
-}
-
-+debug::registerRange("heart", heart)
-
-monitor: {
-  !include "res/pulse.green.petmate.gen.asm"
-}
-
-+debug::registerRange("monitor", monitor)
-
-dead: {
-  !include "res/dead.petmate.gen.asm"
-}
-
-+debug::registerRange("dead", dead)
 
 ; advancePlayhead: {
 ;   inc playhead

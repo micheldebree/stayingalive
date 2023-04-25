@@ -10,4 +10,4 @@ Session.vim
 .source.txt
 .idea
 *.gen.asm
-res/*.png
+main.txt
