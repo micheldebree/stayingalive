@@ -1,10 +1,13 @@
 #!/bin/sh
-rm -f *.png
+BASENAME=$(basename "$1" .gif)
+DEST="$BASENAME-frames"
+mkdir -p "${DEST}"
+# rm -f *.png
 # convert -coalesce "$1" out%05d.png
 convert \
   -resize 320x200 \
   -gravity center \
   -extent 320x200 \
-  "$1" out%05d.png
+  "$1" "${DEST}/out%05d.png"
 
 

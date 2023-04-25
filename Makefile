@@ -27,7 +27,12 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
 %.petmate.gen.asm: %.petmate
-	node lib/petmate2asm.js "$<"
+	node lib/petmate2asm-bw.mjs "$<"
+
+.PHONY: test
+test: main.prg
+	# @echo $(GENASM)
+	open "$<"
 
 main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM)
 
@@ -50,6 +55,6 @@ clean:
 	rm -f *.vs
 	rm -f *.dbg
 	rm -f *.d64
-	rm -f res/*.bin
+	# rm -f res/*.bin
 	rm -f res/*.gen.asm
 	# rm -rf node_modules
