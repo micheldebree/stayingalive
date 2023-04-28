@@ -53,8 +53,8 @@ basic:
 +debug::registerRange("basic start", basic)
 
 !include "animation.asm"
-!include "animationDance.asm"
-!include "animationHeart.asm"
+; !include "animationDance.asm"
+!include "animationHeart2.asm"
 !include "animationWalker.asm"
 
 !segment default
@@ -126,7 +126,7 @@ init: {
 ; +copyRomChar(1, spriteData)
 
   ; jsr animationWalker::drawKeyframe
-  jsr animationDance::drawKeyframe
+  jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
   jsr music.init
@@ -137,7 +137,7 @@ init: {
 mainIrq:  {
   ; inc $d020
   ; jsr animationWalker::advance
-  jsr animationDance::advance
+  jsr animationHeart2::advance
   ; jsr animationHeart::advance
   ; dec $d020
   jsr music.play
