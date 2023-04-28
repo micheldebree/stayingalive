@@ -14,15 +14,13 @@ export function encode (bytes) {
 
   bytes.forEach((b, i) => {
     const isLastByte = (i === (bytes.length - 1))
+    const repeatedValue = b === currentByte
+    const flushRun = !repeatedValue || isLastByte || runLength >= maxRunLength
 
     // same byte again? count towards current cun
-    if (b === currentByte) {
-      // TODO: maximize runlength
-      runLength++
-    }
+    runLength += repeatedValue ? 1 : 0
 
-    // flush current run if a new value starts or the end has been reached
-    if (b !== currentByte || isLastByte) {
+    if (flushRun) {
       // flush previous run
       if (runLength >= minRunLength) {
         result.push(runMarker)
@@ -35,12 +33,12 @@ export function encode (bytes) {
       }
       // start with counting the run of the new value
       runLength = 1
+      currentByte = b
     }
-    // if the last value is a new value, flush it
-    if (b !== currentByte && isLastByte) {
-      result.push(b)
+
+    if (!repeatedValue && isLastByte) {
+        result.push(b)
     }
-    currentByte = b
   })
   return result
 }
