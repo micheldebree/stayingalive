@@ -1,17 +1,12 @@
 {
   "name": "stayingAlive",
   "version": "1.0.0",
-  "type": "module",
   "main": "convert_image.js",
   "author": "Michel de Bree <michel@micheldebree.nl>",
   "license": "MIT",
   "devDependencies": {
     "c64jasm": "0.9.2",
-    "jest": "29.5.0",
     "sharp": "0.32.0",
     "standard": "17.0.0"
-  },
-  "scripts": {
-    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   }
 }

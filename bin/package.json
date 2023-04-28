@@ -1,0 +1,15 @@
+{
+  "name": "lib",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Michel de Bree <michel@micheldebree.nl>",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "jest": "29.5.0",
+    "standard": "17.0.0"
+  },
+  "scripts": {
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
+  }
+}

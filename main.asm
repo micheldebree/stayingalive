@@ -13,6 +13,12 @@
 !let firstRasterY = $ff
 !let frameRate = 3
 
+!let mem = {
+  codeStart: $4000
+}
+
+!segment dataSegment(start=$0801, end=$3dff)
+!segment mainCodeSegment(start = mem.codeStart, end = music.location - 1)
 !segment musicSegment(start = music.location, end = music.location + $1400)
 
 ; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
@@ -36,6 +42,8 @@
     sta $01
 }
 
+!segment dataSegment
+
 * = $0801
 
 +debug::reserveRange("screen matrix", screenMatrix, screenMatrix + 1000)
@@ -44,11 +52,20 @@ basic:
 +kernal::basicstart(start)
 +debug::registerRange("basic start", basic)
 
-!include "typer.asm"
 !include "animation.asm"
 !include "animationDance.asm"
 !include "animationHeart.asm"
 !include "animationWalker.asm"
+
+!segment default
+; N.B. c64 debugger seems to only support breakpoints in the default
+; segment.
+
+* = mem.codeStart
+
+defaultStart:
+
+!include "typer.asm"
 
 !segment default
 
@@ -78,22 +95,22 @@ init: {
   +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
-  lda #1
-  sta $d020
-  sta $d021
+  ; lda #1
+  ; sta $d020
+  ; sta $d021
 
-initColorRam: {
-  ldx #0
-  lda #0
-  sta $d020
-loop:
-  sta $d800,x
-  sta $d900,x
-  sta $da00,x
-  sta $db00,x
-  inx
-  bne loop
-}
+; initColorRam: {
+;   ldx #0
+;   lda #0
+;   sta $d020
+; loop:
+;   sta $d800,x
+;   sta $d900,x
+;   sta $da00,x
+;   sta $db00,x
+;   inx
+;   bne loop
+; }
 
   lda #vic.initD011({})
   sta $d011
@@ -104,7 +121,7 @@ loop:
   lda #vic.initD016({})
   sta $d016
 
-  ; jsr typer::setupSprites
+  jsr typer::setupSprites
 
 ; +copyRomChar(1, spriteData)
 
@@ -119,7 +136,7 @@ loop:
 
 mainIrq:  {
   ; inc $d020
-  jsr animationWalker::advance
+  ; jsr animationWalker::advance
   jsr animationDance::advance
   ; jsr animationHeart::advance
   ; dec $d020
@@ -155,7 +172,7 @@ for:
   rts
 }
 
-+debug::registerRange("main code", start)
++debug::registerRange("main code", defaultStart)
 
 ; advancePlayhead: {
 ;   inc playhead

@@ -1,9 +1,8 @@
 ; vim:set ft=c64jasm:
 !filescope animationHeart
 
-!segment default
-
-!include "res/pulse.heart.petmate.gen.asm"
+animation:
+  !include "res/pulse.heart.petmate.gen.asm"
 
 advance:
   +animation::advance(framesLo, framesHi)
@@ -11,4 +10,4 @@ advance:
 drawKeyframe:
   +animation::drawKeyframe(framesLo, framesHi)
 
-+debug::registerRange("heart", advance)
++debug::registerRange("heart", animation)

@@ -18,3 +18,26 @@
 !macro clearScreen() {
   jsr $ff81
 }
+
+; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
+; so we can use it and also use the VIC and SID registers
+!macro copyRomChar(toAddress, nrBlocks) {
+
+        lda $01
+        pha
+        ; make rom characters visible
+        lda #%00110011
+        sta $01
+        ldx #0
+loop:
+        !for i in range(nrBlocks) {
+          lda $d000 + (i * $100),x
+          sta toAddress + (i * $100),x
+        }
+        inx
+        bne loop
+
+        pla
+        sta $01
+}
+

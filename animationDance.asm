@@ -1,9 +1,8 @@
 ; vim:set ft=c64jasm:
 !filescope animationDance
 
-!segment default
-
-!include "res/dance.petmate.gen.asm"
+animation:
+  !include "res/dance.petmate.gen.asm"
 
 advance:
   +animation::advance(framesLo, framesHi)
@@ -11,4 +10,4 @@ advance:
 drawKeyframe:
   +animation::drawKeyframe(framesLo, framesHi)
 
-+debug::registerRange("dance", advance)
++debug::registerRange("dance", animation)

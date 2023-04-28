@@ -18,15 +18,15 @@ setupSprites: {
   tay
   lda #%11100000
   sta vic.sprites.xHibits
-  ; ldx #$50
-  ; !for i in range(nrSprites) {
-  ;   lda #24 + (i * 2 * 24)
-  ;   sta vic.sprites.x(i)
-  ;   lda #i
-  ;   sta vic.sprites.color(i)
-  ;   stx vic.sprites.y(i)
-  ;   sty vic.sprites.pointer(screenMatrix, i)
-  ; }
+  ldx #$50
+  !for i in range(nrSprites) {
+    lda #24 + (i * 2 * 24)
+    sta vic.sprites.x(i)
+    lda #i
+    sta vic.sprites.color(i)
+    stx vic.sprites.y(i)
+    sty vic.sprites.pointer(screenMatrix, i)
+  }
 
   ldx #0
   ldy #0
@@ -50,7 +50,7 @@ setPointer:
   rts
 }
 
-!segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize)
+!segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
 !segment spriteSegment
 
 theSprite:
