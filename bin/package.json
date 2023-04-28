@@ -1,5 +1,5 @@
 {
-  "name": "lib",
+  "name": "c64-code-tools",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Michel de Bree <michel@micheldebree.nl>",

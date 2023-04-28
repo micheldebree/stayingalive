@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 import sharp from 'sharp'
-import { fileURLToPath } from 'url'
-import path from 'path'
-import { toFilenames } from './utils.mjs'
+import { toFilenames, relativePath } from './utils.mjs'
 import {
   readChars,
   forEachCellIn,
@@ -64,9 +62,7 @@ async function convertFile (filename, charSet) {
 (async function () {
   const inputName = process.argv[2]
   const filenames = await toFilenames(inputName, supportedExtensions)
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-  const charSet = await readChars(path.join(__dirname, './characters.901225-01.bin'))
+  const charSet = await readChars(relativePath('./characters.901225-01.bin'))
   const screens = await Promise.all(filenames.map(f => convertFile(f, charSet)))
   await toPetmate(`${inputName}.petmate`, screens)
 })()

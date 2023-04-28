@@ -1,6 +1,8 @@
-const { hex, hexbyte } = require('./bytes.js')
+function hex(_unused, n) {
+  return `$${n.toString(16)}`
+}
 
-const opcode = {
+export const opcode = {
   ldx: {
     mnemonic: 'ldx',
     imm: {
@@ -51,10 +53,11 @@ const opcode = {
   }
 }
 
-const render = {
-  imm: (opcode, argument) => `${opcode.mnemonic} #${hexbyte(null, argument)} ; ${opcode.imm.cycles}\n`,
-  abs: (opcode, argument) => `${opcode.mnemonic} ${hex(null, argument)} ; ${opcode.abs.cycles}\n`,
+export const render = {
+  imm: (opcode, argument) => `${opcode.mnemonic} #${hex(null,
+      argument)} ; ${opcode.imm.cycles}\n`,
+  abs: (opcode, argument) => `${opcode.mnemonic} ${hex(null,
+      argument)} ; ${opcode.abs.cycles}\n`,
   implied: (opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
 }
 
-module.exports = { opcode, render }

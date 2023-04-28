@@ -1,4 +1,5 @@
 import { lstat, readdir } from 'node:fs/promises'
+import { fileURLToPath } from 'url'
 import path from 'path'
 
 // Return the filename, or return the files in the folder if a folder is supplied
@@ -21,4 +22,11 @@ export async function toFilenames (fileOrFolderName, supportedExtensions) {
     return filtered
   }
   throw new Error(`Unsupported filetype: ${fileOrFolderName}`)
+}
+
+// get a path relative to this module
+export function relativePath (filename) {
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  return path.join(__dirname, filename)
 }

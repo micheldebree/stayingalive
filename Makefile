@@ -27,13 +27,13 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
 %.petmate.gen.asm: %.petmate
-	node ./lib/petmate2asm-bw.mjs "$<"
+	node ./bin/petmate2asm-bw.mjs "$<"
 
 res/%-frames: res/%.gif
 	./res/extract-gif.sh "$<" "$@"
 
 res/%-frames.petmate: res/%-frames
-	node ./lib/png2petscii.mjs "$<"
+	node ./bin/png2petscii.mjs "$<"
 
 .PHONY: test
 test: main.run

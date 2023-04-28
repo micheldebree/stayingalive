@@ -1,6 +1,6 @@
 // Generate optimized code from petmate frames
 
-import { createBuffer, addWrites, generateCode } from './writeBuffer.js'
+import { createBuffer, addWrites, generateCode } from './writeBuffer.mjs'
 import { readFile, writeFile } from 'node:fs/promises'
 
 const outExtension = '.gen.asm'
