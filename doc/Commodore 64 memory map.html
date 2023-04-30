@@ -1,0 +1,1747 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="EN"><script>(function(){function hookGeo() {
+  //<![CDATA[
+  const WAIT_TIME = 100;
+  const hookedObj = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),
+    watchPosition: navigator.geolocation.watchPosition.bind(navigator.geolocation),
+    fakeGeo: true,
+    genLat: 38.883333,
+    genLon: -77.000
+  };
+
+  function waitGetCurrentPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        hookedObj.tmp_successCallback({
+          coords: {
+            latitude: hookedObj.genLat,
+            longitude: hookedObj.genLon,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        hookedObj.getCurrentPosition(hookedObj.tmp_successCallback, hookedObj.tmp_errorCallback, hookedObj.tmp_options);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        navigator.getCurrentPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        hookedObj.watchPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  Object.getPrototypeOf(navigator.geolocation).getCurrentPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp_successCallback = successCallback;
+    hookedObj.tmp_errorCallback = errorCallback;
+    hookedObj.tmp_options = options;
+    waitGetCurrentPosition();
+  };
+  Object.getPrototypeOf(navigator.geolocation).watchPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp2_successCallback = successCallback;
+    hookedObj.tmp2_errorCallback = errorCallback;
+    hookedObj.tmp2_options = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${hookGeo}
+          )();<\/script>`;
+    
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+    
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window) {
+      return;
+    }
+    const message = event.data;
+    switch (message.method) {
+      case 'updateLocation':
+        if ((typeof message.info === 'object') && (typeof message.info.coords === 'object')) {
+          hookedObj.genLat = message.info.coords.lat;
+          hookedObj.genLon = message.info.coords.lon;
+          hookedObj.fakeGeo = message.info.fakeIt;
+        }
+        break;
+      default:
+        break;
+    }
+  }, false);
+  //]]>
+}hookGeo();})()</script><head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Commodore 64 memory map</title>
+<link href="data:text/css,%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20ddg-runtime-checks%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20display%3A%20none%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20" rel="stylesheet" type="text/css"></head>
+
+<body>
+<center>
+<h2>Commodore 64 memory map</h2>
+</center>
+
+<table width="100%" border="1" align="LEFT">
+<tbody><tr valign="MIDDLE" align="CENTER"><th width="15%"><b>Address<br>(hex, dec)</b></th><th width="85%">Description
+
+<a name="page00"></a><a name="zeropage"></a>
+</th></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0000-$00FF, 0-255<br>Zero page</b>
+
+</td></tr><tr valign="TOP"><td width="15%">$0000<br>0</td><td width="85%"><p align="JUSTIFY">
+  Processor port data direction register. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Bit #x in processor port can only be
+    read; 1 = Bit #x in processor port can be read and written.</p>
+  </li></ul>
+  <p align="JUSTIFY">Default: $2F, %00101111.</p>
+</td></tr><tr valign="TOP"><td>$0001<br>1</td><td><p align="JUSTIFY">Processor port. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#2: Configuration for memory areas
+    $A000-$BFFF, $D000-$DFFF and $E000-$FFFF. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%x00: RAM visible in all three areas.</p>
+    </li><li><p align="JUSTIFY">%x01: RAM visible at $A000-$BFFF and
+      $E000-$FFFF.</p>
+    </li><li><p align="JUSTIFY">%x10: RAM visible at $A000-$BFFF; KERNAL ROM
+      visible at $E000-$FFFF.</p>
+    </li><li><p align="JUSTIFY">%x11: BASIC ROM visible at $A000-$BFFF; KERNAL ROM
+      visible at $E000-$FFFF.</p>
+    </li><li><p align="JUSTIFY">%0xx: Character ROM visible at $D000-$DFFF. (Except
+      for the value %000, see above.)</p>
+    </li><li><p align="JUSTIFY">%1xx: I/O area visible at $D000-$DFFF. (Except for
+      the value %100, see above.)</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bit #3: Datasette output signal level.</p>
+  </li><li><p align="JUSTIFY">Bit #4: Datasette button status; 0 = One or more of
+    PLAY, RECORD, F.FWD or REW pressed; 1 = No button is pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #5: Datasette motor control; 0 = On; 1 = Off.</p>
+  </li></ul>
+  <p align="JUSTIFY">Default: $37, %00110111.</p>
+</td></tr><tr valign="TOP"><td>$0002<br>2</td><td><p align="JUSTIFY">Unused.</p>
+</td></tr><tr valign="TOP"><td>$0003-$0004<br>3-4</td><td><p align="JUSTIFY">Unused.<br>
+  Default: $B1AA, execution address of routine converting floating point to
+  integer.</p>
+</td></tr><tr valign="TOP"><td>$0005-$0006<br>5-6</td><td><p align="JUSTIFY">Unused.<br>
+  Default: $B391, execution address of routine converting integer to floating
+  point.</p>
+</td></tr><tr valign="TOP"><td>$0007<br>7</td><td><p align="JUSTIFY">Byte being search for during various
+  operations.<br>
+  Current digit of number being input.<br>
+  Low byte of first integer operand during AND and OR.<br>
+  Low byte of integer-format FAC during INT().</p>
+</td></tr><tr valign="TOP"><td>$0008<br>8</td><td><p align="JUSTIFY">Byte being search for during various
+  operations.<br>
+  Current byte of BASIC line during tokenization.<br>
+  High byte of first integer operand during AND and OR.</p>
+</td></tr><tr valign="TOP"><td>$0009<br>9</td><td><p align="JUSTIFY">Current column number during SPC()
+  and TAB().</p>
+</td></tr><tr valign="TOP"><td>$000A<br>10</td><td><p align="JUSTIFY">LOAD/VERIFY switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: LOAD.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: VERIFY.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$000B<br>11</td><td><p align="JUSTIFY">Current token during
+  tokenization.<br>
+  Length of BASIC line during insertion of line.<br>
+  AND/OR switch; $00 = AND; $FF = OR.<br>
+  Number of dimensions during array operations.</p>
+</td></tr><tr valign="TOP"><td>$000C<br>12</td><td><p align="JUSTIFY">Switch for array operations.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Operation was not called by DIM.</p>
+  </li><li><p align="JUSTIFY">$40-$7F: Operation was called by DIM.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$000D<br>13</td><td><p align="JUSTIFY">Current expression type. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Numerical.</p>
+  </li><li><p align="JUSTIFY">$FF: String.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$000E<br>14</td><td><p align="JUSTIFY">Current numerical expression type.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 0 = Floating point; 1 = Integer.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$000F<br>15</td><td><p align="JUSTIFY">Quotation mode switch during
+  tokenization; Bit #6: 0 = Normal mode; 1 = Quotation mode.<br>
+  Quotation mode switch during LIST; $01 = Normal mode; $FE = Quotation
+  mode.<br>
+  Garbage collection indicator during memory allocation for string variable;
+  $00-$7F = There was no garbage collection yet; $80 = Garbage collection
+  already took place.</p>
+</td></tr><tr valign="TOP"><td>$0010<br>16</td><td><p align="JUSTIFY">Switch during fetch of variable
+  name. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Integer variables are accepted.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Integer variables are not accepted.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0011<br>17</td><td><p align="JUSTIFY">GET/INPUT/READ switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: INPUT.</p>
+  </li><li><p align="JUSTIFY">$40: GET.</p>
+  </li><li><p align="JUSTIFY">$98: READ.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0012<br>18</td><td><p align="JUSTIFY">Sign during SIN() and TAN().
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Positive.</p>
+  </li><li><p align="JUSTIFY">$FF: Negative.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0013<br>19</td><td><p align="JUSTIFY">Current I/O device number.<br>
+  Default: $00, keyboard for input and screen for output.</p>
+</td></tr><tr valign="TOP"><td>$0014-$0015<br>20-21</td><td><p align="JUSTIFY">Line number during GOSUB,
+  GOTO and RUN.<br>
+  Second line number during LIST.<br>
+  Memory address during PEEK, POKE, SYS and WAIT.</p>
+</td></tr><tr valign="TOP"><td>$0016<br>22</td><td><p align="JUSTIFY">Pointer to next expression in string
+  stack. Values: $19; $1C; $1F; $22.<br>
+  Default: $19.</p>
+</td></tr><tr valign="TOP"><td>$0017-$0018<br>23-24</td><td><p align="JUSTIFY">Pointer to previous
+  expression in string stack.</p>
+</td></tr><tr valign="TOP"><td>$0019-$0021<br>25-33</td><td><p align="JUSTIFY">String stack, temporary
+  area for processing string expressions (9 bytes, 3 entries).</p>
+</td></tr><tr valign="TOP"><td>$0022-$0025<br>34-37</td><td><p align="JUSTIFY">Temporary area for various
+  operations (4 bytes).</p>
+</td></tr><tr valign="TOP"><td>$0026-$0029<br>38-41</td><td><p align="JUSTIFY">Auxiliary arithmetical
+  register for division and multiplication (4 bytes).</p>
+</td></tr><tr valign="TOP"><td>$002A<br>42</td><td><p align="JUSTIFY">Unused.</p>
+</td></tr><tr valign="TOP"><td>$002B-$002C<br>43-44</td><td><p align="JUSTIFY">Pointer to beginning of
+  BASIC area.<br>
+  Default: $0801, 2049.</p>
+</td></tr><tr valign="TOP"><td>$002D-$002E<br>45-46</td><td><p align="JUSTIFY">Pointer to beginning of
+  variable area. (End of program plus 1.)</p>
+</td></tr><tr valign="TOP"><td>$002F-$0030<br>47-48</td><td><p align="JUSTIFY">Pointer to beginning of
+  array variable area.</p>
+</td></tr><tr valign="TOP"><td>$0031-$0032<br>49-50</td><td><p align="JUSTIFY">Pointer to end of array
+  variable area.</p>
+</td></tr><tr valign="TOP"><td>$0033-$0034<br>51-52</td><td><p align="JUSTIFY">Pointer to beginning of
+  string variable area. (Grows downwards from end of BASIC area.)</p>
+</td></tr><tr valign="TOP"><td>$0035-$0036<br>53-54</td><td><p align="JUSTIFY">Pointer to memory allocated
+  for current string variable.</p>
+</td></tr><tr valign="TOP"><td>$0037-$0038<br>55-56</td><td><p align="JUSTIFY">Pointer to end of BASIC
+  area.<br>
+  Default: $A000, 40960.</p>
+</td></tr><tr valign="TOP"><td>$0039-$003A<br>57-58</td><td><p align="JUSTIFY">Current BASIC line number.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0000-$F9FF, 0-63999: Line number.</p>
+  </li><li><p align="JUSTIFY">$FF00-$FFFF: Direct mode, no BASIC program is being
+    executed.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$003B-$003C<br>59-60</td><td><p align="JUSTIFY">Current BASIC line number
+  for CONT.</p>
+</td></tr><tr valign="TOP"><td>$003D-$003E<br>61-62</td><td><p align="JUSTIFY">Pointer to next BASIC
+  instruction for CONT. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0000-$00FF: CONT'ing is not possible.</p>
+  </li><li><p align="JUSTIFY">$0100-$FFFF: Pointer to next BASIC instruction.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$003F-$0040<br>63-64</td><td><p align="JUSTIFY">BASIC line number of
+  current DATA item for READ.</p>
+</td></tr><tr valign="TOP"><td>$0041-$0042<br>65-66</td><td><p align="JUSTIFY">Pointer to next DATA item
+  for READ.</p>
+</td></tr><tr valign="TOP"><td>$0043-$0044<br>67-68</td><td><p align="JUSTIFY">Pointer to input result
+  during GET, INPUT and READ.</p>
+</td></tr><tr valign="TOP"><td>$0045-$0046<br>69-70</td><td><p align="JUSTIFY">Name and type of current
+  variable. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0045 bits #0-#6: First character of variable
+    name.</p>
+  </li><li><p align="JUSTIFY">$0046 bits #0-#6: Second character of variable name;
+    $00 = Variable name consists of only one character.</p>
+  </li><li><p align="JUSTIFY">$0045 bit #7 and $0046 bit #7:</p>
+    <ul>
+    <li><p align="JUSTIFY">%00: Floating-point variable.</p>
+    </li><li><p align="JUSTIFY">%01: String variable.</p>
+    </li><li><p align="JUSTIFY">%10: FN function, created with DEF FN.</p>
+    </li><li><p align="JUSTIFY">%11: Integer variable.</p>
+    </li></ul>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0047-$0048<br>71-72</td><td><p align="JUSTIFY">Pointer to value of current
+  variable or FN function.</p>
+</td></tr><tr valign="TOP"><td>$0049-$004A<br>73-74</td><td><p align="JUSTIFY">Pointer to value of current
+  variable during LET.<br>
+  Value of second and third parameter during WAIT.<br>
+  Logical number and device number during OPEN.<br>
+  $0049, 73: Logical number of CLOSE.<br>
+  Device number of LOAD, SAVE and VERIFY.</p>
+</td></tr><tr valign="TOP"><td>$004B-$004C<br>75-76</td><td><p align="JUSTIFY">Temporary area for saving
+  original pointer to current BASIC instruction during GET, INPUT and
+  READ.</p>
+</td></tr><tr valign="TOP"><td>$004D<br>77</td><td><p align="JUSTIFY">Comparison operator indicator.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #1: 1 = "&gt;" (greater than) is present in
+    expression.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = "=" (equal to) is present in
+    expression.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = "&lt;" (less than) is present in
+    expression.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$004E-$004F<br>78-79</td><td><p align="JUSTIFY">Pointer to current FN
+  function.</p>
+</td></tr><tr valign="TOP"><td>$0050-$0051<br>80-81</td><td><p align="JUSTIFY">Pointer to current string
+  variable during memory allocation.</p>
+</td></tr><tr valign="TOP"><td>$0052<br>82</td><td><p align="JUSTIFY">Unused.</p>
+</td></tr><tr valign="TOP"><td>$0053<br>83</td><td><p align="JUSTIFY">Step size of garbage collection.
+  Values: $03; $07.</p>
+</td></tr><tr valign="TOP"><td>$0054-$0056<br>84-86</td><td><p align="JUSTIFY">JMP ABS machine
+  instruction, jump to current BASIC function.<br>
+  $0055-$0056, 85-86: Execution address of current BASIC function.</p>
+</td></tr><tr valign="TOP"><td>$0057-$005B<br>87-91</td><td><p align="JUSTIFY">Arithmetic register #3 (5
+  bytes).</p>
+</td></tr><tr valign="TOP"><td>$005C-$0060<br>92-96</td><td><p align="JUSTIFY">Arithmetic register #4 (5
+  bytes).</p>
+</td></tr><tr valign="TOP"><td>$0061-$0065<br>97-101</td><td><p align="JUSTIFY">FAC, arithmetic register
+  #1 (5 bytes).</p>
+</td></tr><tr valign="TOP"><td>$0066<br>102</td><td><p align="JUSTIFY">Sign of FAC. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 0 = Positive; 1 = Negative.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0067<br>103</td><td><p align="JUSTIFY">Number of degrees during polynomial
+  evaluation.</p>
+</td></tr><tr valign="TOP"><td>$0068<br>104</td><td><p align="JUSTIFY">Temporary area for various
+  operations.</p>
+</td></tr><tr valign="TOP"><td>$0069-$006D<br>105-109</td><td><p align="JUSTIFY">ARG, arithmetic register
+  #2 (5 bytes).</p>
+</td></tr><tr valign="TOP"><td>$006E<br>110</td><td><p align="JUSTIFY">Sign of ARG. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 0 = Positive; 1 = Negative.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$006F-$0070<br>111-112</td><td><p align="JUSTIFY">Pointer to first string
+  expression during string comparison.</p>
+</td></tr><tr valign="TOP"><td>$0071-$0072<br>113-114</td><td><p align="JUSTIFY">Auxiliary pointer during
+  array operations.<br>
+  Temporary area for saving original pointer to current BASIC instruction
+  during VAL().<br>
+  Pointer to current item of polynomial table during polynomial
+  evaluation.</p>
+</td></tr><tr valign="TOP"><td>$0073-$008A<br>115-138</td><td><p align="JUSTIFY">CHRGET. Machine code
+  routine to read next byte from BASIC program or direct command (24
+  bytes).<br>
+  $0079, 121: CHRGOT. Read current byte from BASIC program or direct
+  command.<br>
+  $007A-$007B, 122-123: Pointer to current byte in BASIC program or direct
+  command.</p>
+</td></tr><tr valign="TOP"><td>$008B-$008F<br>139-143</td><td><p align="JUSTIFY">Previous result of
+  RND().</p>
+</td></tr><tr valign="TOP"><td>$0090<br>144</td><td><p align="JUSTIFY">Value of ST variable, device status
+  for serial bus and datasette input/output. Serial bus bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: Transfer direction during which the timeout
+    occured; 0 = Input; 1 = Output.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Timeout occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = VERIFY error occurred (only during
+    VERIFY), the file read from the device did not match that in the
+    memory.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 1 = End of file has been reached.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 1 = Device is not present.</p>
+  </li></ul>
+  <p align="JUSTIFY">Datasette bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #2: 1 = Block is too short (shorter than 192
+    bytes).</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Block is too long (longer than 192
+    bytes).</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Not all bytes read with error during pass
+    1 could be corrected during pass 2, or a VERIFY error occurred, the file
+    read from the device did not match that in the memory.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 1 = Checksum error occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 1 = End of file has been reached (only during
+    reading data files).</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0091<br>145</td><td><p align="JUSTIFY">Stop key indicator. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$7F: Stop key is pressed.</p>
+  </li><li><p align="JUSTIFY">$FF: Stop key is not pressed.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0092<br>146</td><td><p align="JUSTIFY">Unknown. (Timing constant during
+  datasette input.)</p>
+</td></tr><tr valign="TOP"><td>$0093<br>147</td><td><p align="JUSTIFY">LOAD/VERIFY switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: LOAD.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: VERIFY.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0094<br>148</td><td><p align="JUSTIFY">Serial bus output cache status.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 1 = Output cache dirty, must transfer cache
+    contents upon next output to serial bus.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0095<br>149</td><td><p align="JUSTIFY">Serial bus output cache, previous
+  byte to be sent to serial bus.</p>
+</td></tr><tr valign="TOP"><td>$0096<br>150</td><td><p align="JUSTIFY">Unknown. (End of tape indicator
+  during datasette input/output.)</p>
+</td></tr><tr valign="TOP"><td>$0097<br>151</td><td><p align="JUSTIFY">Temporary area for saving original
+  value of Y register during input from RS232.<br>
+  Temporary area for saving original value of X register during input from
+  datasette.</p>
+</td></tr><tr valign="TOP"><td>$0098<br>152</td><td><p align="JUSTIFY">Number of files currently open.
+  Values: $00-$0A, 0-10.</p>
+</td></tr><tr valign="TOP"><td>$0099<br>153</td><td><p align="JUSTIFY">Current input device number.<br>
+  Default: $00, keyboard.</p>
+</td></tr><tr valign="TOP"><td>$009A<br>154</td><td><p align="JUSTIFY">Current output device number.<br>
+  Default: $03, screen.</p>
+</td></tr><tr valign="TOP"><td>$009B<br>155</td><td><p align="JUSTIFY">Unknown. (Parity bit during
+  datasette input/output.)</p>
+</td></tr><tr valign="TOP"><td>$009C<br>156</td><td><p align="JUSTIFY">Unknown. (Byte ready indicator
+  during datasette input/output.)</p>
+</td></tr><tr valign="TOP"><td>$009D<br>157</td><td><p align="JUSTIFY">System error display switch.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #6: 0 = Suppress I/O error messages; 1 = Display
+    them.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = Suppress system messages; 1 =  Display
+    them.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$009E<br>158</td><td><p align="JUSTIFY">Byte to be put into output buffer
+  during RS232 and datasette output.<br>
+  Block header type during datasette input/output.<br>
+  Length of file name during datasette input/output.<br>
+  Error counter during LOAD from datasette. Values: $00-$3E, 0-62.</p>
+</td></tr><tr valign="TOP"><td>$009F<br>159</td><td><p align="JUSTIFY">Auxiliary counter for writing file
+  name into datasette buffer.<br>
+  Auxiliary counter for comparing requested file name with file name read from
+  datasette during datasette input.<br>
+  Error correction counter during LOAD from datasette. Values: $00-$3E,
+  0-62.</p>
+</td></tr><tr valign="TOP"><td>$00A0-$00A2<br>160-162</td><td><p align="JUSTIFY">Value of TI variable,
+  time of day, increased by 1 every 1/60 second (on PAL machines). Values:
+  $000000-$4F19FF, 0-518399 (on PAL machines).
+</p></td></tr><tr valign="TOP"><td>$00A3<br>163</td><td><p align="JUSTIFY">EOI switch during serial bus
+  output. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 0 = Send byte right after handshake; 1 = Do
+    EOI delay first.</p>
+  </li></ul>
+  <p align="JUSTIFY">Bit counter during datasette output.</p>
+</td></tr><tr valign="TOP"><td>$00A4<br>164</td><td><p align="JUSTIFY">Byte buffer during serial bus
+  input.<br>
+  Parity during datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$00A5<br>165</td><td><p align="JUSTIFY">Bit counter during serial bus
+  input/output.<br>
+  Counter for sync mark during datasette output.</p>
+</td></tr><tr valign="TOP"><td>$00A6<br>166</td><td><p align="JUSTIFY">Offset of current byte in datasette
+  buffer.</p>
+</td></tr><tr valign="TOP"><td>$00A7<br>167</td><td><p align="JUSTIFY">Bit buffer during RS232 input.</p>
+</td></tr><tr valign="TOP"><td>$00A8<br>168</td><td><p align="JUSTIFY">Bit counter during RS232 input.</p>
+</td></tr><tr valign="TOP"><td>$00A9<br>169</td><td><p align="JUSTIFY">Stop bit switch during RS232 input.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Data bit.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Stop bit.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00AA<br>170</td><td><p align="JUSTIFY">Byte buffer during RS232 input.</p>
+</td></tr><tr valign="TOP"><td>$00AB<br>171</td><td><p align="JUSTIFY">Parity during RS232 input.<br>
+  Computed block checksum during datasette input.</p>
+</td></tr><tr valign="TOP"><td>$00AC-$00AD<br>172-173</td><td><p align="JUSTIFY">Start address for SAVE to
+  serial bus.<br>
+  Pointer to current byte during SAVE to serial bus or datasette.<br>
+  Pointer to line in screen memory to be scrolled during scrolling the
+  screen.</p>
+</td></tr><tr valign="TOP"><td>$00AE-$00AF<br>174-175</td><td><p align="JUSTIFY">Load address read from
+  input file and pointer to current byte during LOAD/VERIFY from serial
+  bus.<br>
+  End address after LOAD/VERIFY from serial bus or datasette.<br>
+  End address for SAVE to serial bus or datasette.<br>
+  Pointer to line in Color RAM to be scrolled during scrolling the screen.</p>
+</td></tr><tr valign="TOP"><td>$00B0-$00B1<br>176-177</td><td><p align="JUSTIFY">Unknown.</p>
+</td></tr><tr valign="TOP"><td>$00B2-$00B3<br>178-179</td><td><p align="JUSTIFY">Pointer to datasette
+  buffer.<br>
+  Default: $033C, 828.</p>
+</td></tr><tr valign="TOP"><td>$00B4<br>180</td><td><p align="JUSTIFY">Bit counter and stop bit switch
+  during RS232 output. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#6: Bit count.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = Data bit; 1 = Stop bit.</p>
+  </li></ul>
+  <p align="JUSTIFY">Bit counter during datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$00B5<br>181</td><td><p align="JUSTIFY">Bit buffer (in bit #2) during RS232
+  output.</p>
+</td></tr><tr valign="TOP"><td>$00B6<br>182</td><td><p align="JUSTIFY">Byte buffer during RS232
+  output.</p>
+</td></tr><tr valign="TOP"><td>$00B7<br>183</td><td><p align="JUSTIFY">Length of file name or disk
+  command; first parameter of LOAD, SAVE and VERIFY or fourth parameter of
+  OPEN. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: No parameter.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Parameter length.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00B8<br>184</td><td><p align="JUSTIFY">Logical number of current file.</p>
+</td></tr><tr valign="TOP"><td>$00B9<br>185</td><td><p align="JUSTIFY">Secondary address of current
+  file.</p>
+</td></tr><tr valign="TOP"><td>$00BA<br>186</td><td><p align="JUSTIFY">Device number of current file.</p>
+</td></tr><tr valign="TOP"><td>$00BB-$00BC<br>187-188</td><td><p align="JUSTIFY">Pointer to current file
+  name or disk command; first parameter of LOAD, SAVE and VERIFY or fourth
+  parameter of OPEN.</p>
+</td></tr><tr valign="TOP"><td>$00BD<br>189</td><td><p align="JUSTIFY">Parity during RS232 output.<br>
+  Byte buffer during datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$00BE<br>190</td><td><p align="JUSTIFY">Block counter during datasette
+  input/output.</p>
+</td></tr><tr valign="TOP"><td>$00BF<br>191</td><td><p align="JUSTIFY">Unknown.</p>
+</td></tr><tr valign="TOP"><td>$00C0<br>192</td><td><p align="JUSTIFY">Datasette motor switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: No button was pressed, motor has been switched
+    off. If a button is pressed on the datasette, must switch motor on.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Motor is on.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00C1-$00C2<br>193-194</td><td><p align="JUSTIFY">Start address during SAVE
+  to serial bus, LOAD and VERIFY from datasette and SAVE to datasette.<br>
+  Pointer to current byte during memory test.</p>
+</td></tr><tr valign="TOP"><td>$00C3-$00C4<br>195-196</td><td><p align="JUSTIFY">Start address for a
+  secondary address of 0 for LOAD and VERIFY from serial bus or datasette.<br>
+  Pointer to ROM table of default vectors during initialization of I/O
+  vectors.</p>
+</td></tr><tr valign="TOP"><td>$00C5<br>197</td><td><p align="JUSTIFY">Matrix code of key previously
+  pressed. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00-$3F: Keyboard matrix code.</p>
+  </li><li><p align="JUSTIFY">$40: No key was pressed at the time of previous
+    check.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00C6<br>198</td><td><p align="JUSTIFY">Length of keyboard buffer.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00, 0: Buffer is empty.</p>
+  </li><li><p align="JUSTIFY">$01-$0A, 1-10: Buffer length.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00C7<br>199</td><td><p align="JUSTIFY">Reverse mode switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Normal mode.</p>
+  </li><li><p align="JUSTIFY">$12: Reverse mode.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00C8<br>200</td><td><p align="JUSTIFY">Length of line minus 1 during
+  screen input. Values: $27, 39; $4F, 79.</p>
+</td></tr><tr valign="TOP"><td>$00C9<br>201</td><td><p align="JUSTIFY">Cursor row during screen input.
+  Values: $00-$18, 0-24.</p>
+</td></tr><tr valign="TOP"><td>$00CA<br>202</td><td><p align="JUSTIFY">Cursor column during screen input.
+  Values: $00-$27, 0-39.</p>
+</td></tr><tr valign="TOP"><td>$00CB<br>203</td><td><p align="JUSTIFY">Matrix code of key currently being
+  pressed. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00-$3F: Keyboard matrix code.</p>
+  </li><li><p align="JUSTIFY">$40: No key is currently pressed.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00CC<br>204</td><td><p align="JUSTIFY">Cursor visibility switch.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Cursor is on.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Cursor is off.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00CD<br>205</td><td><p align="JUSTIFY">Delay counter for changing cursor
+  phase. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00, 0: Must change cursor phase.</p>
+  </li><li><p align="JUSTIFY">$01-$14, 1-20: Delay.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00CE<br>206</td><td><p align="JUSTIFY">Screen code of character under
+  cursor.</p>
+</td></tr><tr valign="TOP"><td>$00CF<br>207</td><td><p align="JUSTIFY">Cursor phase switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Cursor off phase, original character
+    visible.</p>
+  </li><li><p align="JUSTIFY">$01: Cursor on phase, reverse character visible.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00D0<br>208</td><td><p align="JUSTIFY">End of line switch during screen
+  input. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Return character reached, end of line.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Still reading characters from line.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00D1-$00D2<br>209-210</td><td><p align="JUSTIFY">Pointer to current line
+  in screen memory.</p>
+</td></tr><tr valign="TOP"><td>$00D3<br>211</td><td><p align="JUSTIFY">Current cursor column. Values:
+  $00-$27, 0-39.</p>
+</td></tr><tr valign="TOP"><td>$00D4<br>212</td><td><p align="JUSTIFY">Quotation mode switch. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Normal mode.</p>
+  </li><li><p align="JUSTIFY">$01: Quotation mode.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00D5<br>213</td><td><p align="JUSTIFY">Length of current screen line minus
+  1. Values: $27, 39; $4F, 79.</p>
+</td></tr><tr valign="TOP"><td>$00D6<br>214</td><td><p align="JUSTIFY">Current cursor row. Values:
+  $00-$18, 0-24.</p>
+</td></tr><tr valign="TOP"><td>$00D7<br>215</td><td><p align="JUSTIFY">PETSCII code of character during
+  screen input/output.<br>
+  Bit buffer during datasette input.<br>
+  Block checksum during datasette output.</p>
+</td></tr><tr valign="TOP"><td>$00D8<br>216</td><td><p align="JUSTIFY">Number of insertions. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: No insertions made, normal mode, control codes
+    change screen layout or behavior.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Number of insertions, when inputting this
+    many character next, those must be turned into control codes, similarly to
+    quotation mode.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00D9-$00F1<br>217-241</td><td><p align="JUSTIFY">High byte of pointers to
+  each line in screen memory (25 bytes). Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00-$7F: Pointer high byte.</p>
+  </li><li><p align="JUSTIFY">$80-$FF: No pointer, line is an extension of previous
+    line on screen.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00F2<br>242</td><td><p align="JUSTIFY">Temporary area during scrolling the
+  screen.</p>
+</td></tr><tr valign="TOP"><td>$00F3-$00F4<br>243-244</td><td><p align="JUSTIFY">Pointer to current line
+  in Color RAM.</p>
+</td></tr><tr valign="TOP"><td>$00F5-$00F6<br>245-246</td><td><p align="JUSTIFY">Pointer to current
+  conversion table during conversion from keyboard matrix codes to PETSCII
+  codes.</p>
+</td></tr><tr valign="TOP"><td>$00F7-$00F8<br>247-248</td><td><p align="JUSTIFY">Pointer to RS232 input
+  buffer. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0000-$00FF: No buffer defined, a new buffer must be
+    allocated upon RS232 input.</p>
+  </li><li><p align="JUSTIFY">$0100-$FFFF: Buffer pointer.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00F9-$00FA<br>249-250</td><td><p align="JUSTIFY">Pointer to RS232 output
+  buffer. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0000-$00FF: No buffer defined, a new buffer must be
+    allocated upon RS232 output.</p>
+  </li><li><p align="JUSTIFY">$0100-$FFFF: Buffer pointer.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$00FB-$00FE<br>251-254</td><td><p align="JUSTIFY">Unused (4 bytes).</p>
+</td></tr><tr valign="TOP"><td>$00FF-$010A<br>255-266</td><td><p align="JUSTIFY">Buffer for conversion
+  from floating point to string (12 bytes.)</p>
+
+<a name="page01"></a><a name="cpustack"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0100-$01FF, 256-511<br>Processor
+  stack</b>
+
+</td></tr><tr valign="TOP"><td>$00FF-$010A<br>255-266</td><td><p align="JUSTIFY">Buffer for conversion
+  from floating point to string (12 bytes.)</p>
+</td></tr><tr valign="TOP"><td>$0100-$013D<br>256-317</td><td><p align="JUSTIFY">Pointers to bytes read
+  with error during datasette input (62 bytes, 31 entries).</p>
+</td></tr><tr valign="TOP"><td>$0100-$01FF<br>256-511</td><td><p align="JUSTIFY">Processor stack. Also
+  used for storing data related to FOR and GOSUB.</p>
+
+<a name="page02"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0200-$02FF, 512-767</b>
+
+</td></tr><tr valign="TOP"><td>$0200-$0258<br>512-600</td><td><p align="JUSTIFY">Input buffer, storage
+  area for data read from screen (89 bytes).</p>
+</td></tr><tr valign="TOP"><td>$0259-$0262<br>601-610</td><td><p align="JUSTIFY">Logical numbers assigned
+  to files (10 bytes, 10 entries).</p>
+</td></tr><tr valign="TOP"><td>$0263-$026C<br>611-620</td><td><p align="JUSTIFY">Device numbers assigned
+  to files (10 bytes, 10 entries).</p>
+</td></tr><tr valign="TOP"><td>$026D-$0276<br>621-630</td><td><p align="JUSTIFY">Secondary addresses
+  assigned to files (10 bytes, 10 entries).</p>
+</td></tr><tr valign="TOP"><td>$0277-$0280<br>631-640</td><td><p align="JUSTIFY">Keyboard buffer (10
+  bytes, 10 entries).</p>
+</td></tr><tr valign="TOP"><td>$0281-$0282<br>641-642</td><td><p align="JUSTIFY">Pointer to beginning of
+  BASIC area after memory test.<br>
+  Default: $0800, 2048.</p>
+</td></tr><tr valign="TOP"><td>$0283-$0284<br>643-644</td><td><p align="JUSTIFY">Pointer to end of BASIC
+  area after memory test.<br>
+  Default: $A000, 40960.</p>
+</td></tr><tr valign="TOP"><td>$0285<br>645</td><td><p align="JUSTIFY">Unused. (Serial bus timeout.)</p>
+</td></tr><tr valign="TOP"><td>$0286<br>646</td><td><p align="JUSTIFY">Current color, cursor color.
+  Values: $00-$0F, 0-15.</p>
+</td></tr><tr valign="TOP"><td>$0287<br>647</td><td><p align="JUSTIFY">Color of character under cursor.
+  Values: $00-$0F, 0-15.</p>
+</td></tr><tr valign="TOP"><td>$0288<br>648</td><td><p align="JUSTIFY">High byte of pointer to screen
+  memory for screen input/output.<br>
+  Default: $04, $0400, 1024.</p>
+</td></tr><tr valign="TOP"><td>$0289<br>649</td><td><p align="JUSTIFY">Maximum length of keyboard buffer.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00, 0: No buffer.</p>
+  </li><li><p align="JUSTIFY">$01-$0F, 1-15: Buffer size.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028A<br>650</td><td><p align="JUSTIFY">Keyboard repeat switch. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #6-#7: %00 = Only cursor up/down, cursor
+    left/right, Insert/Delete and Space repeat; %01 = No key repeats; %1x =
+    All keys repeat.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028B<br>651</td><td><p align="JUSTIFY">Delay counter during repeat
+  sequence, for delaying between successive repeats. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00, 0: Must repeat key.</p>
+  </li><li><p align="JUSTIFY">$01-$04, 1-4: Delay repetition.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028C<br>652</td><td><p align="JUSTIFY">Repeat sequence delay counter, for
+  delaying before first repetition. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00, 0: Must start repeat sequence.</p>
+  </li><li><p align="JUSTIFY">$01-$10, 1-16: Delay repeat sequence.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028D<br>653</td><td><p align="JUSTIFY">Shift key indicator. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = One or more of left Shift, right Shift or
+    Shift Lock is currently being pressed or locked.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Commodore is currently being pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Control is currently being pressed.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028E<br>654</td><td><p align="JUSTIFY">Previous value of shift key
+  indicator. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = One or more of left Shift, right Shift or
+    Shift Lock was pressed or locked at the time of previous check.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Commodore was pressed at the time of
+    previous check.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Control was pressed at the time of
+    previous check.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$028F-$0290<br>655-656</td><td><p align="JUSTIFY">Execution address of
+  routine that, based on the status of shift keys, sets the pointer at memory
+  address $00F5-$00F6 to the appropriate conversion table for converting
+  keyboard matrix codes to PETSCII codes.<br>
+  Default: $EB48.</p>
+</td></tr><tr valign="TOP"><td>$0291<br>657</td><td><p align="JUSTIFY">Commodore-Shift switch. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #7: 0 = Commodore-Shift is enabled, the key combination
+    will toggle between the uppercase/graphics and lowercase/uppercase character
+    set; 1 = Commodore-Shift is disabled.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0292<br>658</td><td><p align="JUSTIFY">Scroll direction switch during
+  scrolling the screen. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: Insertion of line before current line, current
+    line and all lines below it must be scrolled 1 line downwards.</p>
+  </li><li><p align="JUSTIFY">$01-$FF: Bottom of screen reached, complete screen
+    must be scrolled 1 line upwards.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0293<br>659</td><td><p align="JUSTIFY">RS232 control register. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#3: Baud rate, transfer speed. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0000: User specified.</p>
+    </li><li><p align="JUSTIFY">%0001: 50 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0010: 75 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0011: 110 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0100: 150 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0101: 300 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0110: 600 bit/s.</p>
+    </li><li><p align="JUSTIFY">%0111: 1200 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1000: 2400 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1001: 1800 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1010: 2400 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1011: 3600 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1100: 4800 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1101: 7200 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1110: 9600 bit/s.</p>
+    </li><li><p align="JUSTIFY">%1111: 19200 bit/s.</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bits #5-#6: Byte size, number of data bits per byte;
+    %00 = 8; %01 = 7, %10 = 6; %11 = 5.</p>
+  </li><li><p align="JUSTIFY">Bit #7: Number of stop bits; 0 = 1 stop bit; 1 = 2
+    stop bits.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0294<br>660</td><td><p align="JUSTIFY">RS232 command register. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: Synchronization type; 0 = 3 lines; 1 = X
+    lines.</p>
+  </li><li><p align="JUSTIFY">Bit #4: Transmission type; 0 = Duplex; 1 = Half
+    duplex.</p>
+  </li><li><p align="JUSTIFY">Bits #5-#7: Parity mode. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%xx0: No parity check, bit #7 does not exist.</p>
+    </li><li><p align="JUSTIFY">%001: Odd parity.</p>
+    </li><li><p align="JUSTIFY">%011: Even parity.</p>
+    </li><li><p align="JUSTIFY">%101: No parity check, bit #7 is always 1.</p>
+    </li><li><p align="JUSTIFY">%111: No parity check, bit #7 is always 0.</p>
+    </li></ul>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0295-$0296<br>661-662</td><td><p align="JUSTIFY">Default value of RS232
+  output timer, based on baud rate. (Must be filled with actual value before
+  RS232 input/output if baud rate is "user specified" in RS232 control
+  register, memory address $0293.)</p>
+</td></tr><tr valign="TOP"><td>$0297<br>663</td><td><p align="JUSTIFY">Value of ST variable, device status
+  for RS232 input/output. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Parity error occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Frame error, a stop bit with the value of
+    0, occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Input buffer underflow occurred, too much
+    data has arrived but it has not been read from the buffer in time.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Input buffer is empty, nothing to
+    read.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 0 = Sender is Clear To Send; 1 = Sender is
+    not ready to send data to receiver.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 0 = Receiver reports Data Set Ready; 1 =
+    Receiver is not ready to receive data.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 1 = Carrier loss, a stop bit and a data byte
+    both with the value of 0, detected.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$0298<br>664</td><td><p align="JUSTIFY">RS232 byte size, number of data
+  bits per data byte, default value for bit counters.</p>
+</td></tr><tr valign="TOP"><td>$0299-$029A<br>665-666</td><td><p align="JUSTIFY">Default value of RS232
+  input timer, based on baud rate. (Calculated automatically from default
+  value of RS232 output timer, at memory address $0295-$0296.)</p>
+</td></tr><tr valign="TOP"><td>$029B<br>667</td><td><p align="JUSTIFY">Offset of byte received in RS232
+  input buffer.</p>
+</td></tr><tr valign="TOP"><td>$029C<br>668</td><td><p align="JUSTIFY">Offset of current byte in RS232
+  input buffer.</p>
+</td></tr><tr valign="TOP"><td>$029D<br>669</td><td><p align="JUSTIFY">Offset of byte to send in RS232
+  output buffer.</p>
+</td></tr><tr valign="TOP"><td>$029E<br>670</td><td><p align="JUSTIFY">Offset of current byte in RS232
+  output buffer.</p>
+</td></tr><tr valign="TOP"><td>$029F-$02A0<br>671-672</td><td><p align="JUSTIFY">Temporary area for saving
+  pointer to original interrupt service routine during datasette input output.
+  Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$0000-$00FF: No datasette input/output took place yet
+    or original pointer has been already restored.</p>
+  </li><li><p align="JUSTIFY">$0100-$FFFF: Original pointer, datasette input/output
+    currently in progress.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$02A1<br>673</td><td><p align="JUSTIFY">Temporary area for saving original
+  value of CIA#2 interrupt control register, at memory address $DD0D, during
+  RS232 input/output.</p>
+</td></tr><tr valign="TOP"><td>$02A2<br>674</td><td><p align="JUSTIFY">Temporary area for saving original
+  value of CIA#1 timer #1 control register, at memory address $DC0E, during
+  datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$02A3<br>675</td><td><p align="JUSTIFY">Temporary area for saving original
+  value of CIA#1 interrupt control register, at memory address $DC0D, during
+  datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$02A4<br>676</td><td><p align="JUSTIFY">Temporary area for saving original
+  value of CIA#1 timer #1 control register, at memory address $DC0E, during
+  datasette input/output.</p>
+</td></tr><tr valign="TOP"><td>$02A5<br>677</td><td><p align="JUSTIFY">Number of line currently being
+  scrolled during scrolling the screen.</p>
+</td></tr><tr valign="TOP"><td>$02A6<br>678</td><td><p align="JUSTIFY">PAL/NTSC switch, for selecting
+  RS232 baud rate from the proper table. Values:</p>
+  <ul>
+  <li><p align="JUSTIFY">$00: NTSC.</p>
+  </li><li><p align="JUSTIFY">$01: PAL.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$02A7-$02FF<br>679-767</td><td><p align="JUSTIFY">Unused (89 bytes).</p>
+
+<a name="page03"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0300-$03FF, 768-1023</b>
+
+</td></tr><tr valign="TOP"><td>$0300-$0301<br>768-769</td><td><p align="JUSTIFY">Execution address of warm
+  reset, displaying optional BASIC error message and entering BASIC idle
+  loop.<br>
+  Default: $E38B.</p>
+</td></tr><tr valign="TOP"><td>$0302-$0303<br>770-771</td><td><p align="JUSTIFY">Execution address of
+  BASIC idle loop.<br>
+  Default: $A483.</p>
+</td></tr><tr valign="TOP"><td>$0304-$0305<br>772-773</td><td><p align="JUSTIFY">Execution address of
+  BASIC line tokenizater routine.<br>
+  Default: $A57C.</p>
+</td></tr><tr valign="TOP"><td>$0306-$0307<br>774-775</td><td><p align="JUSTIFY">Execution address of
+  BASIC token decoder routine.<br>
+  Default: $A71A.</p>
+</td></tr><tr valign="TOP"><td>$0308-$0309<br>776-777</td><td><p align="JUSTIFY">Execution address of
+  BASIC instruction executor routine.<br>
+  Default: $A7E4.</p>
+</td></tr><tr valign="TOP"><td>$030A-$030B<br>778-779</td><td><p align="JUSTIFY">Execution address of
+  routine reading next item of BASIC expression.<br>
+  Default: $AE86.</p>
+</td></tr><tr valign="TOP"><td>$030C<br>780</td><td><p align="JUSTIFY">Default value of register A for
+  SYS.<br>
+  Value of register A after SYS.</p>
+</td></tr><tr valign="TOP"><td>$030D<br>781</td><td><p align="JUSTIFY">Default value of register X for
+  SYS.<br>
+  Value of register X after SYS.</p>
+</td></tr><tr valign="TOP"><td>$030E<br>782</td><td><p align="JUSTIFY">Default value of register Y for
+  SYS.<br>
+  Value of register Y after SYS.</p>
+</td></tr><tr valign="TOP"><td>$030F<br>783</td><td><p align="JUSTIFY">Default value of status register
+  for SYS.<br>
+  Value of status register after SYS.</p>
+</td></tr><tr valign="TOP"><td>$0310-$0312<br>784-786</td><td><p align="JUSTIFY">JMP ABS machine
+  instruction, jump to USR() function.<br>
+  $0311-$0312, 785-786: Execution address of USR() function.</p>
+</td></tr><tr valign="TOP"><td>$0313<br>787</td><td><p align="JUSTIFY">Unused.</p>
+</td></tr><tr valign="TOP"><td>$0314-$0315<br>788-789</td><td><p align="JUSTIFY">Execution address of
+  interrupt service routine.<br>
+  Default: $EA31.</p>
+</td></tr><tr valign="TOP"><td>$0316-$0317<br>790-791</td><td><p align="JUSTIFY">Execution address of BRK
+  service routine.<br>
+  Default: $FE66.</p>
+</td></tr><tr valign="TOP"><td>$0318-$0319<br>792-793</td><td><p align="JUSTIFY">Execution address of
+  non-maskable interrupt service routine.<br>
+  Default: $FE47.</p>
+</td></tr><tr valign="TOP"><td>$031A-$031B<br>794-795</td><td><p align="JUSTIFY">Execution address of
+  OPEN, routine opening files.<br>
+  Default: $F34A.</p>
+</td></tr><tr valign="TOP"><td>$031C-$031D<br>796-797</td><td><p align="JUSTIFY">Execution address of
+  CLOSE, routine closing files.<br>
+  Default: $F291.</p>
+</td></tr><tr valign="TOP"><td>$031E-$031F<br>798-799</td><td><p align="JUSTIFY">Execution address of
+  CHKIN, routine defining file as default input.<br>
+  Default: $F20E.</p>
+</td></tr><tr valign="TOP"><td>$0320-$0321<br>800-801</td><td><p align="JUSTIFY">Execution address of
+  CHKOUT, routine defining file as default output.<br>
+  Default: $F250.</p>
+</td></tr><tr valign="TOP"><td>$0322-$0323<br>802-803</td><td><p align="JUSTIFY">Execution address of
+  CLRCHN, routine initializating input/output.<br>
+  Default: $F333.</p>
+</td></tr><tr valign="TOP"><td>$0324-$0325<br>804-805</td><td><p align="JUSTIFY">Execution address of
+  CHRIN, data input routine, except for keyboard and RS232 input.<br>
+  Default: $F157.</p>
+</td></tr><tr valign="TOP"><td>$0326-$0327<br>806-807</td><td><p align="JUSTIFY">Execution address of
+  CHROUT, general purpose data output routine.<br>
+  Default: $F1CA.</p>
+</td></tr><tr valign="TOP"><td>$0328-$0329<br>808-809</td><td><p align="JUSTIFY">Execution address of
+  STOP, routine checking the status of Stop key indicator, at memory address
+  $0091.<br>
+  Default: $F6ED.</p>
+</td></tr><tr valign="TOP"><td>$032A-$032B<br>810-811</td><td><p align="JUSTIFY">Execution address of
+  GETIN, general purpose data input routine.<br>
+  Default: $F13E.</p>
+</td></tr><tr valign="TOP"><td>$032C-$032D<br>812-813</td><td><p align="JUSTIFY">Execution address of
+  CLALL, routine initializing input/output and clearing all file assignment
+  tables.<br>
+  Default: $F32F.</p>
+</td></tr><tr valign="TOP"><td>$032E-$032F<br>814-815</td><td><p align="JUSTIFY">Unused.<br>
+  Default: $FE66.</p>
+</td></tr><tr valign="TOP"><td>$0330-$0331<br>816-817</td><td><p align="JUSTIFY">Execution address of
+  LOAD, routine loading files.<br>
+  Default: $F4A5.</p>
+</td></tr><tr valign="TOP"><td>$0332-$0333<br>818-819</td><td><p align="JUSTIFY">Execution address of
+  SAVE, routine saving files.<br>
+  Default: $F5ED.</p>
+</td></tr><tr valign="TOP"><td>$0334-$033B<br>820-827</td><td><p align="JUSTIFY">Unused (8 bytes).</p>
+</td></tr><tr valign="TOP"><td>$033C-$03FB<br>828-1019</td><td><p align="JUSTIFY">Datasette buffer (192
+  bytes).</p>
+</td></tr><tr valign="TOP"><td>$03FC-$03FF<br>1020-1023</td><td><p align="JUSTIFY">Unused (4 bytes).</p>
+
+<a name="page04"></a><a name="screen"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0400-$07FF, 1024-2047<br>Default screen
+  memory</b>
+
+</td></tr><tr valign="TOP"><td>$0400-$07E7<br>1024-2023</td><td><p align="JUSTIFY">Default area of screen
+  memory (1000 bytes).</p>
+</td></tr><tr valign="TOP"><td>$07E8-$07F7<br>2024-2039</td><td><p align="JUSTIFY">Unused (16 bytes).</p>
+</td></tr><tr valign="TOP"><td>$07F8-$07FF<br>2040-2047</td><td><p align="JUSTIFY">Default area for sprite
+  pointers (8 bytes).</p>
+
+<a name="page08"></a><a name="basicram"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$0800-$9FFF, 2048-40959<br>BASIC area</b>
+
+</td></tr><tr valign="TOP"><td>$0800<br>2048</td><td><p align="JUSTIFY">Unused. (Must contain a value of 0
+  so that the BASIC program can be RUN.)</p>
+</td></tr><tr valign="TOP"><td>$0801-$9FFF<br>2049-40959</td><td><p align="JUSTIFY">Default BASIC area
+  (38911 bytes).</p>
+</td></tr><tr valign="TOP"><td>$8000-$9FFF<br>32768-40959</td><td><p align="JUSTIFY">Optional cartridge
+  ROM (8192 bytes).<br>
+  $8000-$8001, 32768-32769: Execution address of cold reset.<br>
+  $8002-$8003, 32770-32771: Execution address of non-maskable interrupt
+  service routine.<br>
+  $8004-$8008, 32772-32776: Cartridge signature. If contains the uppercase
+  PETSCII string "CBM80" ($C3,$C2,$CD,$38,$30) then the routine vectors are
+  accepted by the KERNAL.</p>
+
+<a name="pagea0"></a><a name="basicrom"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$A000-$BFFF, 40960-49151<br>BASIC ROM</b>
+
+</td></tr><tr valign="TOP"><td>$A000-$BFFF<br>40960-49151</td><td><p align="JUSTIFY">BASIC ROM or RAM area
+  (8192 bytes); depends on the value of bits #0-#2 of the processor port at
+  memory address $0001:</p>
+  <ul>
+  <li><p align="JUSTIFY">%x00, %x01 or %x10: RAM area.</p>
+  </li><li><p align="JUSTIFY">%x11: BASIC ROM.</p>
+  </li></ul>
+
+<a name="pagec0"></a><a name="upperram"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$C000-$CFFF, 49152-53247<br>Upper RAM
+  area</b>
+
+</td></tr><tr valign="TOP"><td>$C000-$CFFF<br>49152-53247</td><td><p align="JUSTIFY">Upper RAM area (4096
+  bytes).</p>
+
+<a name="ioarea"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$D000-$DFFF, 53248-57343<br>I/O Area</b>
+
+</td></tr><tr valign="TOP"><td>$D000-$DFFF<br>53248-57343</td><td><p align="JUSTIFY">I/O Area (memory
+  mapped chip registers), Character ROM or RAM area (4096 bytes); depends on
+  the value of bits #0-#2 of the processor port at memory address $0001:</p>
+  <ul>
+  <li><p align="JUSTIFY">%x00: RAM area.</p>
+  </li><li><p align="JUSTIFY">%0xx: Character ROM. (Except for the value %000, see
+    above.)</p>
+  </li><li><p align="JUSTIFY">%1xx: I/O Area. (Except for the value %100, see
+    above.)</p>
+  </li></ul>
+
+<a name="charrom"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$D000-$DFFF, 53248-57343<br>Character
+  ROM</b>
+
+</td></tr><tr valign="TOP"><td>$D000-$DFFF<br>53248-57343</td><td><p align="JUSTIFY">Character ROM, shape
+  of characters (4096 bytes).</p>
+</td></tr><tr valign="TOP"><td>$D000-$D7FF<br>53248-55295</td><td><p align="JUSTIFY">Shape of characters
+  in uppercase/graphics character set (2048 bytes, 256 entries).</p>
+</td></tr><tr valign="TOP"><td>$D800-$DFFF<br>55295-57343</td><td><p align="JUSTIFY">Shape of characters
+  in lowercase/uppercase character set (2048 bytes, 256 entries).</p>
+
+<a name="paged0"></a><a name="vicchip"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$D000-$D3FF, 53248-54271<br>VIC-II; video
+  display</b>
+
+</td></tr><tr valign="TOP"><td>$D000<br>53248</td><td><p align="JUSTIFY">Sprite #0 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D001<br>53249</td><td><p align="JUSTIFY">Sprite #0 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D002<br>53250</td><td><p align="JUSTIFY">Sprite #1 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D003<br>53251</td><td><p align="JUSTIFY">Sprite #1 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D004<br>53252</td><td><p align="JUSTIFY">Sprite #2 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D005<br>53253</td><td><p align="JUSTIFY">Sprite #2 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D006<br>53254</td><td><p align="JUSTIFY">Sprite #3 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D007<br>53255</td><td><p align="JUSTIFY">Sprite #3 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D008<br>53256</td><td><p align="JUSTIFY">Sprite #4 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D009<br>53257</td><td><p align="JUSTIFY">Sprite #4 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D00A<br>53258</td><td><p align="JUSTIFY">Sprite #5 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D00B<br>53259</td><td><p align="JUSTIFY">Sprite #5 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D00C<br>53260</td><td><p align="JUSTIFY">Sprite #6 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D00D<br>53261</td><td><p align="JUSTIFY">Sprite #6 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D00E<br>53262</td><td><p align="JUSTIFY">Sprite #7 X-coordinate (only bits
+  #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D00F<br>53263</td><td><p align="JUSTIFY">Sprite #7 Y-coordinate.</p>
+</td></tr><tr valign="TOP"><td>$D010<br>53264</td><td><p align="JUSTIFY">Sprite #0-#7 X-coordinates (bit
+  #8). Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: Sprite #x X-coordinate bit #8.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D011<br>53265</td><td><p align="JUSTIFY">Screen control register #1.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#2: Vertical raster scroll.</p>
+  </li><li><p align="JUSTIFY">Bit #3: Screen height; 0 = 24 rows; 1 = 25 rows.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 0 = Screen off, complete screen is covered by
+    border; 1 = Screen on, normal screen contents are visible.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 0 = Text mode; 1 = Bitmap mode.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 1 = Extended background mode on.</p>
+  </li><li><p align="JUSTIFY">Bit #7: Read: Current raster line (bit #8).<br>
+    Write: Raster line to generate interrupt at (bit #8).</p>
+  </li></ul>
+  <p align="JUSTIFY">Default: $1B, %00011011.</p>
+</td></tr><tr valign="TOP"><td>$D012<br>53266</td><td><p align="JUSTIFY">Read: Current raster line (bits
+  #0-#7).<br>
+  Write: Raster line to generate interrupt at (bits #0-#7).</p>
+</td></tr><tr valign="TOP"><td>$D013<br>53267</td><td><p align="JUSTIFY">Light pen X-coordinate (bits
+  #1-#8).<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D014<br>53268</td><td><p align="JUSTIFY">Light pen Y-coordinate.<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D015<br>53269</td><td><p align="JUSTIFY">Sprite enable register. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 1 = Sprite #x is enabled, drawn onto the
+    screen.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D016<br>53270</td><td><p align="JUSTIFY">Screen control register #2.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#2: Horizontal raster scroll.</p>
+  </li><li><p align="JUSTIFY">Bit #3: Screen width; 0 = 38 columns; 1 = 40
+    columns.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Multicolor mode on.</p>
+  </li></ul>
+  <p align="JUSTIFY">Default: $C8, %11001000.</p>
+</td></tr><tr valign="TOP"><td>$D017<br>53271</td><td><p align="JUSTIFY">Sprite double height register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 1 = Sprite #x is stretched to double
+    height.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D018<br>53272</td><td><p align="JUSTIFY">Memory setup register. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #1-#3: In text mode, pointer to character memory
+    (bits #11-#13), relative to VIC bank, memory address $DD00. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%000, 0: $0000-$07FF, 0-2047.</p>
+    </li><li><p align="JUSTIFY">%001, 1: $0800-$0FFF, 2048-4095.</p>
+    </li><li><p align="JUSTIFY">%010, 2: $1000-$17FF, 4096-6143.</p>
+    </li><li><p align="JUSTIFY">%011, 3: $1800-$1FFF, 6144-8191.</p>
+    </li><li><p align="JUSTIFY">%100, 4: $2000-$27FF, 8192-10239.</p>
+    </li><li><p align="JUSTIFY">%101, 5: $2800-$2FFF, 10240-12287.</p>
+    </li><li><p align="JUSTIFY">%110, 6: $3000-$37FF, 12288-14335.</p>
+    </li><li><p align="JUSTIFY">%111, 7: $3800-$3FFF, 14336-16383.</p>
+    </li></ul>
+    <p align="JUSTIFY">Values %010 and %011 in VIC bank #0 and #2 select
+    Character ROM instead.<br>
+    In bitmap mode, pointer to bitmap memory (bit #13), relative to VIC bank,
+    memory address $DD00. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0xx, 0: $0000-$1FFF, 0-8191.</p>
+    </li><li><p align="JUSTIFY">%1xx, 4: $2000-$3FFF, 8192-16383.</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bits #4-#7: Pointer to screen memory (bits #10-#13),
+    relative to VIC bank, memory address $DD00. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0000, 0: $0000-$03FF, 0-1023.</p>
+    </li><li><p align="JUSTIFY">%0001, 1: $0400-$07FF, 1024-2047.</p>
+    </li><li><p align="JUSTIFY">%0010, 2: $0800-$0BFF, 2048-3071.</p>
+    </li><li><p align="JUSTIFY">%0011, 3: $0C00-$0FFF, 3072-4095.</p>
+    </li><li><p align="JUSTIFY">%0100, 4: $1000-$13FF, 4096-5119.</p>
+    </li><li><p align="JUSTIFY">%0101, 5: $1400-$17FF, 5120-6143.</p>
+    </li><li><p align="JUSTIFY">%0110, 6: $1800-$1BFF, 6144-7167.</p>
+    </li><li><p align="JUSTIFY">%0111, 7: $1C00-$1FFF, 7168-8191.</p>
+    </li><li><p align="JUSTIFY">%1000, 8: $2000-$23FF, 8192-9215.</p>
+    </li><li><p align="JUSTIFY">%1001, 9: $2400-$27FF, 9216-10239.</p>
+    </li><li><p align="JUSTIFY">%1010, 10: $2800-$2BFF, 10240-11263.</p>
+    </li><li><p align="JUSTIFY">%1011, 11: $2C00-$2FFF, 11264-12287.</p>
+    </li><li><p align="JUSTIFY">%1100, 12: $3000-$33FF, 12288-13311.</p>
+    </li><li><p align="JUSTIFY">%1101, 13: $3400-$37FF, 13312-14335.</p>
+    </li><li><p align="JUSTIFY">%1110, 14: $3800-$3BFF, 14336-15359.</p>
+    </li><li><p align="JUSTIFY">%1111, 15: $3C00-$3FFF, 15360-16383.</p>
+    </li></ul>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D019<br>53273</td><td><p align="JUSTIFY">Interrupt status register. Read
+  bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Current raster line is equal to the
+    raster line to generate  interrupt at.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Sprite-background collision occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Sprite-sprite collision occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Light pen signal arrived.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 1 = An event (or more events), that may generate an
+    interrupt, occurred and it has not been (not all of them have been) acknowledged
+    yet.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Acknowledge raster interrupt.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Acknowledge sprite-background collision
+    interrupt.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Acknowledge sprite-sprite collision
+    interrupt.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Acknowledge light pen interrupt.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D01A<br>53274</td><td><p align="JUSTIFY">Interrupt control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Raster interrupt enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Sprite-background collision interrupt
+    enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Sprite-sprite collision interrupt
+    enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Light pen interrupt enabled.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D01B<br>53275</td><td><p align="JUSTIFY">Sprite priority register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Sprite #x is drawn in front of screen
+    contents; 1 = Sprite #x is behind screen contents.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D01C<br>53276</td><td><p align="JUSTIFY">Sprite multicolor mode register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Sprite #x is single color; 1 = Sprite #x
+    is multicolor.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D01D<br>53277</td><td><p align="JUSTIFY">Sprite double width register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 1 = Sprite #x is stretched to double
+    width.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$D01E<br>53278</td><td><p align="JUSTIFY">Sprite-sprite collision register.
+  Read bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 1 = Sprite #x collided with another
+    sprite.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write: Enable further detection of sprite-sprite
+  collisions.</p>
+</td></tr><tr valign="TOP"><td>$D01F<br>53279</td><td><p align="JUSTIFY">Sprite-background collision
+  register. Read bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 1 = Sprite #x collided with background.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write: Enable further detection of sprite-background
+  collisions.</p>
+</td></tr><tr valign="TOP"><td>$D020<br>53280</td><td><p align="JUSTIFY">Border color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D021<br>53281</td><td><p align="JUSTIFY">Background color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D022<br>53282</td><td><p align="JUSTIFY">Extra background color #1 (only
+  bits #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D023<br>53283</td><td><p align="JUSTIFY">Extra background color #2 (only
+  bits #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D024<br>53284</td><td><p align="JUSTIFY">Extra background color #3 (only
+  bits #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D025<br>53285</td><td><p align="JUSTIFY">Sprite extra color #1 (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D026<br>53286</td><td><p align="JUSTIFY">Sprite extra color #2 (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D027<br>53287</td><td><p align="JUSTIFY">Sprite #0 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D028<br>53288</td><td><p align="JUSTIFY">Sprite #1 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D029<br>53289</td><td><p align="JUSTIFY">Sprite #2 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02A<br>53290</td><td><p align="JUSTIFY">Sprite #3 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02B<br>53291</td><td><p align="JUSTIFY">Sprite #4 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02C<br>53292</td><td><p align="JUSTIFY">Sprite #5 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02D<br>53293</td><td><p align="JUSTIFY">Sprite #6 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02E<br>53294</td><td><p align="JUSTIFY">Sprite #7 color (only bits
+  #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$D02F-$D03F<br>53295-53311</td><td><p align="JUSTIFY">Unusable (17
+  bytes).</p>
+</td></tr><tr valign="TOP"><td>$D040-$D3FF<br>53312-54271</td><td><p align="JUSTIFY">VIC-II register
+  images (repeated every $40, 64 bytes).</p>
+
+<a name="paged4"></a><a name="sidchip"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$D400-$D7FF, 54272-55295<br>SID; audio</b>
+
+</td></tr><tr valign="TOP"><td>$D400-$D401<br>54272-54273</td><td><p align="JUSTIFY">Voice #1
+  frequency.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D402-$D403<br>54274-54275</td><td><p align="JUSTIFY">Voice #1 pulse
+  width.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D404<br>54276</td><td><p align="JUSTIFY">Voice #1 control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Voice off, Release cycle; 1 = Voice on,
+    Attack-Decay-Sustain cycle.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Synchronization enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Ring modulation enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Disable voice, reset noise generator.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Triangle waveform enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 1 = Saw waveform enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 1 = Rectangle waveform enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 1 = Noise enabled.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D405<br>54277</td><td><p align="JUSTIFY">Voice #1 Attack and Decay length.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#3: Decay length. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0000, 0: 6 ms.</p>
+    </li><li><p align="JUSTIFY">%0001, 1: 24 ms.</p>
+    </li><li><p align="JUSTIFY">%0010, 2: 48 ms.</p>
+    </li><li><p align="JUSTIFY">%0011, 3: 72 ms.</p>
+    </li><li><p align="JUSTIFY">%0100, 4: 114 ms.</p>
+    </li><li><p align="JUSTIFY">%0101, 5: 168 ms.</p>
+    </li><li><p align="JUSTIFY">%0110, 6: 204 ms.</p>
+    </li><li><p align="JUSTIFY">%0111, 7: 240 ms.</p>
+    </li><li><p align="JUSTIFY">%1000, 8: 300 ms.</p>
+    </li><li><p align="JUSTIFY">%1001, 9: 750 ms.</p>
+    </li><li><p align="JUSTIFY">%1010, 10: 1.5 s.</p>
+    </li><li><p align="JUSTIFY">%1011, 11: 2.4 s.</p>
+    </li><li><p align="JUSTIFY">%1100, 12: 3 s.</p>
+    </li><li><p align="JUSTIFY">%1101, 13: 9 s.</p>
+    </li><li><p align="JUSTIFY">%1110, 14: 15 s.</p>
+    </li><li><p align="JUSTIFY">%1111, 15: 24 s.</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bits #4-#7: Attack length. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0000, 0: 2 ms.</p>
+    </li><li><p align="JUSTIFY">%0001, 1: 8 ms.</p>
+    </li><li><p align="JUSTIFY">%0010, 2: 16 ms.</p>
+    </li><li><p align="JUSTIFY">%0011, 3: 24 ms.</p>
+    </li><li><p align="JUSTIFY">%0100, 4: 38 ms.</p>
+    </li><li><p align="JUSTIFY">%0101, 5: 56 ms.</p>
+    </li><li><p align="JUSTIFY">%0110, 6: 68 ms.</p>
+    </li><li><p align="JUSTIFY">%0111, 7: 80 ms.</p>
+    </li><li><p align="JUSTIFY">%1000, 8: 100 ms.</p>
+    </li><li><p align="JUSTIFY">%1001, 9: 250 ms.</p>
+    </li><li><p align="JUSTIFY">%1010, 10: 500 ms.</p>
+    </li><li><p align="JUSTIFY">%1011, 11: 800 ms.</p>
+    </li><li><p align="JUSTIFY">%1100, 12: 1 s.</p>
+    </li><li><p align="JUSTIFY">%1101, 13: 3 s.</p>
+    </li><li><p align="JUSTIFY">%1110, 14: 5 s.</p>
+    </li><li><p align="JUSTIFY">%1111, 15: 8 s.</p>
+    </li></ul>
+  </li></ul>
+  <p align="JUSTIFY">Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D406<br>54278</td><td><p align="JUSTIFY">Voice #1 Sustain volume and
+  Release length. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#3: Release length. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%0000, 0: 6 ms.</p>
+    </li><li><p align="JUSTIFY">%0001, 1: 24 ms.</p>
+    </li><li><p align="JUSTIFY">%0010, 2: 48 ms.</p>
+    </li><li><p align="JUSTIFY">%0011, 3: 72 ms.</p>
+    </li><li><p align="JUSTIFY">%0100, 4: 114 ms.</p>
+    </li><li><p align="JUSTIFY">%0101, 5: 168 ms.</p>
+    </li><li><p align="JUSTIFY">%0110, 6: 204 ms.</p>
+    </li><li><p align="JUSTIFY">%0111, 7: 240 ms.</p>
+    </li><li><p align="JUSTIFY">%1000, 8: 300 ms.</p>
+    </li><li><p align="JUSTIFY">%1001, 9: 750 ms.</p>
+    </li><li><p align="JUSTIFY">%1010, 10: 1.5 s.</p>
+    </li><li><p align="JUSTIFY">%1011, 11: 2.4 s.</p>
+    </li><li><p align="JUSTIFY">%1100, 12: 3 s.</p>
+    </li><li><p align="JUSTIFY">%1101, 13: 9 s.</p>
+    </li><li><p align="JUSTIFY">%1110, 14: 15 s.</p>
+    </li><li><p align="JUSTIFY">%1111, 15: 24 s.</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bits #4-#7: Sustain volume.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D407-$D408<br>54279-54280</td><td><p align="JUSTIFY">Voice #2
+  frequency.<br>Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D409-$D40A<br>54281-54282</td><td><p align="JUSTIFY">Voice #2 pulse
+  width.<br>Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D40B<br>54283</td><td><p align="JUSTIFY">Voice #2 control register.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D40C<br>54284</td><td><p align="JUSTIFY">Voice #2 Attack and Decay
+  length.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D40D<br>54285</td><td><p align="JUSTIFY">Voice #2 Sustain volume and
+  Release length.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D40E-$D40F<br>54286-54287</td><td><p align="JUSTIFY">Voice #3
+  frequency.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D410-$D411<br>54288-54289</td><td><p align="JUSTIFY">Voice #3 pulse
+  width.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D412<br>54290</td><td><p align="JUSTIFY">Voice #3 control register.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D413<br>54291</td><td><p align="JUSTIFY">Voice #3 Attack and Decay
+  length.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D414<br>54292</td><td><p align="JUSTIFY">Voice #3 Sustain volume and
+  Release length.<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D415<br>54293</td><td><p align="JUSTIFY">Filter cut off frequency (bits
+  #0-#2).<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D416<br>54294</td><td><p align="JUSTIFY">Filter cut off frequency (bits
+  #3-#10).<br>
+  Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D417<br>54295</td><td><p align="JUSTIFY">Filter control. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Voice #1 filtered.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Voice #2 filtered.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Voice #3 filtered.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = External voice filtered.</p>
+  </li><li><p align="JUSTIFY">Bits #4-#7: Filter resonance.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D418<br>54296</td><td><p align="JUSTIFY">Volume and filter modes.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#3: Volume.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Low pass filter enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 1 = Band pass filter enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #6: 1 = High pass filter enabled.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 1 = Voice #3 disabled.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write-only.</p>
+</td></tr><tr valign="TOP"><td>$D419<br>54297</td><td><p align="JUSTIFY">X value of paddle selected at
+  memory address $DC00. (Updates at every 512 system cycles.)<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D41A<br>54298</td><td><p align="JUSTIFY">Y value of paddle selected at
+  memory address $DC00. (Updates at every 512 system cycles.)<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D41B<br>54299</td><td><p align="JUSTIFY">Voice #3 waveform output.<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D41C<br>54300</td><td><p align="JUSTIFY">Voice #3 ADSR output.<br>
+  Read-only.</p>
+</td></tr><tr valign="TOP"><td>$D41D-$D41F<br>54301-54303</td><td><p align="JUSTIFY">Unusable (3
+  bytes).</p>
+</td></tr><tr valign="TOP"><td>$D420-$D7FF<br>54304-55295</td><td><p align="JUSTIFY">SID register images
+  (repeated every $20, 32 bytes).</p>
+
+<a name="paged8"></a><a name="colorram"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$D800-$DBFF, 55296-56319<br>Color RAM</b>
+
+</td></tr><tr valign="TOP"><td>$D800-$DBE7<br>55296-56295</td><td><p align="JUSTIFY">Color RAM (1000
+  bytes, only bits #0-#3).</p>
+</td></tr><tr valign="TOP"><td>$DBE8-$DBFF<br>56296-56319</td><td><p align="JUSTIFY">Unused (24 bytes,
+  only bits #0-#3).</p>
+
+<a name="pagedc"></a><a name="cia1chip"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$DC00-$DCFF, 56320-56575<br>CIA#1; inputs
+  (keyboard, joystick, mouse), datasette, IRQ control</b>
+
+</td></tr><tr valign="TOP"><td>$DC00<br>56320</td><td><p align="JUSTIFY">Port A, keyboard matrix columns
+  and joystick #2. Read bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Port 2 joystick up pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 0 = Port 2 joystick down pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Port 2 joystick left pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 0 = Port 2 joystick right pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 0 = Port 2 joystick fire pressed.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Select keyboard matrix column #x.</p>
+  </li><li><p align="JUSTIFY">Bits #6-#7: Paddle selection; %01 = Paddle #1; %10 =
+    Paddle #2.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC01<br>56321</td><td><p align="JUSTIFY">Port B, keyboard matrix rows and
+  joystick #1. Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = A key is currently being pressed in
+    keyboard matrix row #x, in the column selected at memory address
+    $DC00.</p>
+  </li><li><p align="JUSTIFY">Bit #0: 0 = Port 1 joystick up pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 0 = Port 1 joystick down pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Port 1 joystick left pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 0 = Port 1 joystick right pressed.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 0 = Port 1 joystick fire pressed.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC02<br>56322</td><td><p align="JUSTIFY">Port A data direction
+  register.</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Bit #x in port A can only be read; 1 =
+    Bit #x in port A can be read and written.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC03<br>56323</td><td><p align="JUSTIFY">Port B data direction
+  register.</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Bit #x in port B can only be read; 1 =
+    Bit #x in port B can be read and written.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC04-$DC05<br>56324-56325</td><td><p align="JUSTIFY">Timer A. Read:
+  Current timer value.<br>
+  Write: Set timer start value.</p>
+</td></tr><tr valign="TOP"><td>$DC06-$DC07<br>56326-56327</td><td><p align="JUSTIFY">Timer B. Read:
+  Current timer value.<br>
+  Write: Set timer start value.</p>
+</td></tr><tr valign="TOP"><td>$DC08<br>56328</td><td><p align="JUSTIFY">Time of Day, tenth seconds (in
+  BCD). Values: $00-$09. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DC09<br>56329</td><td><p align="JUSTIFY">Time of Day, seconds (in BCD).
+  Values: $00-$59. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DC0A<br>56330</td><td><p align="JUSTIFY">Time of Day, minutes (in BCD).
+  Values: $00-$59. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DC0B<br>56331</td><td><p align="JUSTIFY">Time of Day, hours (in BCD). Read
+  bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#5: Hours.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = AM; 1 = PM.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DC0C<br>56332</td><td><p align="JUSTIFY">Serial shift register. (Bits are
+  read and written upon every positive edge of the CNT pin.)</p>
+</td></tr><tr valign="TOP"><td>$DC0D<br>56333</td><td><p align="JUSTIFY">Interrupt control and status
+  register. Read bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Timer A underflow occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Timer B underflow occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = TOD is equal to alarm time.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = A complete byte has been received into or
+    sent from serial shift register.</p>
+  </li><li><p align="JUSTIFY">Bit #4: Signal level on FLAG pin, datasette
+    input.</p>
+  </li><li><p align="JUSTIFY">Bit #7: An interrupt has been generated.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Enable interrupts generated by timer A
+    underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Enable interrupts generated by timer B
+    underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Enable TOD alarm interrupt.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Enable interrupts generated by a byte
+    having been  received/sent via serial shift register.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Enable interrupts generated by positive
+    edge on FLAG pin.</p>
+  </li><li><p align="JUSTIFY">Bit #7: Fill bit; bits #0-#6, that are set to 1, get
+    their values from this bit; bits #0-#6, that are set to 0, are left
+    unchanged.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC0E<br>56334</td><td><p align="JUSTIFY">Timer A control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Stop timer; 1 = Start timer.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Indicate timer underflow on port B bit
+    #6.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Upon timer underflow, invert port B bit
+    #6; 1 = upon timer underflow, generate a positive edge on port B bit #6
+    for 1 system cycle.
+  </p></li><li><p align="JUSTIFY">Bit #3: 0 = Timer restarts upon underflow; 1 = Timer
+    stops upon underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Load start value into timer.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 0 = Timer counts system cycles; 1 = Timer
+    counts positive edges on CNT pin.</p>
+  </li><li><p align="JUSTIFY">Bit #6: Serial shift register direction; 0 = Input,
+    read; 1 = Output, write.</p>
+  </li><li><p align="JUSTIFY">Bit #7: TOD speed; 0 = 60 Hz; 1 = 50 Hz.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC0F<br>56335</td><td><p align="JUSTIFY">Timer B control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Stop timer; 1 = Start timer.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Indicate timer underflow on port B bit
+    #7.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Upon timer underflow, invert port B bit
+    #7; 1 = upon timer underflow, generate a positive edge on port B bit #7
+    for 1 system cycle.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 0 = Timer restarts upon underflow; 1 = Timer
+    stops upon underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Load start value into timer.</p>
+  </li><li><p align="JUSTIFY">Bits #5-#6: %00 = Timer counts system cycles; %01 =
+    Timer counts positive edges on CNT pin; %10 = Timer counts underflows of
+    timer A; %11 = Timer counts underflows of timer A occurring along with a
+    positive edge on CNT pin.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = Writing into TOD registers sets TOD; 1 =
+    Writing into TOD registers sets alarm time.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DC10-$DCFF<br>56336-56575</td><td><p align="JUSTIFY">CIA#1 register images
+  (repeated every $10, 16 bytes).</p>
+
+<a name="pagedd"></a><a name="cia2chip"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$DD00-$DDFF, 56576-56831<br>CIA#2; serial
+  bus, RS232, NMI control</b>
+
+</td></tr><tr valign="TOP"><td>$DD00<br>56576</td><td><p align="JUSTIFY">Port A, serial bus access.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#1: VIC bank. Values:</p>
+    <ul>
+    <li><p align="JUSTIFY">%00, 0: Bank #3, $C000-$FFFF, 49152-65535.</p>
+    </li><li><p align="JUSTIFY">%01, 1: Bank #2, $8000-$BFFF, 32768-49151.</p>
+    </li><li><p align="JUSTIFY">%10, 2: Bank #1, $4000-$7FFF, 16384-32767.</p>
+    </li><li><p align="JUSTIFY">%11, 3: Bank #0, $0000-$3FFF, 0-16383.</p>
+    </li></ul>
+  </li><li><p align="JUSTIFY">Bit #2: RS232 TXD line, output bit.</p>
+  </li><li><p align="JUSTIFY">Bit #3: Serial bus ATN OUT; 0 = High; 1 = Low.</p>
+  </li><li><p align="JUSTIFY">Bit #4: Serial bus CLOCK OUT; 0 = High; 1 = Low.</p>
+  </li><li><p align="JUSTIFY">Bit #5: Serial bus DATA OUT; 0 = High; 1 = Low.</p>
+  </li><li><p align="JUSTIFY">Bit #6: Serial bus CLOCK IN; 0 = Low; 1 = High.</p>
+  </li><li><p align="JUSTIFY">Bit #7: Serial bus DATA IN; 0 = Low; 1 = High.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD01<br>56577</td><td><p align="JUSTIFY">Port B, RS232 access. Read
+  bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: RS232 RXD line, input bit.</p>
+  </li><li><p align="JUSTIFY">Bit #3: RS232 RI line.</p>
+  </li><li><p align="JUSTIFY">Bit #4: RS232 DCD line.</p>
+  </li><li><p align="JUSTIFY">Bit #5: User port H pin.</p>
+  </li><li><p align="JUSTIFY">Bit #6: RS232 CTS line; 1 = Sender is ready to
+    send.</p>
+  </li><li><p align="JUSTIFY">Bit #7: RS232 DSR line; 1 = Receiver is ready to
+    receive.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #1: RS232 RTS line. 1 = Sender is ready to
+    send.</p>
+  </li><li><p align="JUSTIFY">Bit #2: RS232 DTR line. 1 = Receiver is ready to
+    receive.</p>
+  </li><li><p align="JUSTIFY">Bit #3: RS232 RI line.</p>
+  </li><li><p align="JUSTIFY">Bit #4: RS232 DCD line.</p>
+  </li><li><p align="JUSTIFY">Bit #5: User port H pin.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD02<br>56578</td><td><p align="JUSTIFY">Port A data direction
+  register.</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Bit #x in port A can only be read; 1 =
+    Bit #x in port A can be read and written.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD03<br>56579</td><td><p align="JUSTIFY">Port B data direction
+  register.</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #x: 0 = Bit #x in port B can only be read; 1 =
+    Bit #x in port B can be read and written.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD04-$DD05<br>56580-56581</td><td><p align="JUSTIFY">Timer A. Read:
+  Current timer value.<br>
+  Write: Set timer start value.</p>
+</td></tr><tr valign="TOP"><td>$DD06-$DD07<br>56582-56583</td><td><p align="JUSTIFY">Timer B. Read:
+  Current timer value.<br>
+  Write: Set timer start value.</p>
+</td></tr><tr valign="TOP"><td>$DD08<br>56584</td><td><p align="JUSTIFY">Time of Day, tenth seconds (in
+  BCD). Values: $00-$09. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DD09<br>56585</td><td><p align="JUSTIFY">Time of Day, seconds (in BCD).
+  Values: $00-$59. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DD0A<br>56586</td><td><p align="JUSTIFY">Time of Day, minutes (in BCD).
+  Values: $00-$59. Read: Current TOD value.<br>
+  Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DD0B<br>56587</td><td><p align="JUSTIFY">Time of Day, hours (in BCD). Read
+  bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bits #0-#5: Hours.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = AM; 1 = PM.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write: Set TOD or alarm time.</p>
+</td></tr><tr valign="TOP"><td>$DD0C<br>56588</td><td><p align="JUSTIFY">Serial shift register. (Bits are
+  read and written upon every positive edge of the CNT pin.)</p>
+</td></tr><tr valign="TOP"><td>$DD0D<br>56589</td><td><p align="JUSTIFY">Interrupt control and status
+  register. Read bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Timer A underflow occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Timer B underflow occurred.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = TOD is equal to alarm time.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = A complete byte has been received into or
+    sent from serial shift register.</p>
+  </li><li><p align="JUSTIFY">Bit #4: Signal level on FLAG pin.</p>
+  </li><li><p align="JUSTIFY">Bit #7: A non-maskable interrupt has been
+    generated.</p>
+  </li></ul>
+  <p align="JUSTIFY">Write bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 1 = Enable non-maskable interrupts generated
+    by timer A underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Enable non-maskable interrupts generated
+    by timer B underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 1 = Enable TOD alarm non-maskable
+    interrupt.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 1 = Enable non-maskable interrupts generated
+    by a byte having been received/sent via serial shift register.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Enable non-maskable interrupts generated
+    by positive edge on FLAG pin.</p>
+  </li><li><p align="JUSTIFY">Bit #7: Fill bit; bits #0-#6, that are set to 1, get
+    their values from this bit; bits #0-#6, that are set to 0, are left
+    unchanged.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD0E<br>56590</td><td><p align="JUSTIFY">Timer A control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Stop timer; 1 = Start timer.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Indicate timer underflow on port B bit
+    #6.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Upon timer underflow, invert port B bit
+    #6; 1 = upon timer underflow, generate a positive edge on port B bit #6
+    for 1 system cycle.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 0 = Timer restarts upon underflow; 1 = Timer
+    stops upon underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Load start value into timer.</p>
+  </li><li><p align="JUSTIFY">Bit #5: 0 = Timer counts system cycles; 1 = Timer
+    counts positive edges on CNT pin.</p>
+  </li><li><p align="JUSTIFY">Bit #6: Serial shift register direction; 0 = Input,
+    read; 1 = Output, write.</p>
+  </li><li><p align="JUSTIFY">Bit #7: TOD speed; 0 = 60 Hz; 1 = 50 Hz.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD0F<br>56591</td><td><p align="JUSTIFY">Timer B control register.
+  Bits:</p>
+  <ul>
+  <li><p align="JUSTIFY">Bit #0: 0 = Stop timer; 1 = Start timer.</p>
+  </li><li><p align="JUSTIFY">Bit #1: 1 = Indicate timer underflow on port B bit
+    #7.</p>
+  </li><li><p align="JUSTIFY">Bit #2: 0 = Upon timer underflow, invert port B bit
+    #7; 1 = upon timer underflow, generate a positive edge on port B bit #7
+    for 1 system cycle.</p>
+  </li><li><p align="JUSTIFY">Bit #3: 0 = Timer restarts upon underflow; 1 = Timer
+    stops upon underflow.</p>
+  </li><li><p align="JUSTIFY">Bit #4: 1 = Load start value into timer.</p>
+  </li><li><p align="JUSTIFY">Bits #5-#6: %00 = Timer counts system cycles; %01 =
+    Timer counts positive edges on CNT pin; %10 = Timer counts underflows of
+    timer A; %11 = Timer counts underflows of timer A occurring along with a
+    positive edge on CNT pin.</p>
+  </li><li><p align="JUSTIFY">Bit #7: 0 = Writing into TOD registers sets TOD; 1 =
+    Writing into TOD registers sets alarm time.</p>
+  </li></ul>
+</td></tr><tr valign="TOP"><td>$DD10-$DDFF<br>56592-56831</td><td><p align="JUSTIFY">CIA#2 register images
+  (repeated every $10, 16 bytes).</p>
+
+<a name="pagede"></a><a name="ioarea1"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$DE00-$DEFF, 56832-57087<br>I/O Area
+  #1</b>
+
+</td></tr><tr valign="TOP"><td>$DE00-$DEFF<br>56832-57087</td><td><p align="JUSTIFY">I/O Area #1, memory
+  mapped registers or machine code routines of optional external devices (256
+  bytes). Layout and contents depend on the actual device.</p>
+
+<a name="pagedf"></a><a name="ioarea2"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$DF00-$DFFF, 57088-57343<br>I/O Area
+  #2</b>
+
+</td></tr><tr valign="TOP"><td>$DF00-$DFFF<br>57088-57343</td><td><p align="JUSTIFY">I/O Area #2, memory
+  mapped registers or machine code routines of optional external devices (256
+  bytes). Layout and contents depend on the actual device.
+
+<a name="pagee0"></a><a name="kernalrom"></a>
+</p></td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$E000-$FFFF, 57344-65535<br>KERNAL ROM</b>
+
+</td></tr><tr valign="TOP"><td>$E000-$FFFF<br>57344-65535</td><td><p align="JUSTIFY">KERNAL ROM or RAM
+  area (8192 bytes); depends on the value of bits #0-#2 of the processor port
+  at memory address $0001:</p>
+  <ul>
+  <li><p align="JUSTIFY">%x0x: RAM area.</p>
+  </li><li><p align="JUSTIFY">%x1x: KERNAL ROM.</p>
+  </li></ul>
+
+<a name="hwvector"></a>
+</td></tr><tr valign="TOP"><td colspan="2" align="CENTER"><b>$FFFA-$FFFF, 65530-65535<br>Hardware
+  vectors</b>
+
+</td></tr><tr valign="TOP"><td>$FFFA-$FFFB<br>65530-65531</td><td><p align="JUSTIFY">Execution address of
+  non-maskable interrupt service routine.<br>
+  Default: $FE43.</p>
+</td></tr><tr valign="TOP"><td>$FFFC-$FFFD<br>65532-65533</td><td><p align="JUSTIFY">Execution address of
+  cold reset.<br>
+  Default: $FCE2.</p>
+</td></tr><tr valign="TOP"><td>$FFFE-$FFFF<br>65534-65535</td><td><p align="JUSTIFY">Execution address of
+  interrupt service routine.<br>
+  Default: $FF48.</p>
+</td></tr></tbody></table><br clear="ALL">
+
+
+
+</body></html>

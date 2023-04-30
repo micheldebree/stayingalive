@@ -1,5 +1,79 @@
 !filescope animation
 
+!let runmarker = 0  ; marks the start of a run
+
+!let zp = {
+  fromLo: $f7,
+  fromHi: $f8,
+  toLo:   $f9,
+  toHi:   $fa
+}
+
+!macro incWord(word) {
+  inc word
+  bne noOverflow
+  inc word + 1
+noOverflow:
+}
+
+ ; draw an RLE frame to $0400
+ ; zp.fromLo and zp.fromHi contain the location of the RLE data
+decodeFrame: {
+
+!let screenMatrix = $0400
+!let skip = step + 1
+
+; !break
+  lda #0
+  sta zp.toLo
+  lda #b.hi(screenMatrix)
+  sta zp.toHi
+
+loop:
+  ldy #0
+  ldx #1
+  stx skip ; read one byte by default
+  lda (zp.fromLo),y
+  cmp #runmarker
+  bne drawloop
+; encountered a run
+    iny
+    lda (zp.fromLo),y
+    tax ; x holds repeat
+    iny
+    lda (zp.fromLo),y ; a holds value
+    iny
+    sty skip ; skip 3 bytes instead of 1
+  ldy #0
+
+drawloop:
+  sta (zp.toLo),y
+  iny
+  dex
+  bne drawloop
+
+  lda zp.fromLo
+  clc
+step:
+  adc #1
+  sta zp.fromLo
+  lda zp.fromHi
+  adc #0
+  sta zp.fromHi
+
+  tya
+  clc
+  adc zp.toLo
+  sta zp.toLo
+  lda zp.toHi
+  adc #0
+  sta zp.toHi
+  cmp #b.hi(screenMatrix) + 4
+  bne loop
+
+rts
+}
+
 !macro drawKeyframe(loPointers, hiPointers) {
   lda loPointers
   sta keyframe + 1
@@ -12,6 +86,7 @@ keyframe:
 
 !macro advance(loPointers, hiPointers) {
 
+  !let firstFrame = 0
   !let nrFrames = loPointers - hiPointers
 
   ; self-modifying code variables
@@ -27,8 +102,7 @@ keyframe:
     sta delayCounter
 
   frameIndex:
-    ldx #1
-    ; skip the first frame (keyframe) so it is only drawn on initialization
+    ldx #firstFrame
     lda loPointers,x 
     sta frameCallLo
     lda hiPointers,x
@@ -41,7 +115,7 @@ keyframe:
     lda frameNr
     cmp #nrFrames
     bne return
-      lda #1
+      lda #firstFrame
       sta frameNr
 
   return:

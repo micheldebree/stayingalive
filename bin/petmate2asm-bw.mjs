@@ -3,7 +3,7 @@
 import { createBuffer, addWrites, generateCode } from './writeBuffer.mjs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { encode } from './runlengthEncoder.mjs'
-import { renderBytes} from "./codegen.mjs";
+import { renderBytes } from './codegen.mjs'
 
 const outExtension = '.gen.asm'
 const cols = 40
@@ -29,8 +29,6 @@ function getMatrix (frame, cellToByte) {
   const paddingRight = horSpace - paddingLeft
   const paddingTop = Math.max(verSpace >> 1, 0)
   const paddingBottom = verSpace - paddingTop
-
-  // console.log(`dumping frame ${frame.name} with size ${frame.width}x${frame.height}`)
 
   const result = []
   pad(result, paddingTop)
@@ -72,15 +70,13 @@ async function convert (filename) {
   let codeResult = ''
 
   frames.forEach((frame, frameNr) => {
-
     const screenMatrix = getMatrix(frame, cell => cell.code)
 
     // encode the first frame as run lenght encoded data
-    if (frameNr === 0 ) {
+    if (frameNr === 0) {
       const firstFrameData = encode(screenMatrix)
       firstFrame = firstFrameLabel + renderBytes(firstFrameData) + '\n'
-    }
-    else {
+    } else {
       // collect memory writes (address, value) for the screen codes
       // pass the previous matrix so we only need to collect writes
       // for the difference

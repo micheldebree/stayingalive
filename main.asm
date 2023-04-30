@@ -13,13 +13,20 @@
 !let firstRasterY = $ff
 !let frameRate = 3
 
+; zero page addresses in use for various things
+!let zp = {
+  music0: $fc,
+  music1: $fd,
+  music2: $fe
+}
+
 !let mem = {
   codeStart: $4000
 }
 
 !segment dataSegment(start=$0801, end=$3dff)
 !segment mainCodeSegment(start = mem.codeStart, end = music.location - 1)
-!segment musicSegment(start = music.location, end = music.location + $1400)
+!segment musicSegment(start = music.location, end = music.location + music.data.length)
 
 ; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
 ; so we can use it and also use the VIC and SID registers
@@ -121,12 +128,18 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-  jsr typer::setupSprites
+  ; jsr typer::setupSprites
 
 ; +copyRomChar(1, spriteData)
 
+  lda #b.lo(animationHeart2::firstFrame)
+  sta animation::zp.fromLo
+  lda #b.hi(animationHeart2::firstFrame)
+  sta animation::zp.fromHi
+  jsr animation::decodeFrame
+
   ; jsr animationWalker::drawKeyframe
-  jsr animationHeart2::drawKeyframe
+  ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
   jsr music.init
@@ -135,12 +148,10 @@ init: {
 }
 
 mainIrq:  {
-  ; inc $d020
   ; jsr animationWalker::advance
   jsr animationHeart2::advance
   ; jsr animationHeart::advance
-  ; dec $d020
-  jsr music.play
+  ; jsr music.play
 
 ; ack and return
   asl $d019

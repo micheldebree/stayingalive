@@ -65,4 +65,3 @@ export function decode (bytes) {
 
   return result
 }
-
