@@ -1,5 +1,6 @@
 // use 0 as run marker; N.B. cannot be used as a screencode anymore!
 
+// marks a run (marker, length, value)
 export const runMarker = 0
 
 // minimum run is 3, because a run needs 3 bytes to encode,
@@ -31,13 +32,12 @@ export function encode (bytes) {
           result.push(currentByte)
         }
       }
-      // start with counting the run of the new value
       runLength = 1
       currentByte = b
     }
 
     if (!repeatedValue && isLastByte) {
-        result.push(b)
+      result.push(b)
     }
   })
   return result
@@ -65,3 +65,4 @@ export function decode (bytes) {
 
   return result
 }
+

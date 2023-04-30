@@ -32,6 +32,7 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 res/%-frames: res/%.gif
 	./res/extract-gif.sh "$<" "$@"
 
+.PRECIOUS: res/%-frames.petmate
 res/%-frames.petmate: res/%-frames
 	node ./bin/png2petscii.mjs "$<"
 

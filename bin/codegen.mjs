@@ -1,3 +1,5 @@
+// utilities to render c64jasm source code
+
 function hex(_unused, n) {
   return `$${n.toString(16)}`
 }
@@ -61,3 +63,16 @@ export const render = {
   implied: (opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
 }
 
+export function renderBytes(bytes) {
+  let result = ''
+  bytes.forEach((b,i ) => {
+    if (i % 16 === 0) {
+      result += "\n!byte "
+    }
+    else if (i > 0) {
+      result += ','
+    }
+    result += hex(undefined, b)
+  })
+  return `${result}\n; ${bytes.length} bytes\n`;
+}

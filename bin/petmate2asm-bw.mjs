@@ -2,6 +2,8 @@
 
 import { createBuffer, addWrites, generateCode } from './writeBuffer.mjs'
 import { readFile, writeFile } from 'node:fs/promises'
+import { encode } from './runlengthEncoder.mjs'
+import { renderBytes} from "./codegen.mjs";
 
 const outExtension = '.gen.asm'
 const cols = 40
@@ -63,27 +65,37 @@ async function convert (filename) {
   let prevScreenMatrix = Array(cols * rows).fill(space)
 
   // write out hi and lo bytes of pointers to the compiled frames
+  const firstFrameLabel = 'firstFrame:\n'
+  let firstFrame
   let codeTablesHi = 'framesHi:\n'
   let codeTablesLo = 'framesLo:\n'
   let codeResult = ''
 
-  frames.forEach(frame => {
-    codeTablesHi += `!byte b.hi(${frame.name})\n`
-    codeTablesLo += `!byte b.lo(${frame.name})\n`
+  frames.forEach((frame, frameNr) => {
 
-    // collect memory writes (address, value) for the screen codes
-    // pass the previous matrix so we only need to collect writes
-    // for the difference
-    const writes = createBuffer()
     const screenMatrix = getMatrix(frame, cell => cell.code)
-    addWrites(writes, prevScreenMatrix, screenMem, screenMatrix)
 
-    // generate code that performs the memory writes in an optimized way
-    codeResult += generateCode(writes, frame.name)
+    // encode the first frame as run lenght encoded data
+    if (frameNr === 0 ) {
+      const firstFrameData = encode(screenMatrix)
+      firstFrame = firstFrameLabel + renderBytes(firstFrameData) + '\n'
+    }
+    else {
+      // collect memory writes (address, value) for the screen codes
+      // pass the previous matrix so we only need to collect writes
+      // for the difference
+      codeTablesHi += `!byte b.hi(${frame.name})\n`
+      codeTablesLo += `!byte b.lo(${frame.name})\n`
+      const writes = createBuffer()
+      addWrites(writes, prevScreenMatrix, screenMem, screenMatrix)
+
+      // generate code that performs the memory writes in an optimized way
+      codeResult += generateCode(writes, frame.name)
+    }
     prevScreenMatrix = screenMatrix
   })
 
-  await writeFile(`${filename}${outExtension}`, codeTablesHi + codeTablesLo + codeResult)
+  await writeFile(`${filename}${outExtension}`, firstFrame + codeTablesHi + codeTablesLo + codeResult)
 }
 
 (async function () {
