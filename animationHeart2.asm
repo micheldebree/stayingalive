@@ -9,6 +9,6 @@ advance:
   +animation::advance(framesLo, framesHi)
 
 drawKeyframe:
-  +animation::drawKeyframe(framesLo, framesHi)
+  +animation::drawKeyframe(firstFrame)
 
 +debug::registerRange("heart2", animation)

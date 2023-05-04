@@ -1,7 +1,6 @@
 // utilities to render c64jasm source code
 
-// TODO: _unused is not needed anymore?
-function hex (_unused, n) {
+function hex (n) {
   return `$${n.toString(16)}`
 }
 
@@ -57,10 +56,8 @@ export const opcode = {
 }
 
 export const render = {
-  imm: (opcode, argument) => `${opcode.mnemonic} #${hex(null,
-      argument)} ; ${opcode.imm.cycles}\n`,
-  abs: (opcode, argument) => `${opcode.mnemonic} ${hex(null,
-      argument)} ; ${opcode.abs.cycles}\n`,
+  imm: (opcode, argument) => `${opcode.mnemonic} #${hex(argument)} ; ${opcode.imm.cycles}\n`,
+  abs: (opcode, argument) => `${opcode.mnemonic} ${hex(argument)} ; ${opcode.abs.cycles}\n`,
   implied: (opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
 }
 
@@ -72,7 +69,7 @@ export function renderBytes (bytes) {
     } else if (i > 0) {
       result += ','
     }
-    result += hex(undefined, b)
+    result += hex(b)
   })
   return `${result}\n; ${bytes.length} bytes\n`
 }

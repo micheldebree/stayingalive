@@ -1,5 +1,6 @@
 !filescope animation
 
+!let screenMatrix = $0400
 !let runmarker = 0  ; marks the start of a run
 
 !let zp = {
@@ -9,18 +10,9 @@
   toHi:   $fa
 }
 
-!macro incWord(word) {
-  inc word
-  bne noOverflow
-  inc word + 1
-noOverflow:
-}
-
- ; draw an RLE frame to $0400
+decodeFrame: { ; draw an RLE frame to $0400
  ; zp.fromLo and zp.fromHi contain the location of the RLE data
-decodeFrame: {
 
-!let screenMatrix = $0400
 !let skip = step + 1
 
 ; !break
@@ -74,14 +66,12 @@ step:
 rts
 }
 
-!macro drawKeyframe(loPointers, hiPointers) {
-  lda loPointers
-  sta keyframe + 1
-  lda hiPointers
-  sta keyframe + 2
-keyframe:
-  jsr $0000
-  rts
+!macro drawKeyframe(firstFrame) {
+  lda #b.lo(firstFrame)
+  sta zp.fromLo
+  lda #b.hi(firstFrame)
+  sta zp.fromHi
+  jmp decodeFrame
 }
 
 !macro advance(loPointers, hiPointers) {

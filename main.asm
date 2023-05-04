@@ -13,8 +13,7 @@
 !let firstRasterY = $ff
 !let frameRate = 3
 
-; zero page addresses in use for various things
-!let zp = {
+!let zp = { ; zero page addresses in use for various things
   music0: $fc,
   music1: $fd,
   music2: $fe
@@ -28,9 +27,9 @@
 !segment mainCodeSegment(start = mem.codeStart, end = music.location - 1)
 !segment musicSegment(start = music.location, end = music.location + music.data.length)
 
+!macro copyRomChar(charIndex, toAddress) {
 ; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
 ; so we can use it and also use the VIC and SID registers
-!macro copyRomChar(charIndex, toAddress) {
     lda $01
     pha
     ; make rom characters visible
@@ -61,7 +60,7 @@ basic:
 
 !include "animation.asm"
 ; !include "animationDance.asm"
-!include "animationHeart2.asm"
+; !include "animationHeart2.asm"
 !include "animationWalker.asm"
 
 !segment default
@@ -119,6 +118,18 @@ init: {
 ;   bne loop
 ; }
 
+initScreenMatrix: {
+  lda #$a0
+  ldx #0
+ loop:
+  sta $0400,x
+  sta $0500,x
+  sta $0600,x
+  sta $0700,x
+  inx
+  bne loop
+}
+
   lda #vic.initD011({})
   sta $d011
 
@@ -132,13 +143,15 @@ init: {
 
 ; +copyRomChar(1, spriteData)
 
-  lda #b.lo(animationHeart2::firstFrame)
-  sta animation::zp.fromLo
-  lda #b.hi(animationHeart2::firstFrame)
-  sta animation::zp.fromHi
-  jsr animation::decodeFrame
+; drawKeyframe: {
+;   lda #b.lo(animationHeart2::firstFrame)
+;   sta animation::zp.fromLo
+;   lda #b.hi(animationHeart2::firstFrame)
+;   sta animation::zp.fromHi
+;   jsr animation::decodeFrame
+; }
 
-  ; jsr animationWalker::drawKeyframe
+  jsr animationWalker::drawKeyframe
   ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
@@ -148,10 +161,10 @@ init: {
 }
 
 mainIrq:  {
-  ; jsr animationWalker::advance
-  jsr animationHeart2::advance
+  jsr animationWalker::advance
+  ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
-  ; jsr music.play
+  jsr music.play
 
 ; ack and return
   asl $d019
@@ -220,6 +233,7 @@ musicData:
 
 +debug::registerRange("music", musicData)
 
++debug::reserveRange("color memory", $d800, $d800 + 1000)
+
 !! debug::js.outputMemoryMap()
 
-+debug::reserveRange("color memory", $d800, $d800 + 1000)

@@ -1,4 +1,5 @@
 VICE=x64sc
+# VICE=/Applications/vice-arm64-gtk3-3.7.1/x64sc.app/Contents/MacOS/x64sc
 DEBUGGER=/Applications/C64\ Debugger.app/Contents/MacOS/C64\ Debugger
 EXOMIZER=/usr/local/bin/exomizer
 BIN=./node_modules/.bin
@@ -26,6 +27,7 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 %.debug: %.prg
 	@$(DEBUGGER) -prg "$<" -wait 5000 -autojmp -layout 9 -debuginfo "$*.dbg"
 
+.PRECIOUS: %.petmate.gen.asm
 %.petmate.gen.asm: %.petmate
 	node ./bin/petmate2asm-bw.mjs "$<"
 
