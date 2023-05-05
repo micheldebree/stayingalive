@@ -21,7 +21,12 @@ function spriteAddresses (baseAddress) {
   return result
 }
 
+function randomDelays () {
+  return Array(nrSprites * 3 * 2).fill(0).map((_unused) => 4 + Math.random() * 16)
+}
+
 module.exports = {
   charAddresses: (_unused) => charAddresses(),
-  spriteAddresses: (_unused, baseAddress) => spriteAddresses(baseAddress)
+  spriteAddresses: (_unused, baseAddress) => spriteAddresses(baseAddress),
+  randomDelays: (_unused) => randomDelays()
 }

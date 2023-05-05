@@ -89,17 +89,17 @@ copyDataTo:
 }
 
 cursor: {
-  ; y holds the cursor position
 
 !let toAddrLo = copyDataTo + 1
 !let toAddrHi = copyDataTo + 2
 
+  ldy cursorPosition
   lda spriteAddrLo, y
   sta toAddrLo
   lda spriteAddrHi, y
   sta toAddrHi
-  inc delay + 1
 
+  inc delay + 1
 delay:
   lda #$01
   and #%00010000
@@ -120,12 +120,29 @@ copyDataTo:
 }
 
 type: {
-  ldx #0
-  ldy #0
-  lda text,x
+  jsr cursor
+  dec typeDelay
+  beq doIt
+  rts
+
+doIt:
+  ldy cursorPosition
+  lda randomDelays,y
+  sta typeDelay
+  lda text,y
   tax
+  inc cursorPosition
   jmp copyRomChar
 }
+
+typeDelay:
+  !byte 16
+
+cursorPosition:
+  !byte 0
+
+randomDelays:
+  !byte js.randomDelays()
 
 !let charAddresses = js.charAddresses()
 
@@ -144,7 +161,7 @@ spriteAddrHi:
   !byte b.hiBytes(spriteAddresses)
 
 text:
-  !byte b.toScreencode("typer.txt")
+  !byte b.screencode("hello how are you?i am fine")
   !byte 0
 
 !segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
