@@ -137,7 +137,9 @@ mainIrq:  {
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
   jsr music.play
+  inc $d020
   jsr typer::type
+  dec $d020
 
 ; ack and return
   asl $d019
