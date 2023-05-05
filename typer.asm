@@ -1,5 +1,7 @@
 ; vim:set ft=c64jasm:
 !filescope typer
+!use "typer.js" as js
+!use "lib/bytes.js" as b
 
 !let romCharAddress = $d000
 !let nrChars = 64 ; nr of characters supported
@@ -52,37 +54,43 @@ setPointer:
   rts
 }
 
-!macro copyRomChar(spriteAddress) {
+copyRomChar: {
 
 ; x holds the character to type
+; y holds the type position
 
 !let fromAddrLo = copyData + 1
 !let fromAddrHi = copyData + 2
+!let toAddrLo = copyDataTo + 1
+!let toAddrHi = copyDataTo + 2
 
         lda charOffsetLo,x
         sta fromAddrLo
         lda charOffsetHi,x
         sta fromAddrHi
 
+        lda spriteAddrLo, y
+        sta toAddrLo
+        lda spriteAddrHi, y
+        sta toAddrHi
+
         lda #%00110011 ; make rom characters visible
         sta $01
         ldx #7
         ldy #7 * 3
 copyData:
-        lda $d000,x
-        sta spriteAddress,y
+        lda $ffff,x
+copyDataTo:
+        sta $ffff,y
         dey
         dey
         dey
         dex
         bpl copyData
         +irq::disableKernalRom() ; restore mem visibility
+        rts
 }
 
-initCharacterSet: { ; TODO: unneeded indirection to macro
-  +copyRomChar(spriteData)
-  rts
-}
 
 charOffsetLo:
   !for i in range(nrChars) {
@@ -93,7 +101,14 @@ charOffsetHi:
     !byte b.hi(romCharAddress + i * 8)
   }
 
-; TODO: make an address table for typing positions in spritedata
+!let spriteAddresses = js.spriteAddresses(spriteData)
+
+spriteAddrLo:
+  !byte b.loBytes(spriteAddresses)
+  
+spriteAddrHi:
+  !byte b.hiBytes(spriteAddresses)
+
 
 !segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
 !segment spriteSegment

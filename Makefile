@@ -6,7 +6,7 @@ EXOMIZER=/usr/local/bin/exomizer
 BIN=./node_modules/.bin
 
 SRC_ASM=$(shell find . -name "*.asm")
-LIB_JS=$(shell find ./lib -name "*.js")
+LIB_JS=$(shell find . -name "*.js")
 RES=$(shell find ./res -name "*.bin" )
 PETMATE=$(shell find ./res -name "*.petmate")
 GENASM=$(PETMATE:.petmate=.petmate.gen.asm)

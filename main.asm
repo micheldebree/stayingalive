@@ -116,10 +116,10 @@ initScreenMatrix: {
 
   jsr typer::setupSprites
   ldx #1
-  jsr typer::initCharacterSet
+  ldy #3*6 + 1
+  jsr typer::copyRomChar
 
 ; +copyRomChar(1, spriteData)
-
 
   jsr animationWalker::drawKeyframe
 
