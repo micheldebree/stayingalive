@@ -3,8 +3,6 @@
 !use "typer.js" as js
 !use "lib/bytes.js" as b
 
-!let romCharAddress = $d000
-!let nrChars = 64 ; nr of characters supported
 !let spritePointer = $f8
 !let nrSprites = 8
 !let spriteSize = $40
@@ -31,7 +29,6 @@ setupSprites: {
     stx vic.sprites.y(i)
     sty vic.sprites.pointer(screenMatrix, i)
   }
-
   ldx #0
   ldy #0
   lda #24
@@ -64,42 +61,79 @@ copyRomChar: {
 !let toAddrLo = copyDataTo + 1
 !let toAddrHi = copyDataTo + 2
 
-        lda charOffsetLo,x
-        sta fromAddrLo
-        lda charOffsetHi,x
-        sta fromAddrHi
+  lda charOffsetLo,x
+  sta fromAddrLo
+  lda charOffsetHi,x
+  sta fromAddrHi
 
-        lda spriteAddrLo, y
-        sta toAddrLo
-        lda spriteAddrHi, y
-        sta toAddrHi
+  lda spriteAddrLo, y
+  sta toAddrLo
+  lda spriteAddrHi, y
+  sta toAddrHi
 
-        lda #%00110011 ; make rom characters visible
-        sta $01
-        ldx #7
-        ldy #7 * 3
+  lda #%00110011 ; make rom characters visible
+  sta $01
+  ldx #7
+  ldy #7 * 3
 copyData:
-        lda $ffff,x
+  lda $ffff,x
 copyDataTo:
-        sta $ffff,y
-        dey
-        dey
-        dey
-        dex
-        bpl copyData
-        +irq::disableKernalRom() ; restore mem visibility
-        rts
+  sta $ffff,y
+  dey
+  dey
+  dey
+  dex
+  bpl copyData
+  +irq::disableKernalRom() ; restore mem visibility
+  rts
 }
 
+cursor: {
+  ; y holds the cursor position
+
+!let toAddrLo = copyDataTo + 1
+!let toAddrHi = copyDataTo + 2
+
+  lda spriteAddrLo, y
+  sta toAddrLo
+  lda spriteAddrHi, y
+  sta toAddrHi
+  inc delay + 1
+
+delay:
+  lda #$01
+  and #%00010000
+  beq doIt
+turnOn:
+  lda #$ff
+doIt:
+  ldx #7
+  ldy #7 * 3
+copyDataTo:
+  sta $ffff,y
+  dey
+  dey
+  dey
+  dex
+  bpl copyDataTo
+  rts
+}
+
+type: {
+  ldx #0
+  ldy #0
+  lda text,x
+  tax
+  jmp copyRomChar
+}
+
+!let charAddresses = js.charAddresses()
 
 charOffsetLo:
-  !for i in range(nrChars) {
-    !byte b.lo(romCharAddress + i * 8)
-  }
+  !byte b.loBytes(charAddresses)
+
 charOffsetHi:
-  !for i in range(nrChars) {
-    !byte b.hi(romCharAddress + i * 8)
-  }
+  !byte b.hiBytes(charAddresses)
 
 !let spriteAddresses = js.spriteAddresses(spriteData)
 
@@ -109,12 +143,13 @@ spriteAddrLo:
 spriteAddrHi:
   !byte b.hiBytes(spriteAddresses)
 
+text:
+  !byte b.toScreencode("typer.txt")
+  !byte 0
 
 !segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
 !segment spriteSegment
 
-theSprite:
-
 !fill nrSprites * spriteSize, $ff
 
-+debug::registerRange("sprites", theSprite)
++debug::registerRange("sprites", spriteData)

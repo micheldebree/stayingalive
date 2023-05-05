@@ -49,7 +49,7 @@ basic:
 
 !segment code
 
-start: {
+start: { ; set raster interrupt and init
 
   sei
   jsr init
@@ -115,9 +115,7 @@ initScreenMatrix: {
   sta $d016
 
   jsr typer::setupSprites
-  ldx #1
-  ldy #3*6 + 1
-  jsr typer::copyRomChar
+  jsr typer::type
 
 ; +copyRomChar(1, spriteData)
 
@@ -139,6 +137,8 @@ mainIrq:  {
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
   jsr music.play
+  ldy #1
+  jsr typer::cursor
 
 ; ack and return
   asl $d019
@@ -203,7 +203,7 @@ for:
 !segment musicSegment
 
 musicData:
-!byte music.data
+  !byte music.data
 
 +debug::registerRange("music", musicData)
 
