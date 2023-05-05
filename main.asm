@@ -7,6 +7,9 @@
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
 
+; TODO: only use RLE and double buffer to save space? 50Hz is too much
+; for PETSCII animation anyway
+
 !let screenMatrix = $400
 
 !let music = sid("res/staying.sid")
@@ -19,38 +22,20 @@
   music2: $fe
 }
 
-!let mem = {
-  codeStart: $4000
-}
-
+!segment code(start=$4000, end=$5fff)
 !segment dataSegment(start=$0801, end=$3dff)
-!segment mainCodeSegment(start = mem.codeStart, end = music.location - 1)
 !segment musicSegment(start = music.location, end = music.location + music.data.length)
 
-!macro copyRomChar(charIndex, toAddress) {
-; copy the character data that is hidden in the ROM underneath $d000 to a location in RAM,
-; so we can use it and also use the VIC and SID registers
-    lda $01
-    pha
-    ; make rom characters visible
-    lda #%00110011
-    sta $01
-    !for i in range(8) {
-      lda $d000 + charIndex * 8 + i
-      sta toAddress + i * 3
-      sta toAddress + (i + 8) * 3
-      sta toAddress + i * 3 + 1
-      sta toAddress + (i + 8) * 3 + 1
-      sta toAddress + i * 3 + 2
-      sta toAddress + (i + 8) * 3 + 2
-    }
-    pla
-    sta $01
-}
+; N.B. c64 debugger seems to only support breakpoints in the first
+; segment it encounters in the debug info xml
+; c64jasm seems to output segments sorted by start address
+
+defaultStart:
+
+!include "typer.asm"
+!include "animation.asm"
 
 !segment dataSegment
-
-* = $0801
 
 +debug::reserveRange("screen matrix", screenMatrix, screenMatrix + 1000)
 
@@ -58,24 +43,13 @@ basic:
 +kernal::basicstart(start)
 +debug::registerRange("basic start", basic)
 
-!include "animation.asm"
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
 !include "animationWalker.asm"
 
-!segment default
-; N.B. c64 debugger seems to only support breakpoints in the default
-; segment.
+!segment code
 
-* = mem.codeStart
-
-defaultStart:
-
-!include "typer.asm"
-
-!segment default
-
-start:
+start: {
 
   sei
   jsr init
@@ -96,6 +70,7 @@ start:
   cli
   ; do nothing and let the interrupt do all the work.
   jmp *
+}
 
 init: {
   +kernal::clearScreen()
@@ -139,19 +114,15 @@ initScreenMatrix: {
   lda #vic.initD016({})
   sta $d016
 
-  ; jsr typer::setupSprites
+  jsr typer::setupSprites
+  ldx #1
+  jsr typer::initCharacterSet
 
 ; +copyRomChar(1, spriteData)
 
-; drawKeyframe: {
-;   lda #b.lo(animationHeart2::firstFrame)
-;   sta animation::zp.fromLo
-;   lda #b.hi(animationHeart2::firstFrame)
-;   sta animation::zp.fromHi
-;   jsr animation::decodeFrame
-; }
 
   jsr animationWalker::drawKeyframe
+
   ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
@@ -162,6 +133,9 @@ initScreenMatrix: {
 
 mainIrq:  {
   jsr animationWalker::advance
+  ; inc $d020
+  ; jsr typer::initCharacterSet
+  ; dec $d020
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
   jsr music.play

@@ -1,6 +1,7 @@
 VICE=x64sc
 # VICE=/Applications/vice-arm64-gtk3-3.7.1/x64sc.app/Contents/MacOS/x64sc
-DEBUGGER=/Applications/C64\ Debugger.app/Contents/MacOS/C64\ Debugger
+# DEBUGGER=/Applications/C64\ Debugger.app/Contents/MacOS/C64\ Debugger
+DEBUGGER=/Applications/Retro\ Debugger.app/Contents/MacOS/Retro\ Debugger
 EXOMIZER=/usr/local/bin/exomizer
 BIN=./node_modules/.bin
 

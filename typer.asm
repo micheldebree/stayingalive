@@ -1,12 +1,14 @@
 ; vim:set ft=c64jasm:
 !filescope typer
 
+!let romCharAddress = $d000
+!let nrChars = 64 ; nr of characters supported
 !let spritePointer = $f8
 !let nrSprites = 8
 !let spriteSize = $40
 !let spriteData = spritePointer * spriteSize
 
-!segment default
+!segment code
 
 setupSprites: {
   lda #0
@@ -49,6 +51,49 @@ setPointer:
   bne loop
   rts
 }
+
+!macro copyRomChar(spriteAddress) {
+
+; x holds the character to type
+
+!let fromAddrLo = copyData + 1
+!let fromAddrHi = copyData + 2
+
+        lda charOffsetLo,x
+        sta fromAddrLo
+        lda charOffsetHi,x
+        sta fromAddrHi
+
+        lda #%00110011 ; make rom characters visible
+        sta $01
+        ldx #7
+        ldy #7 * 3
+copyData:
+        lda $d000,x
+        sta spriteAddress,y
+        dey
+        dey
+        dey
+        dex
+        bpl copyData
+        +irq::disableKernalRom() ; restore mem visibility
+}
+
+initCharacterSet: { ; TODO: unneeded indirection to macro
+  +copyRomChar(spriteData)
+  rts
+}
+
+charOffsetLo:
+  !for i in range(nrChars) {
+    !byte b.lo(romCharAddress + i * 8)
+  }
+charOffsetHi:
+  !for i in range(nrChars) {
+    !byte b.hi(romCharAddress + i * 8)
+  }
+
+; TODO: make an address table for typing positions in spritedata
 
 !segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
 !segment spriteSegment

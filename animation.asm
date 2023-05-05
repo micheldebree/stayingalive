@@ -10,12 +10,13 @@
   toHi:   $fa
 }
 
+!segment code
+
 decodeFrame: { ; draw an RLE frame to $0400
  ; zp.fromLo and zp.fromHi contain the location of the RLE data
 
 !let skip = step + 1
 
-; !break
   lda #0
   sta zp.toLo
   lda #b.hi(screenMatrix)
@@ -60,8 +61,11 @@ step:
   lda zp.toHi
   adc #0
   sta zp.toHi
-  cmp #b.hi(screenMatrix) + 4
+  cmp #b.hi(screenMatrix) + 3 
   bne loop
+  lda zp.toLo
+  cmp #$d0 ; stop before overwriting spritepointers
+  bcc loop
 
 rts
 }
@@ -99,7 +103,6 @@ rts
     sta frameCallHi
 
   frameCall:
-  ; !break
     jsr $0000
     inc frameNr
     lda frameNr
