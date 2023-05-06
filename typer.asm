@@ -1,4 +1,5 @@
 ; vim:set ft=c64jasm:
+; type with rom character set into a sprite carpet
 !filescope typer
 !use "typer.js" as js
 !use "lib/bytes.js" as b
@@ -7,11 +8,17 @@
 !let nrSprites = 8
 !let spriteSize = $40
 !let spriteData = spritePointer * spriteSize
-!let expandSprites = 1
+!let expandSprites = 0
+
+; https://www.pagetable.com/c64ref/charset/
+!let specialChars = {
+  heart: $53
+}
 
 !segment code
 
 setupSprites: {
+  jsr clear
   lda #0
   sta vic.sprites.prio
   lda #%11111111
@@ -20,7 +27,7 @@ setupSprites: {
   sta vic.sprites.doubleHeight
   sta vic.sprites.doubleWidth
   tay
-  lda #%11100000
+  lda #%11100000 * expandSprites
   sta vic.sprites.xHibits
   ldx #0
   ldy #0
@@ -46,10 +53,10 @@ setPointer:
   rts
 }
 
-copyRomChar: {
+copyRomChar: { ; copy data of 1 character from rom to sprite
 
-; x holds the character to type
-; y holds the type position
+; x holds the screencode of the character to type
+; y holds the type position in nr of characters
 
 !let fromAddrLo = copyData + 1
 !let fromAddrHi = copyData + 2
@@ -83,7 +90,7 @@ copyDataTo:
   rts
 }
 
-cursor: {
+cursor: { ; display blinking cursor
 
 !let toAddrLo = copyDataTo + 1
 !let toAddrHi = copyDataTo + 2
@@ -98,10 +105,9 @@ cursor: {
 delay:
   lda #$01
   and #%00010000
-  beq doIt
-turnOn:
-  lda #$ff
-doIt:
+  beq draw
+    lda #$ff ; a holds the byte to write, is already 0 if not in this branch
+draw:
   ldx #7
   ldy #7 * 3
 copyDataTo:
@@ -114,7 +120,7 @@ copyDataTo:
   rts
 }
 
-type: {
+type: { ; advance the typing by one step
   jsr cursor
   dec typeDelay
   beq doIt
@@ -129,23 +135,26 @@ doIt:
   ldx #0
   inc textPosition
   lda text,x
-  cmp #0
+  cmp #0 ; newline
   bne elseMaybeStop
-    lda cursorPosition
-    cmp #3 * 6
-    ; if we're on the second line, do not move cursor down
-    bpl noNewLine
-      lda #3 * 6
-      sta cursorPosition
-noNewLine:
+    lda #3 * nrSprites
+    sta cursorPosition
+    lda #32 ; fixed delay
+    sta typeDelay
     ldx #$20 ; clear cursor
     jmp copyRomChar
 
 elseMaybeStop:
   cmp #$ff
-  bne else
+  bne elseMaybeClear
     ldx #$ff
     stx typeDelay
+    rts
+
+elseMaybeClear:
+  cmp #$fe
+  bne else
+    jsr clear
     rts
 
 else:
@@ -154,15 +163,37 @@ else:
   jmp copyRomChar
 }
 
+clear: { ; clear the sprite carpet
+  lda #0
+  ldx #64
+clearData:
+  sta spriteData,x
+  sta spriteData + 1 * 64,x
+  sta spriteData + 2 * 64,x
+  sta spriteData + 3 * 64,x
+  sta spriteData + 4 * 64,x
+  sta spriteData + 5 * 64,x
+  dex
+  bpl clearData
+  sta cursorPosition
+  rts
+  ; TODO: bottom 5 lines do not need clearing because they remain empty
+}
+
+!segment data
+
+; current state
 typeDelay:
   !byte 16
 
 cursorPosition:
   !byte 0
 
+; delay value per typing position
 randomDelays:
   !byte js.randomDelays()
 
+; address in rom for each char
 !let charAddresses = js.charAddresses()
 
 charOffsetLo:
@@ -171,6 +202,7 @@ charOffsetLo:
 charOffsetHi:
   !byte b.hiBytes(charAddresses)
 
+; address in sprite data for each typing position
 !let spriteAddresses = js.spriteAddresses(spriteData)
 
 spriteAddrLo:
@@ -180,12 +212,14 @@ spriteAddrHi:
   !byte b.hiBytes(spriteAddresses)
 
 text:
-  !byte b.screencode("ready."),0,$ff
-  !byte b.screencode("ok"),$ff
+  ; 0 = newline, $ff = pause, $fe = clear
+  !byte b.screencode("dear user."),0
+  ; !byte b.screencode("dear friend."),$fe
+  !byte b.screencode("i "),specialChars.heart,b.screencode(" you!"),$ff,$fe
+  !byte b.screencode("i am alive!"),0
+  !byte b.screencode("alive!!!"),$fe
+  !byte b.screencode("and it is all"), 0, b.screencode("thanks to you!"),$ff
 
-!segment spriteSegment(start = spriteData, end = spriteData + nrSprites * spriteSize - 1)
-!segment spriteSegment
+  !byte $ff,$ff
 
-!fill nrSprites * spriteSize, 0
-
-+debug::registerRange("sprites", spriteData)
++debug::registerRange("typer data", typeDelay)

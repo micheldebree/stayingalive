@@ -22,26 +22,30 @@
   music2: $fe
 }
 
-!segment code(start=$4000, end=$5fff)
-!segment dataSegment(start=$0801, end=$3dff)
+!segment basic(start=$0801, end=$080e)
+!segment data(start=$080f, end=$3dff)
+!segment sprites(start=$3e00, end=$3fff) ; sprites for the typer
+!segment code(start=$c000, end=$cfff)
 !segment musicSegment(start = music.location, end = music.location + music.data.length)
 
 ; N.B. c64 debugger seems to only support breakpoints in the first
 ; segment it encounters in the debug info xml
 ; c64jasm seems to output segments sorted by start address
 
-defaultStart:
+!segment basic
+
+basicStart:
+  +kernal::basicstart(start)
+  +debug::registerRange("basic", basicStart)
+
+!segment code
+
+codeStart:
 
 !include "typer.asm"
 !include "animation.asm"
 
-!segment dataSegment
-
-+debug::reserveRange("screen matrix", screenMatrix, screenMatrix + 1000)
-
-basic:
-+kernal::basicstart(start)
-+debug::registerRange("basic start", basic)
+!segment data
 
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
@@ -171,35 +175,7 @@ for:
   rts
 }
 
-+debug::registerRange("main code", defaultStart)
-
-; advancePlayhead: {
-;   inc playhead
-;   bne return
-;     inc playhead + 1
-;
-; check:
-;
-;   ldx #0
-;   lda timelineLo,x
-;   cmp playhead
-;   bne return
-;     lda timelineHi,x
-;     cmp playhead + 1
-;     bne return
-;
-; return:
-;   rts
-; }
-
-; timelineHi:
-;   !byte 0
-;
-; timelineLo:
-;   !byte 0
-;
-; playhead:
-;   !byte 0,0
++debug::registerRange("main code", codeStart)
 
 !segment musicSegment
 
@@ -207,8 +183,6 @@ musicData:
   !byte music.data
 
 +debug::registerRange("music", musicData)
-
-+debug::reserveRange("color memory", $d800, $d800 + 1000)
 
 !! debug::js.outputMemoryMap()
 
