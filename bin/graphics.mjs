@@ -43,7 +43,7 @@ export function hamming (byte1, byte2) {
   return result
 }
 
-function imageCoordinatesToByteOffset (sharpImage, x, y) {
+export function imageCoordinatesToByteOffset (sharpImage, x, y) {
   // assume 1 byte per channel
   return (y * sharpImage.info.width + x) * sharpImage.info.channels
 }
@@ -93,7 +93,7 @@ export async function readChars (filename) {
   const charData = Uint8Array.from(buffer).slice(0, 255 * 8)
 
   const chars = []
-  forEachCharIn(charData, (i, charBytes) => chars.push(charBytes))
+  forEachCharIn(charData, (_i, charBytes) => chars.push(charBytes))
   return chars
 }
 

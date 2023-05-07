@@ -1,4 +1,24 @@
 #!/usr/bin/env node
+
+// ways to add color:
+//
+// 1. Shape
+// - determine background color (quantize image, count nr occurences per color)
+// - subtract background color from tile, match remaining 'on' pixels to
+// character
+// - average remaining 'on' pixels color and quantize to color
+//
+// --> for tiles with no background color, this will result in block character
+//
+// 2. Luminace
+// - calculate 'luminance'
+// - determine background color (quantize image, count nr occurences per color)
+// - quantize tile
+// - subtract background color from tile
+// - determine tile luminance from remaining pixels
+// - get closest color for remaining pixels
+// -
+
 import sharp from 'sharp'
 import { toFilenames, relativePath } from './utils.mjs'
 import {
@@ -12,8 +32,8 @@ import { toPetmate } from './petmate.mjs'
 
 const threshold = 128
 const allChars = Array(255).fill(0).map((c, i) => i)
-const supportedChars = allChars
-// const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
+// const supportedChars = allChars
+const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
 const cols = 40
 const rows = 25
 const width = cols * 8
