@@ -43,7 +43,8 @@ res/%-frames.petmate: res/%-frames
 test: main.run
 
 main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) \
-	./res/heart2-frames.petmate.gen.asm
+	./res/heart2-frames.petmate.gen.asm \
+	./res/cube-frames.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg

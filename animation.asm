@@ -103,7 +103,7 @@ rts
     sta frameCallHi
 
   frameCall:
-    jsr $0000
+    jsr $ffff
     inc frameNr
     lda frameNr
     cmp #nrFrames
@@ -115,3 +115,4 @@ rts
     dec delayCounter
     rts
 }
+

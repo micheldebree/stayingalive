@@ -50,6 +50,7 @@ codeStart:
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
 !include "animationWalker.asm"
+!include "animationCube.asm"
 
 !segment code
 
@@ -124,6 +125,7 @@ initScreenMatrix: {
 ; +copyRomChar(1, spriteData)
 
   jsr animationWalker::drawKeyframe
+  ; jsr animationCube::drawKeyframe
 
   ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
@@ -135,6 +137,7 @@ initScreenMatrix: {
 
 mainIrq:  {
   jsr animationWalker::advance
+  ; jsr animationCube::advance
   ; inc $d020
   ; jsr typer::initCharacterSet
   ; dec $d020
