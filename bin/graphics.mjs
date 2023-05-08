@@ -58,6 +58,23 @@ export function forEachCellIn (sharpImage, callback) {
   }
 }
 
+// parse an 8 pixel greyscale row to a hires byte
+export function parseHiresByteFromPixelRow(tileRow, threshold = 127) {
+  let result = 0
+  for (let i = 0; i < 8; i++) {
+    // assume greyscale so only consider first channel
+    if (tileRow[i][0] > threshold) {
+      result |= mask[i]
+    }
+  }
+  return result
+}
+
+// count the number of bits set in a byte
+export function countBits(byte) {
+  return mask.filter(m => (byte & m) !== 0).length
+}
+
 // parse the 8 pixels at offset in sharpImage as a hires byte
 export function parseHiresByte (sharpImage, offset, threshold = 127) {
   let result = 0
@@ -66,6 +83,16 @@ export function parseHiresByte (sharpImage, offset, threshold = 127) {
     if (sharpImage.data[firstChannelOffset] > threshold) {
       result |= mask[i]
     }
+  }
+  return result
+}
+
+// get an 8  pixel row as array of pixels from sharpImage. pixels are [r, g, b]
+export function parse8pixelRow (sharpImage, offset) {
+  let result = []
+  for (let i = 0; i < 8; i++) {
+    const firstChannelOffset = offset + i * sharpImage.info.channels
+    result.push([sharpImage.data[firstChannelOffset], sharpImage.data[firstChannelOffset + 1], sharpImage.data[firstChannelOffset + 2]])
   }
   return result
 }

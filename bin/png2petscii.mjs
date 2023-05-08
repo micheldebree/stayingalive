@@ -38,7 +38,7 @@ const cols = 40
 const rows = 25
 const width = cols * 8
 const height = rows * 8
-const supportedExtensions = ['.png']
+const supportedExtensions = ['.png','.jpg']
 
 // load and scale the image
 async function loadFile (filename) {
