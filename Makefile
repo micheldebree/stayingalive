@@ -6,7 +6,7 @@ EXOMIZER=/usr/local/bin/exomizer
 BIN=./node_modules/.bin
 
 SRC_ASM=$(shell find . -name "*.asm")
-LIB_JS=$(shell find . -name "*.js")
+LIB_JS=$(shell find . -name "./lib/*.js")
 RES=$(shell find ./res -name "*.bin" )
 PETMATE=$(shell find ./res -name "*.petmate")
 GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
@@ -42,7 +42,7 @@ res/%-frames.petmate: res/%-frames
 .PHONY: test
 test: main.run
 
-main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) \
+main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
 	./res/heart2-frames.petmate.gen.asm \
 	./res/cube-frames.petmate.gen.asm
 

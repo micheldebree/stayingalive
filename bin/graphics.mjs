@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import {palette} from "./quantizer.mjs";
 
 const bytesPerChar = 8
 
@@ -36,6 +37,15 @@ export function hamming (byte1, byte2) {
   return countBits(byte1 ^ byte2)
 }
 
+// euclidian distance between color channels
+// pixels are arrays of 3 number (r, g ,b)
+export function distance (pixel1, pixel2) {
+  return Math.sqrt(
+      (pixel1[0] - pixel2[0]) ** 2 +
+      (pixel1[1] - pixel2[1]) ** 2 +
+      (pixel1[2] - pixel2[2]) ** 2)
+}
+
 // return average of all channels of an [r, g, b] pixel
 export function pixelLuminance (pixel) {
   return (pixel[0] + pixel[1] + pixel[2]) / 3
@@ -56,20 +66,13 @@ export function cellOffsets (sharpImage) {
     .flat()
 }
 
-// parse an 8 pixel row to a hires byte
-export function parseHiresByteFromPixelRow (tileRow, threshold = 127) {
+// parse an 8 palette index row to a hires byte
+export function parseHiresByteFromPixelRow (tileRow, backgroundColor) {
+  const color = palette[backgroundColor]
   return mask
-    .filter((_m, i) => pixelLuminance(tileRow[i]) > threshold)
-    .reduce((a, v) => (a | v), 0)
-}
+  .filter((_m, i) => distance(tileRow[i], color) > 64)
+  .reduce((a, v) => (a | v), 0)
 
-// parse the 8 pixels at offset in sharpImage as a hires byte
-// a pixel is considered set when the first channel is above the threshold
-// TODO: obsolete?
-export function parseHiresByte (sharpImage, offset, threshold = 127) {
-  return mask
-    .filter((_m, i) => sharpImage.data[offset + i * sharpImage.info.channels] > threshold)
-    .reduce((a, v) => (a | v), 0)
 }
 
 // get an 8  pixel row as array of pixels from sharpImage. pixels are [r, g, b]

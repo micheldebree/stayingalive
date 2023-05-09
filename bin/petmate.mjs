@@ -5,7 +5,7 @@ const rows = 25
 
 // screen = { screenCodes, colors }
 function toFramebuf (screen, name) {
-  const { screenCodes, colors } = screen
+  const { screenCodes, colors, backgroundColor } = screen
 
   const framebuf = []
   for (let y = 0; y < rows; y++) {
@@ -20,7 +20,7 @@ function toFramebuf (screen, name) {
   return {
     width: cols,
     height: rows,
-    backgroundColor: 0,
+    backgroundColor,
     borderColor: 0,
     charset: 'upper',
     name,
@@ -29,6 +29,7 @@ function toFramebuf (screen, name) {
   }
 }
 
+// TODO: different background color per frame
 export async function toPetmate (filename, screens) {
   const framebufs = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`))
   const screenNumbers = Array.from(Array(screens.length).keys())
