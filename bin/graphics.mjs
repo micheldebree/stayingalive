@@ -36,6 +36,11 @@ export function hamming (byte1, byte2) {
   return countBits(byte1 ^ byte2)
 }
 
+// return average of all channels of an [r, g, b] pixel
+export function pixelLuminance (pixel) {
+  return (pixel[0] + pixel[1] + pixel[2]) / 3
+}
+
 export function imageCoordinatesToByteOffset (sharpImage, x, y) {
   // assume 1 byte per channel
   return (y * sharpImage.info.width + x) * sharpImage.info.channels
@@ -51,11 +56,10 @@ export function cellOffsets (sharpImage) {
     .flat()
 }
 
-// parse an 8 pixel greyscale row to a hires byte
-// assume greyscale so only consider first channel
+// parse an 8 pixel row to a hires byte
 export function parseHiresByteFromPixelRow (tileRow, threshold = 127) {
   return mask
-    .filter((_m, i) => tileRow[i][0] > threshold)
+    .filter((_m, i) => pixelLuminance(tileRow[i]) > threshold)
     .reduce((a, v) => (a | v), 0)
 }
 

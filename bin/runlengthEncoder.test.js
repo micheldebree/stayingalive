@@ -1,7 +1,6 @@
 import { decode, encode, minRunLength, runMarker } from './runlengthEncoder.mjs'
 
 test('test encoding', () => {
-
   testBothWays([3], [3])
   testBothWays([], [])
   testBothWays([3, 3, 3], [3, 3, 3])

@@ -3,13 +3,17 @@ import { writeFile } from 'node:fs/promises'
 const cols = 40
 const rows = 25
 
-function toFramebuf (screenCodes, name) {
+// screen = { screenCodes, colors }
+function toFramebuf (screen, name) {
+  const { screenCodes, colors } = screen
+
   const framebuf = []
   for (let y = 0; y < rows; y++) {
     const row = []
     for (let x = 0; x < cols; x++) {
       const code = screenCodes[y * cols + x]
-      row.push({ code, color: 1 })
+      const color = colors[y * cols + x]
+      row.push({ code, color })
     }
     framebuf.push(row)
   }
