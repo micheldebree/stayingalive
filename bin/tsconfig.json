@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "module": "nodenext"
+  },
+  "exclude": ["node_modules", "target", "**/*.spec.ts"]
+}

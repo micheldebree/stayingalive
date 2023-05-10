@@ -7,7 +7,9 @@
   "type": "module",
   "devDependencies": {
     "jest": "29.5.0",
-    "standard": "17.0.0"
+    "standard": "17.0.0",
+    "standardts": "1.0.0",
+    "typescript": "5.0.4"
   },
   "scripts": {
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
