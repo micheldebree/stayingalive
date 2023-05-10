@@ -60,8 +60,8 @@ function unflatten(img: SharpImage): Array<PixelColor> {
   let i: number = 0
   const result: Array<PixelColor> = []
   while (i < img.data.length) {
-    result.push([img.data[i], img.data[i + 1],
-      img.data[i + 2]])
+    // assume 3 channels
+    result.push([img.data[i], img.data[i + 1], img.data[i + 2]])
     i += 3
   }
   return result

@@ -37,7 +37,7 @@ res/%-frames: res/%.gif
 
 .PRECIOUS: res/%-frames.petmate
 res/%-frames.petmate: res/%-frames
-	node ./bin/png2petscii.mjs "$<"
+	node ./bin/png2petscii.js "$<"
 
 .PHONY: test
 test: main.run

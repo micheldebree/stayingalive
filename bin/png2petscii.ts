@@ -17,6 +17,7 @@ import {
 import {palette, quantize, quantize2index} from './quantizer.js'
 import {toPetmate, ScreenCell, Screen} from './petmate.js'
 
+type WeightedScreenCell = { cell: ScreenCell, distance: number }
 
 const threshold: number = 128
 const allChars: Byte[] = Array(255).fill(0).map((_c, i) => i)
@@ -64,7 +65,6 @@ function luminanceOfTile(tile: Tile): number {
   return sum / pixels.length
 }
 
-// TODO: discard background color?
 function averageColorOfTile(tile: Tile): PixelColor {
   const pixels: PixelColor[] = tile.flat()
   const sum: PixelColor = pixels
@@ -140,10 +140,19 @@ function bestMatch(tile: Tile, chars: CharSet, backgroundColor: PixelColor) {
   .reduce((acc, val) => val[1] < acc[1] ? val : acc, [-1, Number.MAX_VALUE])[0]
 }
 
+function bestCell(allDistances: Array<WeightedScreenCell>) {
+  const winner: WeightedScreenCell = allDistances.reduce((a, v) => v.distance < a.distance ? v : a, {
+    cell: {
+      code: 0,
+      color: 0
+    }, distance: Number.MAX_VALUE
+  })
+
+  return winner.cell
+}
+
 // get the combination of color and Char that best matches the tile color
 function bestColorMatch(tile: Tile, chars: CharSet, backgroundColor: PixelColor): ScreenCell {
-
-  type WeightedScreenCell = { cell: ScreenCell, distance: number }
 
   let allDistances: Array<WeightedScreenCell> = []
 
@@ -154,35 +163,57 @@ function bestColorMatch(tile: Tile, chars: CharSet, backgroundColor: PixelColor)
         distance: colorDistance(tile, chars[charIndex], color, backgroundColor)
       }
     })
-
     allDistances = [...allDistances, ...distances]
   })
+  return bestCell(allDistances);
 
-  const winner: WeightedScreenCell = allDistances.reduce((a, v) => v.distance < a.distance ? v : a, {
-    cell: {
-      code: 0,
-      color: 0
-    }, distance: Number.MAX_VALUE
+}
+
+// sum of all distances between corresponding pixels in both rows
+function tileRowDistance(row1: Array<PixelColor>, row2: Array<PixelColor>): number {
+  return row1
+  .map((p, i) => distance(p, row2[i]))
+  .reduce((a, v) => a + v, 0)
+}
+
+// calculate the total color distance between each pixel in both tiles
+function tileDistance(t1: Tile, t2: Tile): number {
+  return t1.map((row, i) => tileRowDistance(row, t2[i]))
+  .reduce((a, v) => a + v, 0)
+}
+
+function bestColorMatch2(tile: Tile, chars: CharSet, backgroundColor: PixelColor): ScreenCell {
+
+  // TODO: discard background color?
+  const bestColor: number = bestColorMatchForTile(tile, backgroundColor)
+
+  const distances: Array<WeightedScreenCell> = supportedChars.map(charIndex => {
+    const charTile = char2Tile(chars[charIndex], palette[bestColor], backgroundColor)
+    const cell: ScreenCell = {code: charIndex, color: bestColor}
+    return {cell, distance: tileDistance(tile, charTile)}
   })
 
-  return winner.cell
+  return bestCell(distances)
 
 }
 
 // get the most occuring color for the tile, excluding background color
-function bestColorMatchForTile(tile, backgroundColor) {
-  // const nonBackgroundPixels = tile
-  // .flatMap(row => row.map(p => quantize2index(p)))
-  // .filter(c => c !== backgroundColor)
-  //
-  // return mostOccuringColorIndex(nonBackgroundPixels)
+function bestColorMatchForTile(tile: Tile, backgroundColor: PixelColor): number {
 
-  return quantize2index(averageColorOfTile(tile))
+  const bgIndex: number =  quantize2index(backgroundColor)
+  const nonBackgroundPixels: Array<number> = tile
+  .flatMap(row => row.map(p => quantize2index(p)))
+  .filter(c => c !== bgIndex)
+
+  return mostOccuringColorIndex(nonBackgroundPixels)
+
 }
 
 // cut SharpImage in 8x8 PixelColor tiles, this is a three dimensional array:
 // 8 rows of 8 pixels of [r, g, b]
 function cutIntoTiles(img: SharpImage): Array<Tile> {
+
+
   return cellOffsets(img).map(offset => {
     return Array(8).fill(0)
     .map((_v, y) => offset + imageCoordinatesToByteOffset(img, 0, y))
@@ -196,23 +227,21 @@ async function convertFile(filename: string, charSet: CharSet): Promise<Screen> 
   const tiles: Array<Tile> = cutIntoTiles(image)
   // map tiles to best match in CharSet
   const backgroundColor = bestBackgroundColor(image)
-  const screenCodes = tiles.map(t => bestMatch(t, charSet, palette[backgroundColor]))
-  const colors = tiles.map(t => bestColorMatchForTile(t, backgroundColor))
+
+  // const screenCodes = tiles.map(t => bestMatch(t, charSet, palette[backgroundColor]))
+  // const colors = tiles.map(t => bestColorMatchForTile(t, backgroundColor))
+  // const cells: Array<ScreenCell> = screenCodes.map((code, i) => {
+  //   return {code, color: colors[i]}
+  // })
 
   // color match
-  // const screenCells: Array<ScreenCell> = tiles.map(
-  //   (t, i) => {
-  //     console.log(i)
-  //     return bestColorMatch(t, charSet, palette[backgroundColor])
-  //   })
-  // const screenCodes = screenCells.map(c => c.code)
-  // const colors = screenCells.map(c => c.color)
+  const cells: Array<ScreenCell> = tiles.map(
+      (t, i) => {
+        console.log(i)
+        return bestColorMatch2(t, charSet, palette[backgroundColor])
+      })
 
-  const cells: Array<ScreenCell> = screenCodes.map((code, i) => {
-    return {code, color: colors[i]}
-  })
-
-  return { backgroundColor, cells }
+  return {backgroundColor, cells}
 
 }
 

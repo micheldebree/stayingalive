@@ -31,8 +31,7 @@ function toFramebuf(screen: Screen, name: string): FrameBuf {
   for (let y: number = 0; y < rows; y++) {
     const row: Array<ScreenCell> = []
     for (let x: number = 0; x < cols; x++) {
-      const cell: ScreenCell = cells[y * cols + x]
-      row.push(cell)
+      row.push(cells[y * cols + x])
     }
     framebuf.push(row)
   }
