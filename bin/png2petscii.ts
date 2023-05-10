@@ -92,7 +92,6 @@ function bestMatch(tile: Tile, chars: CharSet, backgroundColor: number): ScreenC
       return {cell, distance: tileDistance(tile, charTile)}
     })
     finalDistances = [...finalDistances, ...distances]
-
   })
   return bestCell(finalDistances)
 }
@@ -108,7 +107,6 @@ function bestFastMatch(tile: Tile, chars: CharSet, backgroundColor: number): Scr
 
   return bestCell(distances)
 }
-
 
 function quantizeTile(tile: Tile): number[] {
   return tile.flatMap(row => row.map(p => quantize2index(p)))
@@ -138,14 +136,13 @@ async function convertFile(filename: string, charSet: CharSet): Promise<Screen> 
 
     return bestFastMatch(t, charSet, backgroundColor)
   })
-
   return {backgroundColor, cells}
 }
 
 (async function () {
-  const inputName = process.argv[2]
-  const filenames = await toFilenames(inputName, supportedExtensions)
-  const charSet = await readChars(relativePath('./characters.901225-01.bin'))
+  const inputName: string = process.argv[2]
+  const filenames: string[] = await toFilenames(inputName, supportedExtensions)
+  const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
   // array of screens, one screen is a { screenCodes, colors, backgroundColor }
   const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet)))
   await toPetmate(`${inputName}.petmate`, screens)

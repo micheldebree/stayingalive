@@ -14,15 +14,8 @@ export function addWrite(buffer: WriteBuffer, operation: WriteOperation): void {
   buffer[operation.value].push(operation.address)
 }
 
-// write a sequence of bytes beginning at startAddress
-// only write differences
-export function addWrites(buffer: WriteBuffer, writes: WriteOperation[]): void {
-  writes.forEach(w => addWrite(buffer, w))
-
-  // TODO: if byte is one lower or higher, use inc or dec instead of write
-  // TODO: reuse lower nibble of character writes for color writes
-}
-
+// TODO: if byte is one lower or higher, use inc or dec instead of write
+// TODO: reuse lower nibble of character writes for color writes
 export function generateCode(buffer: WriteBuffer, label: string): string {
   let result: string = `${label}:\n`
   let lastIndex: number = -2

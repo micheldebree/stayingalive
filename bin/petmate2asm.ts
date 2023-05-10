@@ -2,7 +2,6 @@
 
 import {
   createBuffer,
-  addWrites,
   generateCode,
   WriteBuffer,
   addWrite,
@@ -32,7 +31,8 @@ function pad(buffer: number[], nrBytes: number) {
 // Get a petmate frame as a simple array of bytes
 // cellToByte: a function to get the byte for a cell in the frame (code or
 // color) so this can be used for both screencodes and colors
-// Pads the frame to filt cols x rows
+// Pads the frame to fill cols x rows
+// TODO: return write operations?
 function getMatrix(frame: FrameBuf, cellToByte: (ScreenCell) => number): number[] {
   const horSpace: number = cols - frame.width
   const verSpace: number = rows - frame.height
@@ -65,7 +65,27 @@ function delta(addressOffset: number, frame: number[], previousFrame: number[]):
   return result.map(op => {
     return {address: addressOffset + op.address, value: op.value}
   })
+}
 
+function onlyUnique(value: number, index: number, array: number[]) {
+  return array.indexOf(value) === index;
+}
+function optimizeColorWrites(colorWrites: WriteOperation[], screenWrites: WriteOperation[]): void {
+
+  // get all the unique values for the screen writes
+  const screenValues = screenWrites
+  .map(op => op.value)
+  .filter(onlyUnique)
+
+  colorWrites.forEach(op => {
+    // if one of the screenValues' lowest nibble matches that of the color value,
+    // use that screenValue. (because values are reused when generating code)
+    const matchingValue: number = screenValues.find(v => (v & 0x1111) === (op.value & 0x1111))
+    if (matchingValue) {
+      op.value = matchingValue
+      console.log(`Replaced color write ${op.value} with ${matchingValue}`)
+    }
+  })
 }
 
 async function convert(filename: string) {
@@ -110,8 +130,14 @@ async function convert(filename: string) {
       const writes: WriteBuffer = createBuffer()
       addWrite(writes, {address: backgroundColor, value: frame.backgroundColor})
       addWrite(writes, {address: borderColor, value: frame.borderColor})
-      addWrites(writes, delta(screenMem, screenMatrix, prevScreenMatrix))
-      addWrites(writes, delta(colorMem, colorMatrix, prevColorMatrix))
+
+      const screenWrites: WriteOperation[] = delta(screenMem, screenMatrix, prevScreenMatrix)
+      const colorWrites: WriteOperation[] = delta(colorMem, colorMatrix, prevColorMatrix)
+
+      screenWrites.forEach(w => addWrite(writes, w))
+      colorWrites.forEach(w => addWrite(writes, w))
+
+      optimizeColorWrites(colorWrites, screenWrites)
 
       // generate code that performs the memory writes in an optimized way
       codeResult += generateCode(writes, frame.name)
