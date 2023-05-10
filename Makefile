@@ -30,7 +30,7 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 
 .PRECIOUS: %.petmate.gen.asm
 %.petmate.gen.asm: %.petmate
-	node ./bin/petmate2asm-bw.mjs "$<"
+	node ./bin/petmate2asm.js "$<"
 
 res/%-frames: res/%.gif
 	./res/extract-gif.sh "$<" "$@"
@@ -44,7 +44,8 @@ test: main.run
 
 main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
 	./res/heart2-frames.petmate.gen.asm \
-	./res/cube-frames.petmate.gen.asm
+	./res/cube-frames.petmate.gen.asm \
+	./res/walking-frames.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg

@@ -1,10 +1,20 @@
 // utilities to render c64jasm source code
 
-function hex (n) {
+function hex (n: number): string {
   return `$${n.toString(16)}`
 }
 
-export const opcode = {
+type Mnemonic = "ldx" | "stx" | "inx" | "inc" | "dec" | "rts"
+type Mode = "imm" | "abs" | "implied"
+
+type ModeInfo = { code: number, bytes: number, cycles: number }
+type Opcode = { mnemonic: Mnemonic,
+  imm?: ModeInfo
+  abs?: ModeInfo
+  implied?: ModeInfo
+}
+
+export const opcode: {[K in Mnemonic]?: Opcode} = {
   ldx: {
     mnemonic: 'ldx',
     imm: {
@@ -55,14 +65,14 @@ export const opcode = {
   }
 }
 
-export const render = {
-  imm: (opcode, argument) => `${opcode.mnemonic} #${hex(argument)} ; ${opcode.imm.cycles}\n`,
-  abs: (opcode, argument) => `${opcode.mnemonic} ${hex(argument)} ; ${opcode.abs.cycles}\n`,
-  implied: (opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
+export const render  = {
+  imm: (opcode: Opcode, argument: number) => `${opcode.mnemonic} #${hex(argument)} ; ${opcode.imm.cycles}\n`,
+  abs: (opcode: Opcode, argument: number) => `${opcode.mnemonic} ${hex(argument)} ; ${opcode.abs.cycles}\n`,
+  implied: (opcode: Opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
 }
 
-export function renderBytes (bytes) {
-  let result = ''
+export function renderBytes (bytes: number[]): string {
+  let result: string = ''
   bytes.forEach((b, i) => {
     if (i % 16 === 0) {
       result += '\n!byte '

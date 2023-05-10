@@ -36,7 +36,7 @@ loop:
   sta vic.sprites.x(0),y
   lda #50
   sta vic.sprites.y(0),y
-  lda #6
+  lda #14
   sta vic.sprites.color(0),x
 setPointer:
   lda #$f8

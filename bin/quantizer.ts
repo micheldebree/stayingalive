@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import sharp from 'sharp'
-import {distance, SharpImage, PixelColor} from './graphics.js'
+import { distance, SharpImage, PixelColor } from './graphics.js'
 
 // the 'PALette' palette
 export const palette: PixelColor[] = [
@@ -23,25 +23,25 @@ export const palette: PixelColor[] = [
 ]
 
 // map an [r, g, b] color to the index of the closest color in the palette
-export function quantize2index(color: PixelColor): number {
+export function quantize2index (color: PixelColor): number {
   return palette
-  .map((paletteColor, i) => [i, distance(color, paletteColor)])
-  .reduce((acc, current) => (current[1] < acc[1] ? current : acc),
+    .map((paletteColor, i) => [i, distance(color, paletteColor)])
+    .reduce((acc, current) => (current[1] < acc[1] ? current : acc),
       [0, Number.POSITIVE_INFINITY])[0]
 }
 
 // load and scale the image, should have 3 channels (r, g, b) after this
-async function loadFile(filename): Promise<SharpImage> {
-  return sharp(filename)
-  .resize(320, 200)
-  .removeAlpha()
-  .normalise()
-  .raw()
-  .toBuffer({resolveWithObject: true})
+async function loadFile (filename): Promise<SharpImage> {
+  return await sharp(filename)
+    .resize(320, 200)
+    .removeAlpha()
+    .normalise()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
 }
 
 // convert indexed image back to PixelColor image and save to file
-async function saveIndexedImage(indexedImage, outputFile) : Promise<void> {
+async function saveIndexedImage (indexedImage, outputFile): Promise<void> {
   const pixelImage = indexedImage.map(p => palette[p])
   const imageData = new Uint8ClampedArray(pixelImage.flat())
   const image = sharp(imageData, {
@@ -56,9 +56,9 @@ async function saveIndexedImage(indexedImage, outputFile) : Promise<void> {
 
 // unflatten image data by converting it to an array of 320x200 pixels of type
 // [r, g, b]
-function unflatten(img: SharpImage): Array<PixelColor> {
+function unflatten (img: SharpImage): PixelColor[] {
   let i: number = 0
-  const result: Array<PixelColor> = []
+  const result: PixelColor[] = []
   while (i < img.data.length) {
     // assume 3 channels
     result.push([img.data[i], img.data[i + 1], img.data[i + 2]])
@@ -68,7 +68,7 @@ function unflatten(img: SharpImage): Array<PixelColor> {
 }
 
 // return an index image (320 x 200 palette indices) from a raw sharp image
-export function quantize(img: SharpImage): number[] {
+export function quantize (img: SharpImage): number[] {
   return unflatten(img).map(p => quantize2index(p))
 }
 

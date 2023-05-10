@@ -1,35 +1,44 @@
-import {writeFile} from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 
 const cols: number = 40
 const rows: number = 25
 
-export type ScreenCell = { code: number, color: number }
-export type Screen = { backgroundColor: number, cells: Array<ScreenCell> }
-type FrameBuf = {
-  width: number,
-  height: number,
-  backgroundColor: number,
-  borderColor: number,
-  charset: string,
-  name: string,
-  framebuf: Array<Array<ScreenCell>>
+export interface ScreenCell { code: number, color: number }
+export interface Screen { backgroundColor: number, cells: ScreenCell[] }
+export interface FrameBuf {
+  width: number
+  height: number
+  backgroundColor: number
+  borderColor: number
+  charset: string
+  name: string
+  framebuf: ScreenCell[][]
   customFonts: object
 }
-type Petmate = {
-  version: number,
-  screens: Array<number>,
-  framebufs: Array<FrameBuf>
+export interface Petmate {
+  version: number
+  screens: number[]
+  framebufs: FrameBuf[]
 
+}
+
+export function fromJSON(json: string): Petmate {
+  const content: Petmate = JSON.parse(json)
+
+  if (content.version !== 2) {
+    throw new Error(`Unsupported Petmate version: ${content.version}`)
+  }
+
+  return content
 }
 
 // screen = { screenCodes, colors }
-function toFramebuf(screen: Screen, name: string): FrameBuf {
+function toFramebuf (screen: Screen, name: string): FrameBuf {
+  const { backgroundColor, cells } = screen
 
-  const {backgroundColor, cells} = screen
-
-  const framebuf: Array<Array<ScreenCell>> = []
+  const framebuf: ScreenCell[][] = []
   for (let y: number = 0; y < rows; y++) {
-    const row: Array<ScreenCell> = []
+    const row: ScreenCell[] = []
     for (let x: number = 0; x < cols; x++) {
       row.push(cells[y * cols + x])
     }
@@ -47,9 +56,9 @@ function toFramebuf(screen: Screen, name: string): FrameBuf {
   }
 }
 
-export async function toPetmate(filename: string, screens: Array<Screen>): Promise<void> {
-  const framebufs: Array<FrameBuf> = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`))
-  const screenNumbers: Array<number> = Array.from(Array(screens.length).keys())
+export async function toPetmate (filename: string, screens: Screen[]): Promise<void> {
+  const framebufs: FrameBuf[] = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`))
+  const screenNumbers: number[] = Array.from(Array(screens.length).keys())
 
   const result: Petmate = {
     version: 2,
