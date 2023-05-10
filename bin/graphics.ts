@@ -1,5 +1,6 @@
 import {readFile} from 'node:fs/promises'
 import { OutputInfo } from 'sharp'
+import {palette} from "./quantizer.js";
 
 // TODO: use CamelCase?
 export type Byte = number
@@ -42,8 +43,8 @@ export function countBits(b: Byte): number {
 }
 
 // convert a Byte to 8 pixels. bit 1 will be color, bit 0 will be background color
-export function byte2Pixels(b: Byte, color: PixelColor, backgroundColor: PixelColor): PixelColor[] {
-  return mask.map(m => (b & m) !== 0 ? color : backgroundColor)
+export function byte2Pixels(b: Byte, color: number, backgroundColor: number): PixelColor[] {
+  return mask.map(m => (b & m) !== 0 ? palette[color] : palette[backgroundColor])
 }
 
 // hamming distance between two bytes (= number of bits that are the same)
