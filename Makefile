@@ -54,6 +54,10 @@ main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
 lint:
 	@$(BIN)/standard
 
+.PHONY: fix
+fix:
+	@$(BIN)/standard --fix
+
 node_modules: package.json yarn.lock
 	yarn install
 

@@ -1,7 +1,6 @@
 import { countBits } from './graphics.mjs'
 
 test('test countBits', () => {
-
   expect(countBits(0)).toEqual(0)
   expect(countBits(0xff)).toEqual(8)
   expect(countBits(0b01010101)).toEqual(4)

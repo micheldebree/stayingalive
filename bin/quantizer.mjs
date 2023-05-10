@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import sharp from 'sharp'
-import {distance} from "./graphics.mjs";
+import { distance } from './graphics.mjs'
 
 // the 'PALette' palette
 export const palette = [
@@ -23,25 +23,25 @@ export const palette = [
 ]
 
 // map an [r, g, b] color to the index of the closest color in the palette
-export function quantize2index(color) {
+export function quantize2index (color) {
   return palette
-  .map((paletteColor, i) => [i, distance(color, paletteColor)])
-  .reduce((acc, current) => (current[1] < acc[1] ? current : acc),
+    .map((paletteColor, i) => [i, distance(color, paletteColor)])
+    .reduce((acc, current) => (current[1] < acc[1] ? current : acc),
       [0, Number.POSITIVE_INFINITY])[0]
 }
 
 // load and scale the image, should have 3 channels (r, g, b) after this
-async function loadFile(filename) {
+async function loadFile (filename) {
   return sharp(filename)
-  .resize(320, 200)
-  .removeAlpha()
-  .normalise()
-  .raw()
-  .toBuffer({resolveWithObject: true})
+    .resize(320, 200)
+    .removeAlpha()
+    .normalise()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
 }
 
 // convert indexed image back to pixel image and save to file
-async function saveIndexedImage(indexedImage, outputFile) {
+async function saveIndexedImage (indexedImage, outputFile) {
   const pixelImage = indexedImage.map(p => palette[p])
   const imageData = new Uint8ClampedArray(pixelImage.flat())
   const image = sharp(imageData, {
@@ -56,7 +56,7 @@ async function saveIndexedImage(indexedImage, outputFile) {
 
 // unflatten image data by converting it to an array of 320x200 pixels of type
 // [r, g, b]
-function unflatten(rawSharpImage) {
+function unflatten (rawSharpImage) {
   let i = 0
   const result = []
   while (i < rawSharpImage.data.length) {
@@ -68,7 +68,7 @@ function unflatten(rawSharpImage) {
 }
 
 // return an index image (320 x 200 palette indices) from a raw sharp image
-export function quantize(rawSharpImage) {
+export function quantize (rawSharpImage) {
   return unflatten(rawSharpImage).map(p => quantize2index(p))
 }
 
