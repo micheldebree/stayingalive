@@ -1,6 +1,13 @@
 // Generate optimized code from petmate frames
 
-import {createBuffer, addWrites, generateCode, WriteBuffer} from './writeBuffer.js'
+import {
+  createBuffer,
+  addWrites,
+  generateCode,
+  WriteBuffer,
+  addWrite,
+  WriteOperation
+} from './writeBuffer.js'
 import {readFile, writeFile} from 'node:fs/promises'
 import {encode} from './runlengthEncoder.js'
 import {renderBytes} from './codegen.js'
@@ -12,6 +19,8 @@ const rows: number = 25
 const space: number = 0x20
 const screenMem: number = 0x400
 const colorMem: number = 0xd800
+const backgroundColor: number = 0xd021
+const borderColor: number = 0xd020
 
 // add a few spaces
 function pad(buffer: number[], nrBytes: number) {
@@ -41,6 +50,22 @@ function getMatrix(frame: FrameBuf, cellToByte: (ScreenCell) => number): number[
   })
   pad(result, paddingBottom)
   return result
+}
+
+// convert a frame (sequence of bytes) to write operations
+// only if it differs from previous frame
+// N.B. the index into the bytes array is implicitly the address offset
+function delta(addressOffset: number, frame: number[], previousFrame: number[]): WriteOperation[] {
+  // N.B. index in frame is (relative) address
+  const result: WriteOperation[] = frame.map((v, i): WriteOperation => {
+    return {address: i, value: v}
+  })
+  .filter(op => op.value !== previousFrame[op.address])
+
+  return result.map(op => {
+    return {address: addressOffset + op.address, value: op.value}
+  })
+
 }
 
 async function convert(filename: string) {
@@ -83,8 +108,10 @@ async function convert(filename: string) {
       codeTablesHi += `!byte b.hi(${frame.name})\n`
       codeTablesLo += `!byte b.lo(${frame.name})\n`
       const writes: WriteBuffer = createBuffer()
-      addWrites(writes, screenMem, screenMatrix, prevScreenMatrix)
-      addWrites(writes, colorMem, colorMatrix, prevColorMatrix)
+      addWrite(writes, {address: backgroundColor, value: frame.backgroundColor})
+      addWrite(writes, {address: borderColor, value: frame.borderColor})
+      addWrites(writes, delta(screenMem, screenMatrix, prevScreenMatrix))
+      addWrites(writes, delta(colorMem, colorMatrix, prevColorMatrix))
 
       // generate code that performs the memory writes in an optimized way
       codeResult += generateCode(writes, frame.name)
