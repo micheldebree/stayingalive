@@ -50,7 +50,7 @@ codeStart:
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
 !include "animationWalker.asm"
-!include "animationCube.asm"
+; !include "animationCube.asm"
 
 !segment code
 

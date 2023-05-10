@@ -2,15 +2,16 @@
 
 import {createBuffer, addWrites, generateCode, WriteBuffer} from './writeBuffer.js'
 import {readFile, writeFile} from 'node:fs/promises'
-import {encode} from './runlengthEncoder.mjs'
+import {encode} from './runlengthEncoder.js'
 import {renderBytes} from './codegen.js'
 import {FrameBuf, fromJSON, Petmate} from "./petmate.js";
 
-const outExtension = '.gen.asm'
-const cols = 40
-const rows = 25
-const space = 0x20
-const screenMem = 0x400
+const outExtension: string = '.gen.asm'
+const cols: number = 40
+const rows: number = 25
+const space: number = 0x20
+const screenMem: number = 0x400
+const colorMem: number = 0xd800
 
 // add a few spaces
 function pad(buffer: number[], nrBytes: number) {
@@ -58,6 +59,7 @@ async function convert(filename: string) {
 
   // start with 'transparent' frame
   let prevScreenMatrix: number[] = Array(cols * rows).fill(space)
+  let prevColorMatrix: number[] = Array(cols * rows).fill(0)
 
   // write out hi and lo bytes of pointers to the compiled frames
   const firstFrameLabel: string = 'firstFrame:\n'
@@ -68,6 +70,7 @@ async function convert(filename: string) {
 
   frames.forEach((frame: FrameBuf, frameNr: number) => {
     const screenMatrix: number[] = getMatrix(frame, cell => cell.code)
+    const colorMatrix: number[] = getMatrix(frame, cell => cell.color)
 
     // encode the first frame as run lenght encoded data
     if (frameNr === 0) {
@@ -81,11 +84,13 @@ async function convert(filename: string) {
       codeTablesLo += `!byte b.lo(${frame.name})\n`
       const writes: WriteBuffer = createBuffer()
       addWrites(writes, screenMem, screenMatrix, prevScreenMatrix)
+      addWrites(writes, colorMem, colorMatrix, prevColorMatrix)
 
       // generate code that performs the memory writes in an optimized way
       codeResult += generateCode(writes, frame.name)
     }
     prevScreenMatrix = screenMatrix
+    prevColorMatrix = colorMatrix
   })
 
   await writeFile(`${filename}${outExtension}`, firstFrame + codeTablesHi + codeTablesLo + codeResult)

@@ -11,3 +11,5 @@ Session.vim
 .idea
 *.gen.asm
 main.txt
+built
+.run

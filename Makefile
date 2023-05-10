@@ -30,14 +30,14 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 
 .PRECIOUS: %.petmate.gen.asm
 %.petmate.gen.asm: %.petmate
-	node ./bin/petmate2asm.js "$<"
+	node ./bin/built/petmate2asm.js "$<"
 
 res/%-frames: res/%.gif
 	./res/extract-gif.sh "$<" "$@"
 
 .PRECIOUS: res/%-frames.petmate
 res/%-frames.petmate: res/%-frames
-	node ./bin/png2petscii.js "$<"
+	node ./bin/built/png2petscii.js "$<"
 
 .PHONY: test
 test: main.run
