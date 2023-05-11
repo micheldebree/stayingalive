@@ -12,18 +12,18 @@ import {encode} from './runlengthEncoder.js'
 import {renderBytes} from './codegen.js'
 import {FrameBuf, fromJSON, Petmate} from "./petmate.js";
 
-const outExtension: string = '.gen.asm'
-const cols: number = 40
-const rows: number = 25
-const space: number = 0x20
-const screenMem: number = 0x400
-const colorMem: number = 0xd800
-const backgroundColor: number = 0xd021
-const borderColor: number = 0xd020
+const outExtension = '.gen.asm'
+const cols = 40
+const rows = 25
+const space = 0x20
+const screenMem = 0x400
+const colorMem = 0xd800
+const backgroundColor = 0xd021
+const borderColor = 0xd020
 
 // add a few spaces
 function pad(buffer: number[], nrBytes: number) {
-  for (let i: number = 0; i < nrBytes; i++) {
+  for (let i = 0; i < nrBytes; i++) {
     buffer.push(space)
   }
 }
@@ -89,7 +89,7 @@ function optimizeColorWrites(colorWrites: WriteOperation[], screenWrites: WriteO
   .map(op => op.value)
   .filter(onlyUnique)
 
-  colorWrites.forEach((op, i) => {
+  colorWrites.forEach(op => {
     // if one of the screenValues' lowest nibble matches that of the color value,
     // use that screenValue. (because values are reused when generating code)
     const matchingValue: number = screenValues.find(v => (v & 0b1111) === (op.value & 0b1111))
@@ -102,6 +102,7 @@ function optimizeColorWrites(colorWrites: WriteOperation[], screenWrites: WriteO
 
 function optimizeInvisibleWrites(screenMatrix: number[], previousScreenMatrix: number[], colorMatrix: number[], backgroundColor: number) {
   screenMatrix.forEach((v, i) => {
+    // TODO: something not right here...
     if (colorMatrix[i] === backgroundColor) {
       screenMatrix[i] = previousScreenMatrix[i]
       console.log("Optimized invisible write.")
@@ -129,11 +130,11 @@ async function convert(filename: string) {
   let prevColorMatrix: number[] = Array(cols * rows).fill(0)
 
   // write out hi and lo bytes of pointers to the compiled frames
-  const firstFrameLabel: string = 'firstFrame:\n'
+  const firstFrameLabel = 'firstFrame:\n'
   let firstFrame
-  let codeTablesHi: string = 'framesHi:\n'
-  let codeTablesLo: string = 'framesLo:\n'
-  let codeResult: string = ''
+  let codeTablesHi = 'framesHi:\n'
+  let codeTablesLo = 'framesLo:\n'
+  let codeResult = ''
 
   frames.forEach((frame: FrameBuf, frameNr: number) => {
     const screenMatrix: number[] = getMatrix(frame, cell => cell.code)
@@ -141,7 +142,7 @@ async function convert(filename: string) {
 
     // encode the first frame as run lenght encoded data
     if (frameNr === 0) {
-      // optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, backgroundColor)
+      optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, frame.backgroundColor)
       const firstFrameData = encode(screenMatrix)
       firstFrame = firstFrameLabel + renderBytes(firstFrameData) + '\n'
     } else {
@@ -154,7 +155,7 @@ async function convert(filename: string) {
       addWrite(writes, {address: backgroundColor, value: frame.backgroundColor})
       addWrite(writes, {address: borderColor, value: frame.borderColor})
 
-      // optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, backgroundColor)
+      optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, frame.backgroundColor)
 
       const screenWrites: WriteOperation[] = delta(screenMem, screenMatrix, prevScreenMatrix)
       const colorWrites: WriteOperation[] = delta(colorMem, colorMatrix, prevColorMatrix)

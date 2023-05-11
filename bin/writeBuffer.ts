@@ -6,7 +6,7 @@ export type WriteBuffer = Array<Array<number>>
 export type WriteOperation = { address: number, value: number }
 
 export function createBuffer(): WriteBuffer {
-  return Array(255).fill(0).map(_v => [])
+  return Array(255).fill(0).map(() => [])
 }
 
 // add a new write (address, value) to the buffer
@@ -17,10 +17,10 @@ export function addWrite(buffer: WriteBuffer, operation: WriteOperation): void {
 // TODO: if byte is one lower or higher, use inc or dec instead of write
 // TODO: reuse lower nibble of character writes for color writes
 export function generateCode(buffer: WriteBuffer, label: string): string {
-  let result: string = `${label}:\n`
-  let lastIndex: number = -2
-  let cycles: number = 0
-  let bytes: number = 0
+  let result = `${label}:\n`
+  let lastIndex = -2
+  let cycles = 0
+  let bytes = 0
   buffer.forEach((addrList: number[], value: number) => {
     if (addrList.length > 0) {
       if (value === lastIndex + 1) {
