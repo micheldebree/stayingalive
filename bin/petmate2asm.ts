@@ -70,6 +70,18 @@ function delta(addressOffset: number, frame: number[], previousFrame: number[]):
 function onlyUnique(value: number, index: number, array: number[]) {
   return array.indexOf(value) === index;
 }
+
+// only the lowest nibble is significant for $d800 writes,
+// so if we have a screencode with the same lowest nibble, we can re-use that
+// for example:
+//  lda #$3f
+//  sta $0400
+//  lda #$0f
+//  sta $d800
+// will be optimized to
+//  lda #$3f
+//  sta $0400
+//  sta $d800
 function optimizeColorWrites(colorWrites: WriteOperation[], screenWrites: WriteOperation[]): void {
 
   // get all the unique values for the screen writes
@@ -77,16 +89,26 @@ function optimizeColorWrites(colorWrites: WriteOperation[], screenWrites: WriteO
   .map(op => op.value)
   .filter(onlyUnique)
 
-  colorWrites.forEach(op => {
+  colorWrites.forEach((op, i) => {
     // if one of the screenValues' lowest nibble matches that of the color value,
     // use that screenValue. (because values are reused when generating code)
-    const matchingValue: number = screenValues.find(v => (v & 0x1111) === (op.value & 0x1111))
+    const matchingValue: number = screenValues.find(v => (v & 0b1111) === (op.value & 0b1111))
     if (matchingValue) {
-      op.value = matchingValue
       console.log(`Replaced color write ${op.value} with ${matchingValue}`)
+      op.value = matchingValue
     }
   })
 }
+
+function optimizeInvisibleWrites(screenMatrix: number[], previousScreenMatrix: number[], colorMatrix: number[], backgroundColor: number) {
+  screenMatrix.forEach((v, i) => {
+    if (colorMatrix[i] === backgroundColor) {
+      screenMatrix[i] = previousScreenMatrix[i]
+      console.log("Optimized invisible write.")
+    }
+  })
+}
+
 
 async function convert(filename: string) {
   const buf: Buffer = await readFile(filename)
@@ -119,6 +141,7 @@ async function convert(filename: string) {
 
     // encode the first frame as run lenght encoded data
     if (frameNr === 0) {
+      // optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, backgroundColor)
       const firstFrameData = encode(screenMatrix)
       firstFrame = firstFrameLabel + renderBytes(firstFrameData) + '\n'
     } else {
@@ -131,13 +154,15 @@ async function convert(filename: string) {
       addWrite(writes, {address: backgroundColor, value: frame.backgroundColor})
       addWrite(writes, {address: borderColor, value: frame.borderColor})
 
+      // optimizeInvisibleWrites(screenMatrix, prevScreenMatrix, colorMatrix, backgroundColor)
+
       const screenWrites: WriteOperation[] = delta(screenMem, screenMatrix, prevScreenMatrix)
       const colorWrites: WriteOperation[] = delta(colorMem, colorMatrix, prevColorMatrix)
 
+      optimizeColorWrites(colorWrites, screenWrites)
+
       screenWrites.forEach(w => addWrite(writes, w))
       colorWrites.forEach(w => addWrite(writes, w))
-
-      optimizeColorWrites(colorWrites, screenWrites)
 
       // generate code that performs the memory writes in an optimized way
       codeResult += generateCode(writes, frame.name)

@@ -23,10 +23,10 @@
 }
 
 !segment basic(start=$0801, end=$080e)
-!segment data(start=$080f, end=$3dff)
+!segment data(start=$4000, end=$9fff)
 !segment sprites(start=$3e00, end=$3fff) ; sprites for the typer
 !segment code(start=$c000, end=$cfff)
-!segment musicSegment(start = music.location, end = music.location + music.data.length)
+!segment musicSegment(start=$a000, end=$bfff)
 
 ; N.B. c64 debugger seems to only support breakpoints in the first
 ; segment it encounters in the debug info xml
@@ -130,7 +130,7 @@ initScreenMatrix: {
   ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
-  jsr music.init
+  ; jsr music.init
 
   rts
 }
@@ -143,7 +143,7 @@ mainIrq:  {
   ; dec $d020
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
-  jsr music.play
+  ; jsr music.play
   inc $d020
   jsr typer::type
   dec $d020
