@@ -19,8 +19,8 @@ interface WeightedScreenCell {
 const allChars: Byte[] = Array(255).fill(0).map((_c, i) => i)
 const supportedChars: Byte[] = allChars
 // const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
-const cols: number = 40
-const rows: number = 25
+const cols = 40
+const rows = 25
 const width: number = cols * 8
 const height: number = rows * 8
 const supportedExtensions: string[] = ['.png', '.jpg']

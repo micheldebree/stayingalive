@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises'
 
-const cols: number = 40
-const rows: number = 25
+const cols = 40
+const rows = 25
 
 export interface ScreenCell { code: number, color: number }
 export interface Screen { backgroundColor: number, cells: ScreenCell[] }
@@ -37,9 +37,9 @@ function toFramebuf (screen: Screen, name: string): FrameBuf {
   const { backgroundColor, cells } = screen
 
   const framebuf: ScreenCell[][] = []
-  for (let y: number = 0; y < rows; y++) {
+  for (let y = 0; y < rows; y++) {
     const row: ScreenCell[] = []
-    for (let x: number = 0; x < cols; x++) {
+    for (let x = 0; x < cols; x++) {
       row.push(cells[y * cols + x])
     }
     framebuf.push(row)

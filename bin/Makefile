@@ -9,3 +9,6 @@ all:
 clean:
 	rm -rf $(BUILT)
 
+fix:
+	./node_modules/.bin/eslint --fix ./*.ts
+

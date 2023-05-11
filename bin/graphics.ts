@@ -11,7 +11,7 @@ export type Tile = PixelColor[][] // 8 x 8 pixels
 
 export interface SharpImage { data: Buffer, info: OutputInfo }
 
-const bytesPerChar: number = 8
+const bytesPerChar = 8
 
 const mask: Byte[] = [
   0b10000000,
@@ -89,7 +89,7 @@ export function parseHiresByteFromPixelRow (tileRow: PixelColor[], backgroundCol
 // get an 8 PixelColor row as array of pixels from SharpImage. pixels are [r, g, b]
 export function parse8pixelRow (img: SharpImage, offset: number): PixelColor[] {
   const result: PixelColor[] = []
-  for (let i: number = 0; i < 8; i++) {
+  for (let i = 0; i < 8; i++) {
     const firstChannelOffset: number = offset + i * img.info.channels
     result.push([img.data[firstChannelOffset],
       img.data[firstChannelOffset + 1],

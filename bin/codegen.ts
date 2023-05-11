@@ -72,7 +72,7 @@ export const render  = {
 }
 
 export function renderBytes (bytes: number[]): string {
-  let result: string = ''
+  let result = ''
   bytes.forEach((b, i) => {
     if (i % 16 === 0) {
       result += '\n!byte '

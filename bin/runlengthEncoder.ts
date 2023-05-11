@@ -1,16 +1,16 @@
 // use 0 as run marker; N.B. cannot be used as a screencode anymore!
 
 // marks a run (marker, length, value)
-export const runMarker: number = 0
+export const runMarker = 0
 
 // minimum run is 3, because a run needs 3 bytes to encode,
 // encoding smaller runs will increase the size
-export const minRunLength: number = 4
-export const maxRunLength: number = 255
+export const minRunLength = 4
+export const maxRunLength = 255
 
 export function encode(bytes: number[]): number[] {
   let currentByte: number
-  let runLength: number = 0
+  let runLength = 0
   const result: number[] = []
 
   bytes.forEach((b: number, i: number) => {
@@ -28,7 +28,7 @@ export function encode(bytes: number[]): number[] {
         result.push(runLength)
         result.push(currentByte)
       } else {
-        for (let ii: number = 0; ii < runLength; ii++) {
+        for (let ii = 0; ii < runLength; ii++) {
           result.push(currentByte)
         }
       }
@@ -46,18 +46,18 @@ export function encode(bytes: number[]): number[] {
 export function decode(bytes: number[]): number[] {
   const result: number[] = []
 
-  let i: number = 0
+  let i = 0
 
   while (i < bytes.length) {
     let value: number = bytes[i]
-    let length: number = 1
+    let length = 1
     if (value === runMarker) {
       i++
       length = bytes[i]
       i++
       value = bytes[i]
     }
-    for (let ii: number = 0; ii < length; ii++) {
+    for (let ii = 0; ii < length; ii++) {
       result.push(value)
     }
     i++

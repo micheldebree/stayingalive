@@ -57,7 +57,7 @@ async function saveIndexedImage (indexedImage, outputFile): Promise<void> {
 // unflatten image data by converting it to an array of 320x200 pixels of type
 // [r, g, b]
 function unflatten (img: SharpImage): PixelColor[] {
-  let i: number = 0
+  let i = 0
   const result: PixelColor[] = []
   while (i < img.data.length) {
     // assume 3 channels
