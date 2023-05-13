@@ -4,17 +4,13 @@ function hex (n: number): string {
   return `$${n.toString(16)}`
 }
 
-type Mnemonic = "ldx" | "stx" | "inx" | "inc" | "dec" | "rts"
-type Mode = "imm" | "abs" | "implied"
+type Mnemonic = 'ldx' | 'stx' | 'inx' | 'inc' | 'dec' | 'rts'
+type Mode = 'imm' | 'abs' | 'implied'
 
-type ModeInfo = { code: number, bytes: number, cycles: number }
-type Opcode = { mnemonic: Mnemonic,
-  imm?: ModeInfo
-  abs?: ModeInfo
-  implied?: ModeInfo
-}
+type ModeInfo = { code: number; bytes: number; cycles: number }
+type Opcode = { mnemonic: Mnemonic; imm?: ModeInfo; abs?: ModeInfo; implied?: ModeInfo }
 
-export const opcode: {[K in Mnemonic]?: Opcode} = {
+export const opcode: { [K in Mnemonic]?: Opcode } = {
   ldx: {
     mnemonic: 'ldx',
     imm: {
@@ -65,7 +61,7 @@ export const opcode: {[K in Mnemonic]?: Opcode} = {
   }
 }
 
-export const render  = {
+export const render = {
   imm: (opcode: Opcode, argument: number) => `${opcode.mnemonic} #${hex(argument)} ; ${opcode.imm.cycles}\n`,
   abs: (opcode: Opcode, argument: number) => `${opcode.mnemonic} ${hex(argument)} ; ${opcode.abs.cycles}\n`,
   implied: (opcode: Opcode) => `${opcode.mnemonic} ; ${opcode.implied.cycles}\n`
