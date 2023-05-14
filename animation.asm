@@ -80,7 +80,14 @@ rts
 
 !macro advance(loPointers, hiPointers) {
 
-  !let firstFrame = 0
+
+  ; make sure the first frame (the keyframe)
+  ; is only drawn once, because it is expensive
+  ; next time round, start at the second (delta) frame
+  ; make sure the last frame is the same as the first for this to work
+  ; TODO: unneccesary optimization?
+  !let keyFrame = 0
+  !let loopFrame = 1
   !let nrFrames = loPointers - hiPointers
 
   ; self-modifying code variables
@@ -96,7 +103,7 @@ rts
     sta delayCounter
 
   frameIndex:
-    ldx #firstFrame
+    ldx #keyFrame ; first frame is keyframe, only visit once
     lda loPointers,x 
     sta frameCallLo
     lda hiPointers,x
@@ -108,7 +115,7 @@ rts
     lda frameNr
     cmp #nrFrames
     bne return
-      lda #firstFrame
+      lda #loopFrame; loop to the second frame to skip keyframe
       sta frameNr
 
   return:

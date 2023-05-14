@@ -14,7 +14,7 @@
 
 !let music = sid("res/staying.sid")
 !let firstRasterY = $ff
-!let frameRate = 3
+!let frameRate = 2
 
 !let zp = { ; zero page addresses in use for various things
   music0: $fc,
@@ -50,6 +50,7 @@ codeStart:
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
 !include "animationWalker.asm"
+; !include "animationHeart.asm"
 ; !include "animationCube.asm"
 
 !segment code
@@ -57,9 +58,9 @@ codeStart:
 start: { ; set raster interrupt and init
 
   sei
-  jsr init
   +irq::disableKernalRom()
   +irq::disableTimerIrqs()
+  jsr init
 
   ; dummy NMI (Non Maskable Interupt)
   ; to avoid crashing due to RESTORE
@@ -78,7 +79,7 @@ start: { ; set raster interrupt and init
 }
 
 init: {
-  +kernal::clearScreen()
+  ; +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
   ; lda #1
@@ -98,18 +99,18 @@ init: {
 ;   bne loop
 ; }
 
-initScreenMatrix: {
-  lda #$a0
-  ldx #0
- loop:
-  sta $0400,x
-  sta $0500,x
-  sta $0600,x
-  sta $0700,x
-  inx
-  bne loop
-}
-
+; initScreenMatrix: {
+;   lda #$a0
+;   ldx #0
+;  loop:
+;   sta $0400,x
+;   sta $0500,x
+;   sta $0600,x
+;   sta $0700,x
+;   inx
+;   bne loop
+; }
+;
   lda #vic.initD011({})
   sta $d011
 
@@ -122,31 +123,26 @@ initScreenMatrix: {
   jsr typer::setupSprites
   jsr typer::type
 
-; +copyRomChar(1, spriteData)
-
-  jsr animationWalker::drawKeyframe
-  ; jsr animationCube::drawKeyframe
-
-  ; jsr animationHeart2::drawKeyframe
   ; jsr drawRandomJunk
   lda #0
-  ; jsr music.init
+  jsr music.init
 
   rts
 }
 
 mainIrq:  {
   jsr animationWalker::advance
+  ; jsr animationDance::advance
   ; jsr animationCube::advance
   ; inc $d020
   ; jsr typer::initCharacterSet
   ; dec $d020
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
-  ; jsr music.play
-  inc $d020
-  jsr typer::type
-  dec $d020
+  jsr music.play
+  ; inc $d020
+  ; jsr typer::type
+  ; dec $d020
 
 ; ack and return
   asl $d019

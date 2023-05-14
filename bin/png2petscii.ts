@@ -146,12 +146,13 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 // convert an image file to a 40x25 array of screencodes
 async function convertFile (filename: string, charSet: CharSet): Promise<Screen> {
   const image: SharpImage = await loadFile(filename)
+  console.log(filename)
   const backgroundColor: number = bestBackgroundColor(image)
-  const cells: ScreenCell[] = cutIntoTiles(image).map((t, i) => {
-    console.log(i)
+  const cells: ScreenCell[] = cutIntoTiles(image).map((t) => {
+    // console.log(i)
 
-    return bestMatch(t, charSet, backgroundColor)
-    // return bestFastMatch(t, charSet, backgroundColor)
+    // return bestMatch(t, charSet, backgroundColor)
+    return bestFastMatch(t, charSet, backgroundColor)
   })
   return { backgroundColor, cells }
 }
