@@ -23,10 +23,10 @@
 }
 
 !segment basic(start=$0801, end=$080e)
-!segment data(start=$4000, end=$9fff)
+!segment code(start=$080f, end=$3dff)
 !segment sprites(start=$3e00, end=$3fff) ; sprites for the typer
-!segment code(start=$c000, end=$cfff)
-!segment musicSegment(start=$a000, end=$bfff)
+!segment data(start=$4000, end=$cfff)
+!segment musicSegment(start=$e000, end=$ffff)
 
 ; N.B. c64 debugger seems to only support breakpoints in the first
 ; segment it encounters in the debug info xml
@@ -50,7 +50,7 @@ codeStart:
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
 !include "animationWalker.asm"
-; !include "animationHeart.asm"
+!include "animationHeart.asm"
 ; !include "animationCube.asm"
 
 !segment code
@@ -58,6 +58,7 @@ codeStart:
 start: { ; set raster interrupt and init
 
   sei
+  +kernal::clearScreen()
   +irq::disableKernalRom()
   +irq::disableTimerIrqs()
   jsr init
@@ -79,7 +80,6 @@ start: { ; set raster interrupt and init
 }
 
 init: {
-  ; +kernal::clearScreen()
   +vicmacro::selectBank(0)
 
   ; lda #1
@@ -121,11 +121,10 @@ init: {
   sta $d016
 
   jsr typer::setupSprites
-  jsr typer::type
 
   ; jsr drawRandomJunk
   lda #0
-  jsr music.init
+  ; jsr music.init
 
   rts
 }
@@ -139,9 +138,9 @@ mainIrq:  {
   ; dec $d020
   ; jsr animationHeart2::advance
   ; jsr animationHeart::advance
-  jsr music.play
+  ; jsr music.play
   ; inc $d020
-  ; jsr typer::type
+  jsr typer::type
   ; dec $d020
 
 ; ack and return

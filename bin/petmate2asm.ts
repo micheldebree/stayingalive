@@ -16,7 +16,7 @@ const backgroundColor = 0xd021
 const borderColor = 0xd020
 
 // add a few spaces
-function pad(buffer: number[], nrBytes: number) {
+function pad (buffer: number[], nrBytes: number) {
     for (let i = 0; i < nrBytes; i++) {
         buffer.push(space)
     }
@@ -27,7 +27,7 @@ function pad(buffer: number[], nrBytes: number) {
 // color) so this can be used for both screencodes and colors
 // Pads the frame to fill cols x rows
 // TODO: return write operations?
-function getMatrix(frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): number[] {
+function getMatrix (frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): number[] {
     const horSpace: number = cols - frame.width
     const verSpace: number = rows - frame.height
     const paddingLeft: number = Math.max(horSpace >> 1, 0)
@@ -49,7 +49,7 @@ function getMatrix(frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): n
 // convert a frame (sequence of bytes) to write operations
 // only if it differs from previous frame
 // N.B. the index into the bytes array is implicitly the address offset
-function delta(addressOffset: number, frame: number[], previousFrame: number[]): WriteOperation[] {
+function delta (addressOffset: number, frame: number[], previousFrame: number[]): WriteOperation[] {
     // N.B. index in frame is (relative) address
     const result: WriteOperation[] = frame
         .map((v, i): WriteOperation => {
@@ -62,13 +62,13 @@ function delta(addressOffset: number, frame: number[], previousFrame: number[]):
     })
 }
 
-function onlyUnique(value: number, index: number, array: number[]) {
+function onlyUnique (value: number, index: number, array: number[]) {
     return array.indexOf(value) === index
 }
 
 // return all unique screencodes being written, so we can reuse some of them
 // for color writes
-function allScreenCodes(screenWrites: WriteOperation[]): number[] {
+function allScreenCodes (screenWrites: WriteOperation[]): number[] {
     return screenWrites.map(w => w.value).filter(onlyUnique)
 }
 
@@ -83,7 +83,7 @@ function allScreenCodes(screenWrites: WriteOperation[]): number[] {
 //  lda #$3f
 //  sta $0400
 //  sta $d800
-function optimizeColorWrite(colorWrite: WriteOperation, screenCodes: number[]): void {
+function optimizeColorWrite (colorWrite: WriteOperation, screenCodes: number[]): void {
     const matchingValue: number = screenCodes.find((v) => (v & 0b1111) === (colorWrite.value & 0b1111))
     if (matchingValue) {
         console.log(`Replaced color write ${colorWrite.value} with ${matchingValue}`)
@@ -91,7 +91,7 @@ function optimizeColorWrite(colorWrite: WriteOperation, screenCodes: number[]): 
     }
 }
 
-function optimizeInvisibleScreenCodeWrites(
+function optimizeInvisibleScreenCodeWrites (
     screenMatrix: number[],
     previousScreenMatrix: number[],
     colorMatrix: number[],
@@ -106,7 +106,7 @@ function optimizeInvisibleScreenCodeWrites(
     })
 }
 
-function optimizeInvisibleColorWrites(colorMatrix: number[], previousColorMatrix: number[], screenMatrix: number[]) {
+function optimizeInvisibleColorWrites (colorMatrix: number[], previousColorMatrix: number[], screenMatrix: number[]) {
     colorMatrix.forEach((_v, i) => {
         if (screenMatrix[i] === 0x20) {
             colorMatrix[i] = previousColorMatrix[i]
@@ -115,7 +115,7 @@ function optimizeInvisibleColorWrites(colorMatrix: number[], previousColorMatrix
     })
 }
 
-async function convert(filename: string) {
+async function convert (filename: string) {
     const buf: Buffer = await readFile(filename)
     const content: Petmate = fromJSON(buf.toString())
 
@@ -133,8 +133,8 @@ async function convert(filename: string) {
     let prevScreenMatrix: number[] = Array(cols * rows).fill(space)
     const firstFrameBackgroundColor = frames[0].backgroundColor
     let prevColorMatrix: number[] = Array(cols * rows).fill(firstFrameBackgroundColor)
-    let previousBackgroundColor:number = 0
-    let previousBorderColor:number = 0
+    let previousBackgroundColor = 0
+    let previousBorderColor = 0
 
     // write out hi and lo bytes of pointers to the compiled frames
     const firstFrameLabel = 'firstFrame:\n'
@@ -167,7 +167,7 @@ async function convert(filename: string) {
             const colorWrites: WriteOperation[] = delta(colorMem, colorMatrix, prevColorMatrix)
 
             const backgroundColorWrite: WriteOperation = {address: backgroundColor, value: frame.backgroundColor}
-            const borderColorWrite: WriteOperation = {address: borderColor, value: frame.borderColor}
+            const borderColorWrite: WriteOperation = {address: borderColor, value: frame.backgroundColor}
 
             // optimize color writes by re-using screen values
             const usedScreenCodes: number[] = allScreenCodes(screenWrites)

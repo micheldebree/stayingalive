@@ -8,7 +8,7 @@ export const runMarker = 0
 export const minRunLength = 4
 export const maxRunLength = 255
 
-export function encode(bytes: number[]): number[] {
+export function encode (bytes: number[]): number[] {
   let currentByte: number
   let runLength = 0
   const result: number[] = []
@@ -24,9 +24,7 @@ export function encode(bytes: number[]): number[] {
     if (flushRun) {
       // flush previous run
       if (runLength >= minRunLength) {
-        result.push(runMarker)
-        result.push(runLength)
-        result.push(currentByte)
+        result.push(runMarker, runLength, currentByte)
       } else {
         for (let ii = 0; ii < runLength; ii++) {
           result.push(currentByte)
@@ -43,7 +41,7 @@ export function encode(bytes: number[]): number[] {
   return result
 }
 
-export function decode(bytes: number[]): number[] {
+export function decode (bytes: number[]): number[] {
   const result: number[] = []
 
   let i = 0

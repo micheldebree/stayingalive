@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Assume color of pixel 0,0 in first frame is background color
+# The color is used to fill the area when extending the image to 320x200
+BGCOLOR=$(convert "$1[0]" -format '%[pixel:p{0,0}]' info:-)
+echo Background color: $BGCOLOR
+
+convert \
+  -resize 320x200 \
+  -gravity center \
+  -extent 320x200 \
+  -background "$BGCOLOR" \
+  "$1" "$1-320x200.gif"
+
+

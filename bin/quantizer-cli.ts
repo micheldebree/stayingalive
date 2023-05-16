@@ -3,7 +3,7 @@ import {PixelColor, SharpImage} from "./graphics.js";
 import sharp, { Sharp } from 'sharp'
 import {palette, quantize} from "./quantizer.js";
 
-async function loadFile(filename: string): Promise<SharpImage> {
+async function loadFile (filename: string): Promise<SharpImage> {
   return await sharp(filename)
   .resize(320, 200)
   .removeAlpha()
@@ -13,7 +13,7 @@ async function loadFile(filename: string): Promise<SharpImage> {
 }
 
 // convert indexed image back to PixelColor image and save to file
-async function saveIndexedImage(indexedImage: number[], outputFile: string): Promise<void> {
+async function saveIndexedImage (indexedImage: number[], outputFile: string): Promise<void> {
   const pixelImage: PixelColor[] = indexedImage.map(p => palette[p])
   const imageData: Uint8ClampedArray = new Uint8ClampedArray(pixelImage.flat())
   const image: Sharp = sharp(imageData, {

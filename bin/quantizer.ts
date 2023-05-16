@@ -104,9 +104,3 @@ export function quantize (img: SharpImage): number[] {
   return unflatten(img).map(p => quantize2index(p))
 }
 
-// (async function () {
-//   const filenameIn = process.argv[2]
-//   const rawSharpImage = await loadFile(filenameIn)
-//   const indexedImage = quantize(rawSharpImage)
-//   await saveIndexedImage(indexedImage, `${filenameIn}-quantized.png`)
-// })()

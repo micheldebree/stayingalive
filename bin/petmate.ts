@@ -22,7 +22,7 @@ export interface Petmate {
 
 }
 
-export function fromJSON(json: string): Petmate {
+export function fromJSON (json: string): Petmate {
   const content: Petmate = JSON.parse(json)
 
   if (content.version !== 2) {

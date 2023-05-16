@@ -5,18 +5,18 @@ import {opcode, render} from './codegen.js'
 export type WriteBuffer = Array<Array<number>>
 export type WriteOperation = { address: number, value: number }
 
-export function createBuffer(): WriteBuffer {
+export function createBuffer (): WriteBuffer {
   return Array(255).fill(0).map(() => [])
 }
 
 // add a new write (address, value) to the buffer
-export function addWrite(buffer: WriteBuffer, operation: WriteOperation): void {
+export function addWrite (buffer: WriteBuffer, operation: WriteOperation): void {
   buffer[operation.value].push(operation.address)
 }
 
 // TODO: if byte is one lower or higher, use inc or dec instead of write
 // TODO: reuse lower nibble of character writes for color writes
-export function generateCode(buffer: WriteBuffer, label: string): string {
+export function generateCode (buffer: WriteBuffer, label: string): string {
   let result = `${label}:\n`
   let lastIndex = -2
   let cycles = 0

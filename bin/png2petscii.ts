@@ -22,25 +22,43 @@ interface WeightedScreenCell {
   distance: number
 }
 
+enum MatchType {
+  slow,
+  fast
+}
+
+interface Config {
+  medianFilter: number
+  matcher: MatchType
+}
+
+const defaultConfig: Config = {
+  medianFilter: 1,
+  matcher: MatchType.slow
+}
+
 const allChars: Byte[] = Array(255)
   .fill(0)
   .map((_c, i) => i)
-const supportedChars: Byte[] = allChars
+// const supportedChars: Byte[] = allChars
 // const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
+// const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x51,0x57,0xd1,0xd7,0x5a,0xda,0x5b,0xdb,0x56,0x7f]
+// const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x5f,0x69,0xdf,0xe9]
+const supportedChars = allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
 const cols = 40
 const rows = 25
 const width: number = cols * 8
 const height: number = rows * 8
-const supportedExtensions: string[] = ['.png', '.jpg']
+const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
 // load and scale the image
-async function loadFile (filename: string): Promise<SharpImage> {
+async function loadFile (filename: string, config: Config): Promise<SharpImage> {
   return await sharp(filename)
     .resize(width, height)
     .removeAlpha()
     // .greyscale()
     .normalise()
-    // .median(4)
+    .median(config.medianFilter)
     .raw()
     .toBuffer({ resolveWithObject: true })
 }
@@ -48,7 +66,7 @@ async function loadFile (filename: string): Promise<SharpImage> {
 // pixels is an array of color indices
 function mostOccuringColorIndex (pixels: number[]): number {
   const counts: number[] = Array(16).fill(0)
-  pixels.forEach((p) => counts[p]++)
+  pixels.forEach(p => counts[p]++)
 
   return counts.map((c, i) => [i, c]).reduce((a, v) => (v[1] > a[1] ? v : a), [0, 0])[0]
 }
@@ -59,7 +77,7 @@ function bestBackgroundColor (img: SharpImage): number {
 
 // convert a Char (8 bytes) to a colored tile (8 x 8 [r, g, b] pixels)
 function char2Tile (char: Char, color: number, backgroundColor: number): Tile {
-  return Array.from(char).map((b) => byte2Pixels(b, color, backgroundColor))
+  return Array.from(char).map(b => byte2Pixels(b, color, backgroundColor))
 }
 
 function bestCell (allDistances: WeightedScreenCell[]) {
@@ -89,9 +107,9 @@ function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number): Screen
 
   Array(16)
     .fill(0)
-    .filter((v) => v !== backgroundColor)
+    .filter((_v, i) => i !== backgroundColor)
     .forEach((_v, bestColor) => {
-      const distances: WeightedScreenCell[] = supportedChars.map((charIndex) => {
+      const distances: WeightedScreenCell[] = supportedChars.map(charIndex => {
         const charTile = char2Tile(chars[charIndex], bestColor, backgroundColor)
         const cell: ScreenCell = { code: charIndex, color: bestColor }
         return { cell, distance: tileDistance(tile, charTile) }
@@ -104,55 +122,45 @@ function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number): Screen
 function bestFastMatch (tile: Tile, chars: CharSet, backgroundColor: number): ScreenCell {
   const bestColor: number = bestColorMatchForTile(tile, backgroundColor)
 
-  const distances: WeightedScreenCell[] = supportedChars.map((charIndex) => {
+  const distances: WeightedScreenCell[] = supportedChars.map(charIndex => {
     const charTile = char2Tile(chars[charIndex], bestColor, backgroundColor)
     const cell: ScreenCell = { code: charIndex, color: bestColor }
     return { cell, distance: tileDistance(tile, charTile) }
   })
-
   return bestCell(distances)
 }
 
 function quantizeTile (tile: Tile): number[] {
-  return tile.flatMap((row) => row.map((p) => quantize2index(p)))
+  return tile.flatMap(row => row.map(p => quantize2index(p)))
 }
-
-// function indexed2Tile(indexed: number[]): Tile {
-//    let i = 0
-//     const result: PixelColor[][] = []
-//    for (let y =0; y < 8; y++) {
-//     for (let x = 0; x < 8; x++) {
-//
-//     }
-//    }
-// }
 
 // get the most occuring color for the tile, excluding background color
 function bestColorMatchForTile (tile: Tile, backgroundColor: number): number {
-  return mostOccuringColorIndex(quantizeTile(tile).filter((c) => c !== backgroundColor))
+  return mostOccuringColorIndex(quantizeTile(tile).filter(c => c !== backgroundColor))
 }
 
 // cut SharpImage in 8x8 PixelColor tiles, this is a three dimensional array:
 // 8 rows of 8 pixels of [r, g, b]
 function cutIntoTiles (img: SharpImage): Tile[] {
-  return cellOffsets(img).map((offset) =>
+  return cellOffsets(img).map(offset =>
     Array(8)
       .fill(0)
       .map((_v, y) => offset + imageCoordinatesToByteOffset(img, 0, y))
-      .map((rowOffset) => parse8pixelRow(img, rowOffset))
+      .map(rowOffset => parse8pixelRow(img, rowOffset))
   )
 }
 
 // convert an image file to a 40x25 array of screencodes
-async function convertFile (filename: string, charSet: CharSet): Promise<Screen> {
-  const image: SharpImage = await loadFile(filename)
+async function convertFile (filename: string, charSet: CharSet, config: Config): Promise<Screen> {
+  const image: SharpImage = await loadFile(filename, config)
   console.log(filename)
   const backgroundColor: number = bestBackgroundColor(image)
-  const cells: ScreenCell[] = cutIntoTiles(image).map((t) => {
-    // console.log(i)
-
-    // return bestMatch(t, charSet, backgroundColor)
-    return bestFastMatch(t, charSet, backgroundColor)
+  const cells: ScreenCell[] = cutIntoTiles(image).map(t => {
+    if (config.matcher === MatchType.slow) {
+      return bestMatch(t, charSet, backgroundColor)
+    } else {
+      return bestFastMatch(t, charSet, backgroundColor)
+    }
   })
   return { backgroundColor, cells }
 }
@@ -162,6 +170,8 @@ async function convertFile (filename: string, charSet: CharSet): Promise<Screen>
   const filenames: string[] = await toFilenames(inputName, supportedExtensions)
   const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
   // array of screens, one screen is a { screenCodes, colors, backgroundColor }
-  const screens: Screen[] = await Promise.all(filenames.map(async (f) => await convertFile(f, charSet)))
+  // TODO: read config from file
+  const config = defaultConfig
+  const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, config)))
   await toPetmate(`${inputName}.petmate`, screens)
 })()

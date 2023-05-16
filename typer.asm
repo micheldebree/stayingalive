@@ -36,8 +36,6 @@ loop:
   sta vic.sprites.x(0),y
   lda #50
   sta vic.sprites.y(0),y
-  lda #14
-  sta vic.sprites.color(0),x
 setPointer:
   lda #$f8
   sta vic.sprites.pointer(screenMatrix, 0),x
@@ -50,6 +48,17 @@ setPointer:
   inx
   cpx #nrSprites
   bne loop
+  lda #0
+  jsr setColor
+  rts
+}
+
+setColor: {
+  ldx #nrSprites - 1
+loop:
+  sta vic.sprites.color(0),x
+  dex
+  bpl loop
   rts
 }
 
@@ -213,7 +222,8 @@ spriteAddrHi:
 
 text:
   ; 0 = newline, $ff = pause, $fe = clear
-  !byte b.screencode("dear user."),0
+  !byte b.screencode("ok friend, let's start"),0,$ff
+  !byte b.screencode("with some push-ups!"),$ff
   ; !byte b.screencode("dear friend."),$fe
   !byte b.screencode("i "),specialChars.heart,b.screencode(" you!"),$ff,$fe
   !byte b.screencode("i am alive!"),0
