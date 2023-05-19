@@ -5,6 +5,11 @@
 BGCOLOR=$(convert "$1[0]" -format '%[pixel:p{0,0}]' info:-)
 echo Background color: $BGCOLOR
 
+set -ex
+convert  -coalesce "$1" "$1.co.gif"
+trash "$1"
+mv "$1.co.gif" "$1"
+
 convert \
   -resize 320x200 \
   -gravity center \

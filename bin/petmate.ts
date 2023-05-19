@@ -3,8 +3,14 @@ import { writeFile } from 'node:fs/promises'
 const cols = 40
 const rows = 25
 
-export interface ScreenCell { code: number, color: number }
-export interface Screen { backgroundColor: number, cells: ScreenCell[] }
+export interface ScreenCell {
+  code: number
+  color: number
+}
+export interface Screen {
+  backgroundColor: number
+  cells: ScreenCell[]
+}
 export interface FrameBuf {
   width: number
   height: number
@@ -19,7 +25,6 @@ export interface Petmate {
   version: number
   screens: number[]
   framebufs: FrameBuf[]
-
 }
 
 export function fromJSON (json: string): Petmate {
@@ -32,7 +37,6 @@ export function fromJSON (json: string): Petmate {
   return content
 }
 
-// screen = { screenCodes, colors }
 function toFramebuf (screen: Screen, name: string): FrameBuf {
   const { backgroundColor, cells } = screen
 

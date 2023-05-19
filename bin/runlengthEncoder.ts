@@ -14,7 +14,7 @@ export function encode (bytes: number[]): number[] {
   const result: number[] = []
 
   bytes.forEach((b: number, i: number) => {
-    const isLastByte: boolean = (i === (bytes.length - 1))
+    const isLastByte: boolean = i === bytes.length - 1
     const repeatedValue: boolean = b === currentByte
     const flushRun: boolean = !repeatedValue || isLastByte || runLength >= maxRunLength
 

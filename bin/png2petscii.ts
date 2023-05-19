@@ -1,4 +1,5 @@
 import sharp from 'sharp'
+import { writeFile } from 'node:fs/promises'
 import { toFilenames, relativePath } from './utils.js'
 import {
   readChars,
@@ -30,21 +31,24 @@ enum MatchType {
 interface Config {
   medianFilter: number
   matcher: MatchType
-}
-
-const defaultConfig: Config = {
-  medianFilter: 1,
-  matcher: MatchType.slow
+  allowedChars: number[]
 }
 
 const allChars: Byte[] = Array(255)
   .fill(0)
   .map((_c, i) => i)
+
+const defaultConfig: Config = {
+  medianFilter: 1,
+  matcher: MatchType.slow,
+  allowedChars: allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
+}
+
 // const supportedChars: Byte[] = allChars
-// const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
+const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
 // const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x51,0x57,0xd1,0xd7,0x5a,0xda,0x5b,0xdb,0x56,0x7f]
 // const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x5f,0x69,0xdf,0xe9]
-const supportedChars = allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
+// const supportedChars = allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
 const cols = 40
 const rows = 25
 const width: number = cols * 8
@@ -121,7 +125,6 @@ function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number): Screen
 
 function bestFastMatch (tile: Tile, chars: CharSet, backgroundColor: number): ScreenCell {
   const bestColor: number = bestColorMatchForTile(tile, backgroundColor)
-
   const distances: WeightedScreenCell[] = supportedChars.map(charIndex => {
     const charTile = char2Tile(chars[charIndex], bestColor, backgroundColor)
     const cell: ScreenCell = { code: charIndex, color: bestColor }
@@ -174,4 +177,5 @@ async function convertFile (filename: string, charSet: CharSet, config: Config):
   const config = defaultConfig
   const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, config)))
   await toPetmate(`${inputName}.petmate`, screens)
+  await writeFile('default.config.json', JSON.stringify(config))
 })()

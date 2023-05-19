@@ -49,7 +49,8 @@ codeStart:
 
 ; !include "animationDance.asm"
 ; !include "animationHeart2.asm"
-!include "animationWalker.asm"
+; !include "animationWalker.asm"
+!include "animationRunner.asm"
 !include "animationHeart.asm"
 ; !include "animationCube.asm"
 
@@ -124,21 +125,22 @@ init: {
 
   ; jsr drawRandomJunk
   lda #0
-  ; jsr music.init
+  jsr music.init
 
   rts
 }
 
 mainIrq:  {
-  jsr animationWalker::advance
+  ; inc $d020
+  jsr animationRunner::advance
   ; jsr animationDance::advance
   ; jsr animationCube::advance
   ; inc $d020
   ; jsr typer::initCharacterSet
   ; dec $d020
   ; jsr animationHeart2::advance
-  ; jsr animationHeart::advance
-  ; jsr music.play
+  jsr animationHeart::advance
+  jsr music.play
   ; inc $d020
   jsr typer::type
   ; dec $d020

@@ -18,7 +18,7 @@ export const palette: PixelColor[] = [
   [0xa9, 0xff, 0x9f, 0xff], // light green
   [0x70, 0x6e, 0xeb, 0xff], // light blue
   [0xb2, 0xb2, 0xb2, 0xff] // light gray
- ]
+]
 
 // const pepto = new Palette([
 //   [0, 0, 0, 0xff], // black
@@ -81,10 +81,8 @@ export const palette: PixelColor[] = [
 export function quantize2index (color: PixelColor): number {
   return palette
     .map((paletteColor, i) => [i, distance(color, paletteColor)])
-    .reduce((acc, current) => (current[1] < acc[1] ? current : acc),
-      [0, Number.POSITIVE_INFINITY])[0]
+    .reduce((acc, current) => (current[1] < acc[1] ? current : acc), [0, Number.POSITIVE_INFINITY])[0]
 }
-
 
 // unflatten image data by converting it to an array of 320x200 pixels of type
 // [r, g, b]
@@ -103,4 +101,3 @@ function unflatten (img: SharpImage): PixelColor[] {
 export function quantize (img: SharpImage): number[] {
   return unflatten(img).map(p => quantize2index(p))
 }
-

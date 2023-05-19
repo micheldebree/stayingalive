@@ -5,8 +5,6 @@ function hex (n: number): string {
 }
 
 type Mnemonic = 'ldx' | 'stx' | 'inx' | 'inc' | 'dec' | 'rts'
-type Mode = 'imm' | 'abs' | 'implied'
-
 type ModeInfo = { code: number; bytes: number; cycles: number }
 type Opcode = { mnemonic: Mnemonic; imm?: ModeInfo; abs?: ModeInfo; implied?: ModeInfo }
 

@@ -15,6 +15,27 @@
   heart: $53
 }
 
+!let zp = {
+  xPosLo: $f7,
+  xPosHi: $f8
+}
+
+!segment data
+
+text:
+  ; 0 = newline, $ff = pause, $fe = clear
+  !byte b.screencode("ok friend, let's start"),0
+  !byte b.screencode("with some push-ups!"),$ff,$fe
+  ; !byte b.screencode("dear friend."),$fe
+  !byte b.screencode("and remember..."),$ff,0
+  !byte b.screencode("i "),specialChars.heart,b.screencode(" you!"),$ff,$fe
+  !byte b.screencode("i am alive!"),0
+  !byte b.screencode("alive!!!"),$fe
+  !byte b.screencode("and it is all"), 0, b.screencode("thanks to you!"),$ff
+
+  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
 !segment code
 
 setupSprites: {
@@ -33,23 +54,23 @@ setupSprites: {
   ldy #0
   lda #24
 loop:
-  sta vic.sprites.x(0),y
   lda #50
   sta vic.sprites.y(0),y
 setPointer:
   lda #$f8
   sta vic.sprites.pointer(screenMatrix, 0),x
-  lda vic.sprites.x(0),y
-  clc
-  adc #24 * (expandSprites + 1)
+  ; lda vic.sprites.x(0),y
+  ; clc
+  ; adc #24 * (expandSprites + 1)
   inc setPointer + 1
   iny
   iny
   inx
   cpx #nrSprites
   bne loop
-  lda #0
+  lda #1
   jsr setColor
+  jsr setSmall
   rts
 }
 
@@ -61,6 +82,49 @@ loop:
   bpl loop
   rts
 }
+
+setBig: {
+  lda #$ff
+  sta vic.sprites.doubleHeight
+  sta vic.sprites.doubleWidth
+  ldx #7 * 2
+loop:
+  lda spriteCoordsBig,x
+  sta $d000,x
+  dex
+  bpl loop
+  lda #%11100000
+  sta vic.sprites.xHibits
+  rts
+}
+
+setSmall: {
+  lda #0
+  sta vic.sprites.doubleHeight
+  sta vic.sprites.doubleWidth
+  sta vic.sprites.xHibits
+  ldx #7 * 2
+loop:
+  lda spriteCoordsSmall,x
+  sta $d000,x
+  dex
+  bpl loop
+  rts
+}
+
+!segment data
+
+spriteCoordsBig:
+!for i in range(8) {
+  !byte 24 + i * 48, 50
+}
+
+spriteCoordsSmall:
+!for i in range(8) {
+  !byte 24 + i * 24, 50
+}
+
+!segment code
 
 copyRomChar: { ; copy data of 1 character from rom to sprite
 
@@ -174,7 +238,7 @@ else:
 
 clear: { ; clear the sprite carpet
   lda #0
-  ldx #64
+  ldx #63
 clearData:
   sta spriteData,x
   sta spriteData + 1 * 64,x
@@ -182,6 +246,8 @@ clearData:
   sta spriteData + 3 * 64,x
   sta spriteData + 4 * 64,x
   sta spriteData + 5 * 64,x
+  sta spriteData + 6 * 64,x
+  sta spriteData + 7 * 64,x
   dex
   bpl clearData
   sta cursorPosition
@@ -220,16 +286,5 @@ spriteAddrLo:
 spriteAddrHi:
   !byte b.hiBytes(spriteAddresses)
 
-text:
-  ; 0 = newline, $ff = pause, $fe = clear
-  !byte b.screencode("ok friend, let's start"),0,$ff
-  !byte b.screencode("with some push-ups!"),$ff
-  ; !byte b.screencode("dear friend."),$fe
-  !byte b.screencode("i "),specialChars.heart,b.screencode(" you!"),$ff,$fe
-  !byte b.screencode("i am alive!"),0
-  !byte b.screencode("alive!!!"),$fe
-  !byte b.screencode("and it is all"), 0, b.screencode("thanks to you!"),$ff
-
-  !byte $ff,$ff
 
 +debug::registerRange("typer data", typeDelay)

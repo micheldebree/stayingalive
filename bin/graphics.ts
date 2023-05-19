@@ -9,19 +9,14 @@ export type PixelColor = Byte[] // TODO: make r, g, b
 export type CharSet = Char[]
 export type Tile = PixelColor[][] // 8 x 8 pixels
 
-export interface SharpImage { data: Buffer, info: OutputInfo }
+export interface SharpImage {
+  data: Buffer
+  info: OutputInfo
+}
 
 const bytesPerChar = 8
 
-const mask: Byte[] = [
-  0b10000000,
-  0b01000000,
-  0b00100000,
-  0b00010000,
-  0b00001000,
-  0b00000100,
-  0b00000010,
-  0b00000001]
+const mask: Byte[] = [0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001]
 
 // array of offsets for each Char in charData
 export function charOffsets (charData: Byte[]): number[] {
@@ -44,7 +39,7 @@ export function countBits (b: Byte): number {
 
 // convert a Byte to 8 pixels. bit 1 will be color, bit 0 will be background color
 export function byte2Pixels (b: Byte, color: number, backgroundColor: number): PixelColor[] {
-  return mask.map(m => (b & m) !== 0 ? palette[color] : palette[backgroundColor])
+  return mask.map(m => ((b & m) !== 0 ? palette[color] : palette[backgroundColor]))
 }
 
 // hamming distance between two bytes (= number of bits that are the same)
@@ -72,18 +67,20 @@ export function imageCoordinatesToByteOffset (img: SharpImage, x: number, y: num
 export function cellOffsets (img: SharpImage): number[] {
   const cols: number = img.info.width >> 3
   const rows: number = img.info.height >> 3
-  return Array(rows).fill(0)
-    .map((_v, row) => Array(cols).fill(0)
-      .map((_v, col) => imageCoordinatesToByteOffset(img, col * 8, row * 8)))
+  return Array(rows)
+    .fill(0)
+    .map((_v, row) =>
+      Array(cols)
+        .fill(0)
+        .map((_v, col) => imageCoordinatesToByteOffset(img, col * 8, row * 8))
+    )
     .flat()
 }
 
 // parse an 8 palette index row to a hires Byte
 // backgroundcolor is [r, g, b]
 export function parseHiresByteFromPixelRow (tileRow: PixelColor[], backgroundColor: PixelColor): Byte {
-  return mask
-    .filter((_m, i) => distance(tileRow[i], backgroundColor) > 64)
-    .reduce((a, v) => (a | v), 0)
+  return mask.filter((_m, i) => distance(tileRow[i], backgroundColor) > 64).reduce((a, v) => a | v, 0)
 }
 
 // get an 8 PixelColor row as array of pixels from SharpImage. pixels are [r, g, b]
@@ -91,9 +88,7 @@ export function parse8pixelRow (img: SharpImage, offset: number): PixelColor[] {
   const result: PixelColor[] = []
   for (let i = 0; i < 8; i++) {
     const firstChannelOffset: number = offset + i * img.info.channels
-    result.push([img.data[firstChannelOffset],
-      img.data[firstChannelOffset + 1],
-      img.data[firstChannelOffset + 2]])
+    result.push([img.data[firstChannelOffset], img.data[firstChannelOffset + 1], img.data[firstChannelOffset + 2]])
   }
   return result
 }
@@ -101,8 +96,7 @@ export function parse8pixelRow (img: SharpImage, offset: number): PixelColor[] {
 // map c64 Byte order to "normal" Byte order
 export function mapByteOrder (offset: number, bytesPerRow: number): number {
   const x: number = Math.floor(offset / bytesPerChar) % bytesPerRow
-  const y: number = Math.floor(offset / (bytesPerRow * bytesPerChar)) * bytesPerChar +
-      (offset % bytesPerChar)
+  const y: number = Math.floor(offset / (bytesPerRow * bytesPerChar)) * bytesPerChar + (offset % bytesPerChar)
   return y * bytesPerRow + x
 }
 
