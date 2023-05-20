@@ -34,11 +34,11 @@ function spriteAddresses (baseAddress) {
 
 // a random delay per typing position
 function randomDelays () {
-  return Array(nrSprites * charsPerSprite * nrLines).fill(0).map((_unused) => minDelay + Math.random() * maxDelay)
+  return Array(nrSprites * charsPerSprite * nrLines).fill(0).map(() => minDelay + Math.random() * maxDelay)
 }
 
 module.exports = {
-  charAddresses: (_unused) => charAddresses(),
+  charAddresses: () => charAddresses(),
   spriteAddresses: (_unused, baseAddress) => spriteAddresses(baseAddress),
-  randomDelays: (_unused) => randomDelays()
+  randomDelays: () => randomDelays()
 }

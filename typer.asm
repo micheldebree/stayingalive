@@ -11,8 +11,11 @@
 !let expandSprites = 0
 
 ; https://www.pagetable.com/c64ref/charset/
-!let specialChars = {
-  heart: $53
+!let char = {
+  heart: $53,
+  newline: $fd,
+  clear: $fe,
+  pause: $ff
 }
 
 !let zp = {
@@ -22,16 +25,22 @@
 
 !segment data
 
+maskCommand:
+  !byte %10000000 ; msb set = command
+
+maskAnimation: ; $8x = select animation
+  !byte %01110000 
+
+
 text:
-  ; 0 = newline, $ff = pause, $fe = clear
-  !byte b.screencode("ok friend, let's start"),0
-  !byte b.screencode("with some push-ups!"),$ff,$fe
+  !byte b.screencode("ok friend, let's start"),$80,char.pause,$81
+  !byte b.screencode("with some push-ups!"),char.pause,char.clear
   ; !byte b.screencode("dear friend."),$fe
-  !byte b.screencode("and remember..."),$ff,0
-  !byte b.screencode("i "),specialChars.heart,b.screencode(" you!"),$ff,$fe
-  !byte b.screencode("i am alive!"),0
-  !byte b.screencode("alive!!!"),$fe
-  !byte b.screencode("and it is all"), 0, b.screencode("thanks to you!"),$ff
+  !byte b.screencode("and remember..."),char.pause,char.newline
+  !byte b.screencode("i "),char.heart,b.screencode(" you!"),char.pause,char.clear
+  !byte b.screencode("i am alive!"),char.newline
+  !byte b.screencode("alive!!!"),char.clear
+  !byte b.screencode("and it is all"), char.newline, b.screencode("thanks to you!"),char.pause
 
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
@@ -208,8 +217,28 @@ doIt:
   ldx #0
   inc textPosition
   lda text,x
-  cmp #0 ; newline
-  bne elseMaybeStop
+  bit maskCommand
+  bne doCommand
+    tax
+    inc cursorPosition
+    jmp copyRomChar
+
+doCommand:
+  cmp #$ff
+  bne noWait
+    lda #$ff
+    sta typeDelay
+    rts
+
+noWait:
+  cmp #$fe
+  bne noClear
+    jsr clear
+    rts
+
+noClear:
+  cmp #$fd
+  bne noNewline
     lda #3 * nrSprites
     sta cursorPosition
     lda #32 ; fixed delay
@@ -217,23 +246,14 @@ doIt:
     ldx #$20 ; clear cursor
     jmp copyRomChar
 
-elseMaybeStop:
-  cmp #$ff
-  bne elseMaybeClear
-    ldx #$ff
-    stx typeDelay
+noNewline:
+  ; bit maskAnimation
+  ; bne else
+    and #1
+    tax
+    jsr toggle::toggleFlag
     rts
 
-elseMaybeClear:
-  cmp #$fe
-  bne else
-    jsr clear
-    rts
-
-else:
-  tax
-  inc cursorPosition
-  jmp copyRomChar
 }
 
 clear: { ; clear the sprite carpet
@@ -285,6 +305,5 @@ spriteAddrLo:
   
 spriteAddrHi:
   !byte b.hiBytes(spriteAddresses)
-
 
 +debug::registerRange("typer data", typeDelay)

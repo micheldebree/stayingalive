@@ -80,7 +80,6 @@ rts
 
 !macro advance(loPointers, hiPointers) {
 
-
   ; make sure the first frame (the keyframe)
   ; is only drawn once, because it is expensive
   ; next time round, start at the second (delta) frame

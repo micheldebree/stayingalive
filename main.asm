@@ -22,8 +22,7 @@
   music2: $fe
 }
 
-!segment basic(start=$0801, end=$080e)
-!segment code(start=$080f, end=$3dff)
+!segment code(start=$0801, end=$3dff)
 !segment sprites(start=$3e00, end=$3fff) ; sprites for the typer
 !segment data(start=$4000, end=$cfff)
 !segment musicSegment(start=$e000, end=$ffff)
@@ -32,16 +31,15 @@
 ; segment it encounters in the debug info xml
 ; c64jasm seems to output segments sorted by start address
 
-!segment basic
+!segment code
 
 basicStart:
   +kernal::basicstart(start)
   +debug::registerRange("basic", basicStart)
 
-!segment code
-
 codeStart:
 
+!include "toggles.asm"
 !include "typer.asm"
 !include "animation.asm"
 
@@ -121,25 +119,33 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-  jsr typer::setupSprites
 
-  ; jsr drawRandomJunk
+  jsr drawRandomJunk
+  jsr typer::setupSprites
   lda #0
   jsr music.init
+
+  +toggle::off(toggle::RUNNER)
+  +toggle::off(toggle::HEART)
 
   rts
 }
 
 mainIrq:  {
   ; inc $d020
+
+  +toggle::jmpWhenOff(toggle::RUNNER, skipRunner)
   jsr animationRunner::advance
+skipRunner:
   ; jsr animationDance::advance
   ; jsr animationCube::advance
   ; inc $d020
   ; jsr typer::initCharacterSet
   ; dec $d020
   ; jsr animationHeart2::advance
+  +toggle::jmpWhenOff(toggle::HEART, skipHeart)
   jsr animationHeart::advance
+skipHeart:
   jsr music.play
   ; inc $d020
   jsr typer::type
@@ -167,7 +173,7 @@ for:
   !for i in range(4) {
     lda $d41b
     sta $0400 + i * $100,x
-    and #%11
+    ; and #%1111
     sta $d800 + i * $100,x
   }
   inx

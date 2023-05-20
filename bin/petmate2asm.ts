@@ -52,14 +52,10 @@ function getMatrix (frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): 
 function delta (addressOffset: number, frame: number[], previousFrame: number[]): WriteOperation[] {
   // N.B. index in frame is (relative) address
   const result: WriteOperation[] = frame
-    .map((v, i): WriteOperation => {
-      return { address: i, value: v }
-    })
+    .map((v, i): WriteOperation => ({ address: i, value: v }))
     .filter(op => op.value !== previousFrame[op.address])
 
-  return result.map(op => {
-    return { address: addressOffset + op.address, value: op.value }
-  })
+  return result.map(op => ({ address: addressOffset + op.address, value: op.value }))
 }
 
 function onlyUnique (value: number, index: number, array: number[]) {
