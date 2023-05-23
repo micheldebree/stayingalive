@@ -12,8 +12,8 @@ const rows = 25
 const space = 0x20
 const screenMem = 0x400
 const colorMem = 0xd800
-const backgroundColor = 0xd021
-const borderColor = 0xd020
+// const backgroundColor = 0xd021
+// const borderColor = 0xd020
 
 // add a few spaces
 function pad (buffer: number[], nrBytes: number) {
@@ -129,8 +129,8 @@ async function convert (filename: string) {
   let prevScreenMatrix: number[] = Array(cols * rows).fill(space)
   const firstFrameBackgroundColor = frames[0].backgroundColor
   let prevColorMatrix: number[] = Array(cols * rows).fill(firstFrameBackgroundColor)
-  let previousBackgroundColor = 0
-  let previousBorderColor = 0
+  // let previousBackgroundColor = 0
+  // let previousBorderColor = 0
 
   // write out hi and lo bytes of pointers to the compiled frames
   const firstFrameLabel = 'firstFrame:\n'
@@ -162,20 +162,20 @@ async function convert (filename: string) {
       const screenWrites: WriteOperation[] = delta(screenMem, screenMatrix, prevScreenMatrix)
       const colorWrites: WriteOperation[] = delta(colorMem, colorMatrix, prevColorMatrix)
 
-      const backgroundColorWrite: WriteOperation = { address: backgroundColor, value: frame.backgroundColor }
-      const borderColorWrite: WriteOperation = { address: borderColor, value: frame.backgroundColor }
+      // const backgroundColorWrite: WriteOperation = { address: backgroundColor, value: frame.backgroundColor }
+      // const borderColorWrite: WriteOperation = { address: borderColor, value: frame.backgroundColor }
 
       // optimize color writes by re-using screen values
       const usedScreenCodes: number[] = allScreenCodes(screenWrites)
       colorWrites.forEach(w => optimizeColorWrite(w, usedScreenCodes))
-      if (backgroundColor != previousBackgroundColor) {
-        optimizeColorWrite(backgroundColorWrite, usedScreenCodes)
-        addWrite(writes, backgroundColorWrite)
-      }
-      if (borderColor != previousBorderColor) {
-        optimizeColorWrite(borderColorWrite, usedScreenCodes)
-        addWrite(writes, borderColorWrite)
-      }
+      // if (backgroundColor != previousBackgroundColor) {
+      //   optimizeColorWrite(backgroundColorWrite, usedScreenCodes)
+      //   addWrite(writes, backgroundColorWrite)
+      // }
+      // if (borderColor != previousBorderColor) {
+      //   optimizeColorWrite(borderColorWrite, usedScreenCodes)
+      //   addWrite(writes, borderColorWrite)
+      // }
       screenWrites.forEach(w => addWrite(writes, w))
       colorWrites.forEach(w => addWrite(writes, w))
 
@@ -184,8 +184,8 @@ async function convert (filename: string) {
     }
     prevScreenMatrix = screenMatrix
     prevColorMatrix = colorMatrix
-    previousBorderColor = borderColor
-    previousBackgroundColor = backgroundColor
+    // previousBorderColor = borderColor
+    // previousBackgroundColor = backgroundColor
   })
 
   await writeFile(`${filename}${outExtension}`, firstFrame + codeTablesHi + codeTablesLo + codeResult)

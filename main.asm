@@ -14,7 +14,7 @@
 
 !let music = sid("res/staying.sid")
 !let firstRasterY = $ff
-!let frameRate = 2
+!let frameRate = 3
 
 !let zp = { ; zero page addresses in use for various things
   music0: $fc,
@@ -50,6 +50,7 @@ codeStart:
 ; !include "animationWalker.asm"
 !include "animationRunner.asm"
 !include "animationHeart.asm"
+!include "animationDancemove1.asm"
 ; !include "animationCube.asm"
 
 !segment code
@@ -120,7 +121,7 @@ init: {
   sta $d016
 
 
-  jsr drawRandomJunk
+  ; jsr drawRandomJunk
   jsr typer::setupSprites
   lda #0
   jsr music.init
@@ -133,7 +134,7 @@ init: {
 
 mainIrq:  {
   ; inc $d020
-
+  ; jsr animationDancemove1::advance
   +toggle::jmpWhenOff(toggle::RUNNER, skipRunner)
   jsr animationRunner::advance
 skipRunner:

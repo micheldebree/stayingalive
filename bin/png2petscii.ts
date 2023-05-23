@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { writeFile } from 'node:fs/promises'
+// import { writeFile } from 'node:fs/promises'
 import { toFilenames, relativePath } from './utils.js'
 import {
   readChars,
@@ -44,8 +44,8 @@ const defaultConfig: Config = {
   allowedChars: allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
 }
 
-// const supportedChars: Byte[] = allChars
-const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
+const supportedChars: Byte[] = allChars
+// const supportedChars = allChars.slice(64, 128).concat(allChars.slice(192, 256))
 // const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x51,0x57,0xd1,0xd7,0x5a,0xda,0x5b,0xdb,0x56,0x7f]
 // const supportedChars: Byte[] = [0x20,0xa0,0x66,0x68,0x5c,0xe8,0xdc,0xe6,0x5f,0x69,0xdf,0xe9]
 // const supportedChars = allChars.slice(0x40, 0x80).concat(allChars.slice(0xc0, 0x100))
@@ -61,7 +61,7 @@ async function loadFile (filename: string, config: Config): Promise<SharpImage> 
     .resize(width, height)
     .removeAlpha()
     // .greyscale()
-    .normalise()
+    // .normalise()
     .median(config.medianFilter)
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -154,10 +154,10 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 }
 
 // convert an image file to a 40x25 array of screencodes
-async function convertFile (filename: string, charSet: CharSet, config: Config): Promise<Screen> {
+async function convertFile (filename: string, charSet: CharSet, backgroundColor: number, config: Config): Promise<Screen> {
   const image: SharpImage = await loadFile(filename, config)
   console.log(filename)
-  const backgroundColor: number = bestBackgroundColor(image)
+  // const backgroundColor: number = bestBackgroundColor(image)
   const cells: ScreenCell[] = cutIntoTiles(image).map(t => {
     if (config.matcher === MatchType.slow) {
       return bestMatch(t, charSet, backgroundColor)
@@ -168,6 +168,14 @@ async function convertFile (filename: string, charSet: CharSet, config: Config):
   return { backgroundColor, cells }
 }
 
+// get the overall background color from one file, by just getting the first
+// (quantized) pixel
+async function getBackgroundColor (filename: string, config: Config): Promise<number> {
+  console.log(`Getting background color from first pixel of ${filename}`)
+  const image: SharpImage = await loadFile(filename, config)
+  return quantize(image)[0]
+}
+
 (async function () {
   const inputName: string = process.argv[2]
   const filenames: string[] = await toFilenames(inputName, supportedExtensions)
@@ -175,7 +183,9 @@ async function convertFile (filename: string, charSet: CharSet, config: Config):
   // array of screens, one screen is a { screenCodes, colors, backgroundColor }
   // TODO: read config from file
   const config = defaultConfig
-  const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, config)))
+  const backgroundColor = await getBackgroundColor(filenames[0], config)
+
+  const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
   await toPetmate(`${inputName}.petmate`, screens)
-  await writeFile('default.config.json', JSON.stringify(config))
+  // await writeFile('default.config.json', JSON.stringify(config))
 })()

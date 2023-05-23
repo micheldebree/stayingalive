@@ -4,12 +4,13 @@
 
 !let HEART = 0
 !let RUNNER = 1
+!let DANCER = 2
 
 !let ON = %01000000
 !let OFF = 0
 
 toggles:
-!byte 0,0
+!byte 0,0,0
 
 !macro jmpWhenOn(index, label) {
   bit toggles + index
