@@ -28,20 +28,45 @@
 maskCommand:
   !byte %10000000 ; msb set = command
 
-maskAnimation: ; $8x = select animation
-  !byte %01110000 
+; maskAnimation: ; $8x = toggle x
+  ; !byte %01110000 
 
+!macro toggle(nr) {
+  !byte $80 + nr
+}
 
 text:
-  !byte b.screencode("ok friend, let's start"),$80,char.pause,$81
-  !byte b.screencode("with some push-ups!"),char.pause,char.clear
-  ; !byte b.screencode("dear friend."),$fe
-  !byte b.screencode("and remember..."),char.pause,char.newline
-  !byte b.screencode("i "),char.heart,b.screencode(" you!"),char.pause,char.clear
-  !byte b.screencode("i am alive!"),char.newline
-  !byte b.screencode("alive!!!"),char.clear
-  !byte b.screencode("and it is all"), char.newline, b.screencode("thanks to you!"),char.pause
-
+  !byte b.screencode("ok bro, let's get you"),char.newline, b.screencode("movin'")
+  +toggle(toggle::DANCEMOVE1)
+  !byte char.pause
+  ; +toggle(toggle::HEART)
+  !byte char.clear
+  !byte b.screencode("if you are too shy to"),char.newline
+  !byte b.screencode("dance, try this")
+  +toggle(toggle::DANCEMOVE1)
+  +toggle(toggle::RUNNER)
+  !byte char.clear
+  !byte b.screencode("hey! y'all keep movin'"),char.newline
+  !byte b.screencode("now!")
+  +toggle(toggle::DANCEMOVE1)
+  !byte char.pause
+  !byte char.clear
+  +toggle(toggle::RUNNER)
+  +toggle(toggle::DANCEMOVE1)
+  +toggle(toggle::WIPE)
+  !byte b.screencode("a banana a day,"),char.newline
+  !byte b.screencode("keeps the doctor away!")
+  +toggle(toggle::BANANA)
+  !byte char.pause
+  +toggle(toggle::BANANA)
+  +toggle(toggle::WIPE)
+  !byte char.pause
+  +toggle(toggle::DANCEMOVE1)
+  !byte char.pause
+  +toggle(toggle::DANCEMOVE1)
+  +toggle(toggle::RUNNER)
+  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
 
@@ -62,9 +87,6 @@ setupSprites: {
   ldx #0
   ldy #0
   lda #24
-loop:
-  lda #50
-  sta vic.sprites.y(0),y
 setPointer:
   lda #$f8
   sta vic.sprites.pointer(screenMatrix, 0),x
@@ -76,8 +98,8 @@ setPointer:
   iny
   inx
   cpx #nrSprites
-  bne loop
-  lda #1
+  bne setPointer
+  lda #vic.color.black
   jsr setColor
   jsr setSmall
   rts
@@ -125,12 +147,12 @@ loop:
 
 spriteCoordsBig:
 !for i in range(8) {
-  !byte 24 + i * 48, 50
+  !byte 24 + i * 48, 51
 }
 
 spriteCoordsSmall:
 !for i in range(8) {
-  !byte 24 + i * 24, 50
+  !byte 24 + i * 24, 51
 }
 
 !segment code
@@ -247,13 +269,10 @@ noClear:
     jmp copyRomChar
 
 noNewline:
-  ; bit maskAnimation
-  ; bne else
-    and #1
+    and #%00001111
     tax
     jsr toggle::toggleFlag
-    rts
-
+    jmp doIt
 }
 
 clear: { ; clear the sprite carpet

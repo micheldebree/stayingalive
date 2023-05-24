@@ -14,7 +14,7 @@
 
 !let music = sid("res/staying.sid")
 !let firstRasterY = $ff
-!let frameRate = 3
+!let frameRate = 2
 
 !let zp = { ; zero page addresses in use for various things
   music0: $fc,
@@ -30,6 +30,8 @@
 ; N.B. c64 debugger seems to only support breakpoints in the first
 ; segment it encounters in the debug info xml
 ; c64jasm seems to output segments sorted by start address
+; so the code segment needs to start lowest in memory in order to use
+; breakpoints in c64 debugger
 
 !segment code
 
@@ -42,21 +44,18 @@ codeStart:
 !include "toggles.asm"
 !include "typer.asm"
 !include "animation.asm"
+!include "transition.asm"
 
 !segment data
 
-; !include "animationDance.asm"
-; !include "animationHeart2.asm"
-; !include "animationWalker.asm"
 !include "animationRunner.asm"
 !include "animationHeart.asm"
 !include "animationDancemove1.asm"
-; !include "animationCube.asm"
+!include "animationBanana.asm"
 
 !segment code
 
 start: { ; set raster interrupt and init
-
   sei
   +kernal::clearScreen()
   +irq::disableKernalRom()
@@ -82,9 +81,9 @@ start: { ; set raster interrupt and init
 init: {
   +vicmacro::selectBank(0)
 
-  ; lda #1
-  ; sta $d020
-  ; sta $d021
+  lda #vic.color.orange
+  sta $d020
+  sta $d021
 
 ; initColorRam: {
 ;   ldx #0
@@ -120,37 +119,23 @@ init: {
   lda #vic.initD016({})
   sta $d016
 
-
-  ; jsr drawRandomJunk
+  jsr drawRandomJunk
+  +toggle::on(toggle::WIPE)
   jsr typer::setupSprites
   lda #0
   jsr music.init
-
-  +toggle::off(toggle::RUNNER)
-  +toggle::off(toggle::HEART)
 
   rts
 }
 
 mainIrq:  {
-  ; inc $d020
-  ; jsr animationDancemove1::advance
-  +toggle::jmpWhenOff(toggle::RUNNER, skipRunner)
-  jsr animationRunner::advance
-skipRunner:
-  ; jsr animationDance::advance
-  ; jsr animationCube::advance
-  ; inc $d020
-  ; jsr typer::initCharacterSet
-  ; dec $d020
-  ; jsr animationHeart2::advance
-  +toggle::jmpWhenOff(toggle::HEART, skipHeart)
-  jsr animationHeart::advance
-skipHeart:
+  +toggle::jsrWhenOn(toggle::RUNNER, animationRunner::advance)
+  +toggle::jsrWhenOn(toggle::HEART, animationHeart::advance)
+  +toggle::jsrWhenOn(toggle::DANCEMOVE1, animationDancemove1::advance)
+  +toggle::jsrWhenOn(toggle::BANANA, animationBanana::advance)
+  +toggle::jsrWhenOn(toggle::WIPE, transition::wipe)
   jsr music.play
-  ; inc $d020
   jsr typer::type
-  ; dec $d020
 
 ; ack and return
   asl $d019

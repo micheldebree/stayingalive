@@ -10,6 +10,9 @@
   toHi:   $fa
 }
 
+!let keyFrame = 0
+!let loopFrame = 1
+
 !segment code
 
 decodeFrame: { ; draw an RLE frame to $0400
@@ -85,8 +88,6 @@ rts
   ; next time round, start at the second (delta) frame
   ; make sure the last frame is the same as the first for this to work
   ; TODO: unneccesary optimization?
-  !let keyFrame = 0
-  !let loopFrame = 1
   !let nrFrames = loPointers - hiPointers
 
   ; self-modifying code variables
