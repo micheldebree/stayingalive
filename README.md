@@ -26,3 +26,7 @@ Color:
 - Skip random writes -> glitches, less memory
 - Only use delta frames
 - match luminance instead of pixels
+
+
+https://github.com/veltman/gifs
+https://superuser.com/questions/48532/convert-animated-svg-to-movie

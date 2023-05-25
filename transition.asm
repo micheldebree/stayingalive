@@ -1,5 +1,7 @@
 !filescope transition
 
+!let WIPE = 0
+
 !let zp = {
   scrOffset: $f7, ; and $f8
 }
@@ -51,6 +53,11 @@ loop:
   bne done
     lda #0
     sta column
-    +toggle::toggle(toggle::WIPE)
+    +toggle::toggle(transition::WIPE)
 done:
   rts
+
+!segment data
+
+toggles:
+  !byte toggle::OFF

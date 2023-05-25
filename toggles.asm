@@ -9,17 +9,12 @@
 
 !segment data
 
-!let HEART = 0
-!let RUNNER = 1
-!let DANCEMOVE1 = 2
-!let BANANA = 3
-!let WIPE = 4
 
 !let ON =  %01000000
 !let OFF = %00111111
 
 toggles:
-  !byte OFF,OFF,OFF,OFF,OFF
+  !byte OFF
 
 !macro jsrWhenOn(index, label) {
   bit toggles + index
@@ -28,15 +23,23 @@ toggles:
 skip:
 }
 
+!macro rtsWhenOff(toggles, index) {
+  bit toggles + index
+  bvs skip
+  rts
+skip:
+}
+
+!macro jmpWhenOff(toggles, index, label) {
+  bit toggles + index
+  bvc label
+}
+
 !macro on(index) {
-  ; lda #ON
-  ; sta toggles + index
   inc toggles + index
 }
 
 !macro off(index) {
-  ; lda #OFF
-  ; sta toggles + index
   dec toggles + index
 }
 
@@ -46,12 +49,21 @@ skip:
   sta toggles + index
 }
 
-!segment code
+!macro toggleFlagX(toggles) {
+   lda toggles,x
+   eor #ON
+   sta toggles,x
+   rts
+}
+
+; !segment code
+
+
 
 ; toggle flag x
-toggleFlag: 
-  lda toggles,x
-  eor #ON
-  sta toggles,x
-  rts
+; toggleFlag: 
+;   lda toggles,x
+;   eor #ON
+;   sta toggles,x
+;   rts
 

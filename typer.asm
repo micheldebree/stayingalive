@@ -37,34 +37,32 @@ maskCommand:
 
 text:
   !byte b.screencode("ok bro, let's get you"),char.newline, b.screencode("movin'")
-  +toggle(toggle::DANCEMOVE1)
+  +toggle(animation::dancemove1::nr)
   !byte char.pause
-  ; +toggle(toggle::HEART)
-  !byte char.clear
   !byte b.screencode("if you are too shy to"),char.newline
   !byte b.screencode("dance, try this")
-  +toggle(toggle::DANCEMOVE1)
-  +toggle(toggle::RUNNER)
+  ; +toggle(animation::DANCEMOVE1)
+  ; +toggle(animation::RUNNER)
   !byte char.clear
   !byte b.screencode("hey! y'all keep movin'"),char.newline
   !byte b.screencode("now!")
-  +toggle(toggle::DANCEMOVE1)
+  ; +toggle(animation::DANCEMOVE1)
   !byte char.pause
   !byte char.clear
-  +toggle(toggle::RUNNER)
-  +toggle(toggle::DANCEMOVE1)
-  +toggle(toggle::WIPE)
+  ; +toggle(animation::RUNNER)
+  ; +toggle(animation::DANCEMOVE1)
+  +toggle(transition::WIPE)
   !byte b.screencode("a banana a day,"),char.newline
   !byte b.screencode("keeps the doctor away!")
-  +toggle(toggle::BANANA)
+  ; +toggle(animation::BANANA)
   !byte char.pause
-  +toggle(toggle::BANANA)
-  +toggle(toggle::WIPE)
+  ; +toggle(animation::BANANA)
+  ; +toggle(toggle::WIPE)
   !byte char.pause
-  +toggle(toggle::DANCEMOVE1)
+  ; +toggle(animation::DANCEMOVE1)
   !byte char.pause
-  +toggle(toggle::DANCEMOVE1)
-  +toggle(toggle::RUNNER)
+  ; +toggle(animation::DANCEMOVE1)
+  ; +toggle(animation::RUNNER)
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
   !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
@@ -271,7 +269,7 @@ noClear:
 noNewline:
     and #%00001111
     tax
-    jsr toggle::toggleFlag
+    +toggle::toggleFlagX(animation::toggles)
     jmp doIt
 }
 

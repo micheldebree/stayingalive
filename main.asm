@@ -42,16 +42,9 @@ basicStart:
 codeStart:
 
 !include "toggles.asm"
-!include "typer.asm"
 !include "animation.asm"
 !include "transition.asm"
-
-!segment data
-
-!include "animationRunner.asm"
-!include "animationHeart.asm"
-!include "animationDancemove1.asm"
-!include "animationBanana.asm"
+!include "typer.asm"
 
 !segment code
 
@@ -120,7 +113,7 @@ init: {
   sta $d016
 
   jsr drawRandomJunk
-  +toggle::on(toggle::WIPE)
+  +toggle::on(transition::WIPE)
   jsr typer::setupSprites
   lda #0
   jsr music.init
@@ -129,11 +122,19 @@ init: {
 }
 
 mainIrq:  {
-  +toggle::jsrWhenOn(toggle::RUNNER, animationRunner::advance)
-  +toggle::jsrWhenOn(toggle::HEART, animationHeart::advance)
-  +toggle::jsrWhenOn(toggle::DANCEMOVE1, animationDancemove1::advance)
-  +toggle::jsrWhenOn(toggle::BANANA, animationBanana::advance)
-  +toggle::jsrWhenOn(toggle::WIPE, transition::wipe)
+  +animation::play(animation::runner::nr, animation::runner::framesLo, animation::runner::framesHi)
+  +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi)
+  +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi)
+  +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi)
+  ; +animation::play(animation::runner)
+  ; +animation::play(animation::HEART)
+  ; +animation::play(animation::DANCEMOVE1)
+  ; +animation::play(animation::BANANA)
+  ; +toggle::jsrWhenOn(animation::RUNNER, animation::animationRunner::advance)
+  ; +toggle::jsrWhenOn(animation::HEART, animationHeart::advance)
+  ; +toggle::jsrWhenOn(animation::DANCEMOVE1, animationDancemove1::advance)
+  ; +toggle::jsrWhenOn(animation::BANANA, animationBanana::advance)
+  +toggle::jsrWhenOn(transition::WIPE, transition::wipe)
   jsr music.play
   jsr typer::type
 
