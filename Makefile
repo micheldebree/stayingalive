@@ -49,7 +49,8 @@ main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
 	./res/lbs-heart.petmate.gen.asm \
 	./res/runner-frames.petmate.gen.asm \
 	./res/dancemove1-frames.petmate.gen.asm \
-	./res/banana-frames.petmate.gen.asm
+	./res/banana-frames.petmate.gen.asm \
+	./res/iloveu-frames.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg

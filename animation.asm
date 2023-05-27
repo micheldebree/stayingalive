@@ -12,9 +12,7 @@
 
 !macro play(nr, framesLo, framesHi) {
 
-; !! debug::js.log(nr)
-+debug::logHex("toggles", toggles)
-  +toggle::jmpWhenOff(toggles, nr, skip)
+  +toggles::jmpWhenOff(nr, skip)
   ; make sure the first frame (the keyframe)
   ; is only drawn once, because it is expensive
   ; next time round, start at the second (delta) frame
@@ -24,7 +22,7 @@
 
   lda frameDelays + nr
   bne return
-  lda #frameRate
+  lda frameRates + nr
   sta frameDelays + nr
 
   ldy frameIndices + nr ; first frame is keyframe, only visit once
@@ -46,22 +44,20 @@ return:
   dec frameDelays + nr
 
 skip:
-
 }
 
 !segment data
 
-!let nrAnimations = 4
-
-toggles:
-+debug::logHex("toggo", *)
-  !for i in range(nrAnimations) {
-    !byte toggle::OFF
-  }
+!let nrAnimations = 5
 
 frameIndices:
   !for i in range(nrAnimations) {
     !byte 0
+  }
+
+frameRates:
+  !for i in range(nrAnimations) {
+    !byte 2
   }
   
 frameDelays:
@@ -70,21 +66,26 @@ frameDelays:
   }
 
 runner: {
-  !include "res/runner-frames.petmate.gen.asm"
   !let nr = 0
+  !include "res/runner-frames.petmate.gen.asm"
 }
 
 heart: {
-  !include "res/lbs-heart.petmate.gen.asm"
   !let nr = 1
+  !include "res/lbs-heart.petmate.gen.asm"
 }
 
 dancemove1: {
-  !include "res/dancemove1-frames.petmate.gen.asm"
   !let nr = 2
+  !include "res/dancemove1-frames.petmate.gen.asm"
 }
 
 banana: {
-  !include "res/banana-frames.petmate.gen.asm"
   !let nr = 3
+  !include "res/banana-frames.petmate.gen.asm"
+}
+
+iloveu: {
+  !let nr = 4
+  !include "res/iloveu-frames.petmate.gen.asm"
 }

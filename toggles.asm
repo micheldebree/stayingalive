@@ -1,4 +1,4 @@
-!filescope toggle
+!filescope toggles
 ; keep track of on/off toggles for effects
 ; testing is done with the BIT operation, which
 ; puts bit 6 in the Z register
@@ -7,14 +7,22 @@
 ; N.B. because of this, toggling ON (inc) a toggle that is already ON,
 ; needs to be toggled OFF (dec) the same amount of times
 
-!segment data
-
-
 !let ON =  %01000000
 !let OFF = %00111111
 
+!segment data
+
+!let nrToggles = 6
+
+!let RUNNER=0
+!let HEART=1
+!let DANCEMOVE1=2
+!let BANANA=3
+!let ILOVEU=4
+!let WIPE=5
+
 toggles:
-  !byte OFF
+  !for i in range(nrToggles) { !byte OFF }
 
 !macro jsrWhenOn(index, label) {
   bit toggles + index
@@ -23,14 +31,14 @@ toggles:
 skip:
 }
 
-!macro rtsWhenOff(toggles, index) {
+!macro rtsWhenOff(index) {
   bit toggles + index
   bvs skip
   rts
 skip:
 }
 
-!macro jmpWhenOff(toggles, index, label) {
+!macro jmpWhenOff(index, label) {
   bit toggles + index
   bvc label
 }
@@ -49,21 +57,9 @@ skip:
   sta toggles + index
 }
 
-!macro toggleFlagX(toggles) {
+!macro toggleX() {
    lda toggles,x
    eor #ON
    sta toggles,x
    rts
 }
-
-; !segment code
-
-
-
-; toggle flag x
-; toggleFlag: 
-;   lda toggles,x
-;   eor #ON
-;   sta toggles,x
-;   rts
-

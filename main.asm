@@ -113,7 +113,7 @@ init: {
   sta $d016
 
   jsr drawRandomJunk
-  +toggle::on(transition::WIPE)
+  +toggles::on(toggles::WIPE)
   jsr typer::setupSprites
   lda #0
   jsr music.init
@@ -126,15 +126,8 @@ mainIrq:  {
   +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi)
   +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi)
   +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi)
-  ; +animation::play(animation::runner)
-  ; +animation::play(animation::HEART)
-  ; +animation::play(animation::DANCEMOVE1)
-  ; +animation::play(animation::BANANA)
-  ; +toggle::jsrWhenOn(animation::RUNNER, animation::animationRunner::advance)
-  ; +toggle::jsrWhenOn(animation::HEART, animationHeart::advance)
-  ; +toggle::jsrWhenOn(animation::DANCEMOVE1, animationDancemove1::advance)
-  ; +toggle::jsrWhenOn(animation::BANANA, animationBanana::advance)
-  +toggle::jsrWhenOn(transition::WIPE, transition::wipe)
+  +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi)
+  +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
   jsr music.play
   jsr typer::type
 

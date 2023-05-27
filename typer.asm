@@ -36,28 +36,31 @@ maskCommand:
 }
 
 text:
+  +toggle(toggles::ILOVEU)
   !byte b.screencode("ok bro, let's get you"),char.newline, b.screencode("movin'")
-  +toggle(animation::dancemove1::nr)
+  +toggle(toggles::DANCEMOVE1)
+  +toggle(toggles::DANCEMOVE1)
   !byte char.pause
+  +toggle(toggles::DANCEMOVE1)
   !byte b.screencode("if you are too shy to"),char.newline
   !byte b.screencode("dance, try this")
-  ; +toggle(animation::DANCEMOVE1)
-  ; +toggle(animation::RUNNER)
+  +toggle(toggles::DANCEMOVE1)
+  +toggle(toggles::RUNNER)
   !byte char.clear
   !byte b.screencode("hey! y'all keep movin'"),char.newline
   !byte b.screencode("now!")
-  ; +toggle(animation::DANCEMOVE1)
+  +toggle(toggles::DANCEMOVE1)
   !byte char.pause
   !byte char.clear
-  ; +toggle(animation::RUNNER)
-  ; +toggle(animation::DANCEMOVE1)
-  +toggle(transition::WIPE)
+  +toggle(toggles::RUNNER)
+  +toggle(toggles::DANCEMOVE1)
+  +toggle(toggles::WIPE)
   !byte b.screencode("a banana a day,"),char.newline
   !byte b.screencode("keeps the doctor away!")
-  ; +toggle(animation::BANANA)
+  +toggle(toggles::BANANA)
   !byte char.pause
   ; +toggle(animation::BANANA)
-  ; +toggle(toggle::WIPE)
+  +toggle(toggles::WIPE)
   !byte char.pause
   ; +toggle(animation::DANCEMOVE1)
   !byte char.pause
@@ -269,7 +272,7 @@ noClear:
 noNewline:
     and #%00001111
     tax
-    +toggle::toggleFlagX(animation::toggles)
+    +toggles::toggleX()
     jmp doIt
 }
 

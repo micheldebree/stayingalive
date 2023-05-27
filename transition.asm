@@ -1,7 +1,5 @@
 !filescope transition
 
-!let WIPE = 0
-
 !let zp = {
   scrOffset: $f7, ; and $f8
 }
@@ -43,7 +41,7 @@ selectColumn:
 loop:
     lda #$20 ; space
     sta (zp.scrOffset),y
-    +addW(zp.scrOffset, size.cols - 1)
+    +addW(zp.scrOffset, size.cols)
     inx
     cpx #size.rows
   bne loop ; while not all rows done
@@ -53,11 +51,7 @@ loop:
   bne done
     lda #0
     sta column
-    +toggle::toggle(transition::WIPE)
+    +toggles::toggle(toggles::WIPE)
 done:
   rts
 
-!segment data
-
-toggles:
-  !byte toggle::OFF
