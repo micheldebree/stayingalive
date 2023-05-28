@@ -37,6 +37,7 @@ maskCommand:
 
 text:
   +toggle(toggles::ILOVEU)
+  !byte char.pause
   !byte b.screencode("ok bro, let's get you"),char.newline, b.screencode("movin'")
   +toggle(toggles::DANCEMOVE1)
   +toggle(toggles::DANCEMOVE1)

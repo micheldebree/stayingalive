@@ -122,11 +122,11 @@ init: {
 }
 
 mainIrq:  {
-  +animation::play(animation::runner::nr, animation::runner::framesLo, animation::runner::framesHi)
-  +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi)
-  +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi)
-  +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi)
-  +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi)
+  +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi, 0)
+  +animation::play(animation::runner::nr, animation::runner::framesLo, animation::runner::framesHi, 1)
+  +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi, 1)
+  +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi, 1)
+  +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi, 1)
   +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
   jsr music.play
   jsr typer::type

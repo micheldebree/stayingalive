@@ -1,5 +1,3 @@
-import { writeFile } from 'node:fs/promises'
-
 const cols = 40
 const rows = 25
 
@@ -7,10 +5,12 @@ export interface ScreenCell {
   code: number
   color: number
 }
+
 export interface Screen {
   backgroundColor: number
   cells: ScreenCell[]
 }
+
 export interface FrameBuf {
   width: number
   height: number
@@ -21,6 +21,7 @@ export interface FrameBuf {
   framebuf: ScreenCell[][]
   customFonts: object
 }
+
 export interface Petmate {
   version: number
   screens: number[]
@@ -33,7 +34,6 @@ export function fromJSON (json: string): Petmate {
   if (content.version !== 2) {
     throw new Error(`Unsupported Petmate version: ${content.version}`)
   }
-
   return content
 }
 
@@ -60,16 +60,17 @@ function toFramebuf (screen: Screen, name: string): FrameBuf {
   }
 }
 
-export async function toPetmate (filename: string, screens: Screen[]): Promise<void> {
+export function toPetmate (screens: Screen[]): Petmate {
   const framebufs: FrameBuf[] = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`))
   const screenNumbers: number[] = Array.from(Array(screens.length).keys())
-
-  const result: Petmate = {
+  return {
     version: 2,
     screens: screenNumbers,
     framebufs
   }
-
-  await writeFile(filename, JSON.stringify(result))
-  console.log(filename)
 }
+
+export function reverse (petmate: Petmate): void {
+  petmate.framebufs = petmate.framebufs.reverse()
+}
+

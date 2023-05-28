@@ -1,6 +1,7 @@
 import sharp from 'sharp'
-// import { writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import { toFilenames, relativePath } from './utils.js'
+import { Petmate } from './petmate.js'
 import {
   readChars,
   parse8pixelRow,
@@ -178,6 +179,7 @@ async function getBackgroundColor (filename: string, config: Config): Promise<nu
 
 (async function () {
   const inputName: string = process.argv[2]
+  const outputName = `${inputName}.petmate`
   const filenames: string[] = await toFilenames(inputName, supportedExtensions)
   const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
   // array of screens, one screen is a { screenCodes, colors, backgroundColor }
@@ -186,6 +188,8 @@ async function getBackgroundColor (filename: string, config: Config): Promise<nu
   const backgroundColor = await getBackgroundColor(filenames[0], config)
 
   const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
-  await toPetmate(`${inputName}.petmate`, screens)
+  const petmate: Petmate = toPetmate(screens)
+  await writeFile(outputName, JSON.stringify(petmate))
+  console.log(outputName)
   // await writeFile('default.config.json', JSON.stringify(config))
 })()

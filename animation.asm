@@ -1,16 +1,11 @@
 !filescope animation
 
 !let keyFrame = 0
-!let loopFrame = 1
 
 !segment code
 
-; TODO: make subroutine with input:
-; - start of lo bytes of frame addresses
-; - start of hi bytes of frame addresses
-; - number of frames
-
-!macro play(nr, framesLo, framesHi) {
+; loop = 1 = loop, 0 = do not loop
+!macro play(nr, framesLo, framesHi, loop) {
 
   +toggles::jmpWhenOff(nr, skip)
   ; make sure the first frame (the keyframe)
@@ -19,6 +14,10 @@
   ; make sure the last frame is the same as the first for this to work
   ; TODO: unneccesary optimization?
   !let nrFrames = framesLo - framesHi
+
+  +debug::logHex("framesLo",framesLo)
+  +debug::logHex("framesHi",framesHi)
+  !! debug::js.log(nrFrames)
 
   lda frameDelays + nr
   bne return
@@ -35,10 +34,15 @@ frameCall:
   jsr $ffff
   inc frameIndices + nr
   lda frameIndices + nr
-  cmp #nrFrames
+  cmp #nrFrames - 1 + loop ; when not looping, stop before the last frame
+                           ; because the last frame is a delta 
+                           ; frame for the first frame
   bne return
-    lda #loopFrame; loop to the second frame to skip keyframe
+    lda #1; loop to the second frame to skip keyframe
     sta frameIndices + nr
+    !if (loop < 1) {
+      +toggles::toggle(nr)
+    }
 
 return:
   dec frameDelays + nr
