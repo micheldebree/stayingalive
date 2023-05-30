@@ -1,6 +1,7 @@
 !filescope animation
 
-!let keyFrame = 0
+!let nrAnimations = 5
+!let initialFramerates = [2,2,2,2,2]
 
 !segment code
 
@@ -14,17 +15,17 @@
   ; make sure the last frame is the same as the first for this to work
   ; TODO: unneccesary optimization?
   !let nrFrames = framesLo - framesHi
+  !let frameIndex = getFrameIndex + 1
+  !let frameDelay = checkFrameDelay + 1
 
-  +debug::logHex("framesLo",framesLo)
-  +debug::logHex("framesHi",framesHi)
-  !! debug::js.log(nrFrames)
-
-  lda frameDelays + nr
+checkFrameDelay:
+  lda #initialFramerates[nr]
   bne return
   lda frameRates + nr
-  sta frameDelays + nr
+  sta frameDelay
 
-  ldy frameIndices + nr ; first frame is keyframe, only visit once
+getFrameIndex:
+  ldy #0 ; first frame is keyframe, only visit once
   lda framesLo,y 
   sta frameCall + 1
   lda framesHi,y
@@ -32,41 +33,29 @@
 
 frameCall:
   jsr $ffff
-  inc frameIndices + nr
-  lda frameIndices + nr
+  inc frameIndex
+  lda frameIndex
   cmp #nrFrames - 1 + loop ; when not looping, stop before the last frame
                            ; because the last frame is a delta 
                            ; frame for the first frame
   bne return
     lda #1; loop to the second frame to skip keyframe
-    sta frameIndices + nr
+    sta frameIndex
     !if (loop < 1) {
       +toggles::toggle(nr)
     }
 
 return:
-  dec frameDelays + nr
+  dec frameDelay
 
 skip:
 }
 
 !segment data
 
-!let nrAnimations = 5
-
-frameIndices:
-  !for i in range(nrAnimations) {
-    !byte 0
-  }
-
 frameRates:
   !for i in range(nrAnimations) {
-    !byte 2
-  }
-  
-frameDelays:
-  !for i in range(nrAnimations) {
-    !byte frameRate
+    !byte initialFramerates[i]
   }
 
 runner: {

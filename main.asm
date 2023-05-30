@@ -7,8 +7,13 @@
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
 
-; TODO: only use RLE and double buffer to save space? 50Hz is too much
-; for PETSCII animation anyway
+; TODO
+; - [ ] Heartbeat intro
+; - [ ] Staying alive logo
+; - [ ] > 256 bytes of text in typer
+; - [ ] Animation speed control
+; - [ ] Different text themes in typer (position, size)
+; - [ ] Transition effects in typer (bounce, slide, put in border?)
 
 !let screenMatrix = $400
 

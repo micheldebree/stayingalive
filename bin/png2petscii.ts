@@ -76,9 +76,9 @@ function mostOccuringColorIndex (pixels: number[]): number {
   return counts.map((c, i) => [i, c]).reduce((a, v) => (v[1] > a[1] ? v : a), [0, 0])[0]
 }
 
-function bestBackgroundColor (img: SharpImage): number {
-  return mostOccuringColorIndex(quantize(img))
-}
+// function bestBackgroundColor (img: SharpImage): number {
+  // return mostOccuringColorIndex(quantize(img))
+// }
 
 // convert a Char (8 bytes) to a colored tile (8 x 8 [r, g, b] pixels)
 function char2Tile (char: Char, color: number, backgroundColor: number): Tile {
