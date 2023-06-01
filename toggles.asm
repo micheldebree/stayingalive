@@ -10,7 +10,7 @@
 
 !use "toggles.js" as js
 
-!let playlist = js("playlist.json")
+!let playlist = js.playlist("playlist.json")
 
 !let ON =  %01000000
 !let OFF = %00111111
@@ -23,8 +23,6 @@
 !let HEARTSPIN=5
 !let TYPER=6
 !let WIPE=7
-
-!let CMD_TOGGLE = $f0
 
 !let nrToggles = WIPE + 1
 
@@ -78,12 +76,17 @@ showPlayhead: {
 ticker:
   !byte 0,0
 
+commandToggle:
+  !byte js.commandTypes["toggle"] ^ %11110000
+commandBackground:
+  !byte js.commandTypes["bgcolor"] ^ %11110000
+
 playlistLo:
-!byte playlist.ticksLower
+  !byte playlist.ticksLower
 playlistHi:
-!byte playlist.ticksUpper
+  !byte playlist.ticksUpper
 playlistCommand:
-!byte playlist.commands
+  !byte playlist.commands
 
 +debug::registerRange("playlist", playlistLo)
 
@@ -143,17 +146,18 @@ tick: {
     bne done
       inc keyFrame
       lda playlistCommand,x
-      pha
-      and #CMD_TOGGLE
-      cmp #CMD_TOGGLE
-      bne nopCommand
-        pla
+      bit commandToggle
+      bne checkBackground
         and #$0f
         tax
         +toggleX()
         jmp done
-nopCommand:
-      pla
+checkBackground:
+      bit commandBackground
+      bne done
+        and #$0f
+        sta $d020
+        sta $d021
 
 done:
   +bytes::incW(ticker)
