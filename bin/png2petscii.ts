@@ -61,8 +61,6 @@ async function loadFile (filename: string, config: Config): Promise<SharpImage> 
   return await sharp(filename)
     .resize(width, height)
     .removeAlpha()
-    // .greyscale()
-    // .normalise()
     .median(config.medianFilter)
     .raw()
     .toBuffer({ resolveWithObject: true })

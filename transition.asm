@@ -9,30 +9,13 @@
   rows: 25
 }
 
-!macro staW(addr, word) {
-  lda #b.lo(word)
-  sta addr
-  lda #b.hi(word)
-  sta addr + 1
-}
-
-!macro addW(addr, word) {
-  lda addr
-  clc
-  adc #b.lo(word)
-  sta addr
-  lda addr + 1
-  adc #b.hi(word)
-  sta addr + 1
-}
-
 !segment code
 
 !let column = selectColumn + 1
 
 wipe:
 ; !break
-  +staW(zp.scrOffset, screenMatrix)
+  +bytes::staW(zp.scrOffset, screenMatrix)
 
 selectColumn:
   ldy #0
@@ -41,7 +24,7 @@ selectColumn:
 loop:
     lda #$20 ; space
     sta (zp.scrOffset),y
-    +addW(zp.scrOffset, size.cols)
+    +bytes::addW(zp.scrOffset, size.cols)
     inx
     cpx #size.rows
   bne loop ; while not all rows done

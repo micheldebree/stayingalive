@@ -6,6 +6,7 @@ export interface ScreenCell {
   color: number
 }
 
+// TODO: this is not petmate specific?
 export interface Screen {
   backgroundColor: number
   cells: ScreenCell[]

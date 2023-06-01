@@ -4,10 +4,8 @@
 !use "typer.js" as js
 !use "lib/bytes.js" as b
 
-!let spritePointer = $f8
+!let spritePointer = spriteDataStart / $40
 !let nrSprites = 8
-!let spriteSize = $40
-!let spriteData = spritePointer * spriteSize
 !let expandSprites = 0
 
 ; https://www.pagetable.com/c64ref/charset/
@@ -25,73 +23,48 @@
 
 !segment data
 
-maskCommand:
-  !byte %10000000 ; msb set = command
-
-; maskAnimation: ; $8x = toggle x
-  ; !byte %01110000 
 
 !macro toggle(nr) {
-  !byte $80 + nr
+  !byte nr | %10000000
 }
 
 text:
-  +toggle(toggles::ILOVEU)
+  !byte b.screencode("ok bro, let's get you"), char.newline, b.screencode("movin'")
   !byte char.pause
-  !byte b.screencode("ok bro, let's get you"),char.newline, b.screencode("movin'")
-  +toggle(toggles::DANCEMOVE1)
-  +toggle(toggles::DANCEMOVE1)
-  !byte char.pause
-  +toggle(toggles::DANCEMOVE1)
+  !byte char.clear
   !byte b.screencode("if you are too shy to"),char.newline
   !byte b.screencode("dance, try this")
-  +toggle(toggles::DANCEMOVE1)
-  +toggle(toggles::RUNNER)
   !byte char.clear
   !byte b.screencode("hey! y'all keep movin'"),char.newline
   !byte b.screencode("now!")
-  +toggle(toggles::DANCEMOVE1)
   !byte char.pause
   !byte char.clear
-  +toggle(toggles::RUNNER)
-  +toggle(toggles::DANCEMOVE1)
-  +toggle(toggles::WIPE)
   !byte b.screencode("a banana a day,"),char.newline
   !byte b.screencode("keeps the doctor away!")
-  +toggle(toggles::BANANA)
   !byte char.pause
-  ; +toggle(animation::BANANA)
-  +toggle(toggles::WIPE)
   !byte char.pause
-  ; +toggle(animation::DANCEMOVE1)
   !byte char.pause
-  ; +toggle(animation::DANCEMOVE1)
-  ; +toggle(animation::RUNNER)
-  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-  !byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
 
 !segment code
 
 setupSprites: {
   jsr clear
   lda #0
-  sta vic.sprites.prio
+  sta vic::js.sprites.prio
   lda #%11111111
-  sta vic.sprites.enabled
+  sta vic::js.sprites.enabled
   lda #%11111111 * expandSprites
-  sta vic.sprites.doubleHeight
-  sta vic.sprites.doubleWidth
+  sta vic::js.sprites.doubleHeight
+  sta vic::js.sprites.doubleWidth
   tay
   lda #%11100000 * expandSprites
-  sta vic.sprites.xHibits
+  sta vic::js.sprites.xHibits
   ldx #0
   ldy #0
   lda #24
 setPointer:
-  lda #$f8
-  sta vic.sprites.pointer(screenMatrix, 0),x
+  lda #spritePointer
+  sta vic::js.sprites.pointer(screenMatrix, 0),x
   ; lda vic.sprites.x(0),y
   ; clc
   ; adc #24 * (expandSprites + 1)
@@ -101,7 +74,7 @@ setPointer:
   inx
   cpx #nrSprites
   bne setPointer
-  lda #vic.color.black
+  lda #vic::js.color.black
   jsr setColor
   jsr setSmall
   rts
@@ -110,7 +83,7 @@ setPointer:
 setColor: {
   ldx #nrSprites - 1
 loop:
-  sta vic.sprites.color(0),x
+  sta vic::js.sprites.color(0),x
   dex
   bpl loop
   rts
@@ -118,8 +91,8 @@ loop:
 
 setBig: {
   lda #$ff
-  sta vic.sprites.doubleHeight
-  sta vic.sprites.doubleWidth
+  sta vic::js.sprites.doubleHeight
+  sta vic::js.sprites.doubleWidth
   ldx #7 * 2
 loop:
   lda spriteCoordsBig,x
@@ -127,15 +100,15 @@ loop:
   dex
   bpl loop
   lda #%11100000
-  sta vic.sprites.xHibits
+  sta vic::js.sprites.xHibits
   rts
 }
 
 setSmall: {
   lda #0
-  sta vic.sprites.doubleHeight
-  sta vic.sprites.doubleWidth
-  sta vic.sprites.xHibits
+  sta vic::js.sprites.doubleHeight
+  sta vic::js.sprites.doubleWidth
+  sta vic::js.sprites.xHibits
   ldx #7 * 2
 loop:
   lda spriteCoordsSmall,x
@@ -227,42 +200,33 @@ copyDataTo:
 }
 
 type: { ; advance the typing by one step
-  jsr cursor
   dec typeDelay
   beq doIt
   rts
 
 doIt:
   ldy cursorPosition
-  lda randomDelays,y
+  lda randomDelays,y ; 
   sta typeDelay
 
 !let textPosition = * + 1
   ldx #0
   inc textPosition
   lda text,x
-  bit maskCommand
-  bne doCommand
-    tax
-    inc cursorPosition
-    jmp copyRomChar
+  cmp #char.newline
+  beq newLine
+  cmp #char.pause
+  beq pause
+  cmp #char.clear
+  beq clear
+  tax
+  inc cursorPosition
+  jmp copyRomChar
 
-doCommand:
-  cmp #$ff
-  bne noWait
-    lda #$ff
-    sta typeDelay
+pause:
+    +toggles::toggle(toggles::TYPER)
     rts
-
-noWait:
-  cmp #$fe
-  bne noClear
-    jsr clear
-    rts
-
-noClear:
-  cmp #$fd
-  bne noNewline
+newLine:
     lda #3 * nrSprites
     sta cursorPosition
     lda #32 ; fixed delay
@@ -271,9 +235,6 @@ noClear:
     jmp copyRomChar
 
 noNewline:
-    and #%00001111
-    tax
-    +toggles::toggleX()
     jmp doIt
 }
 
@@ -281,14 +242,14 @@ clear: { ; clear the sprite carpet
   lda #0
   ldx #63
 clearData:
-  sta spriteData,x
-  sta spriteData + 1 * 64,x
-  sta spriteData + 2 * 64,x
-  sta spriteData + 3 * 64,x
-  sta spriteData + 4 * 64,x
-  sta spriteData + 5 * 64,x
-  sta spriteData + 6 * 64,x
-  sta spriteData + 7 * 64,x
+  sta spriteDataStart,x
+  sta spriteDataStart + 1 * 64,x
+  sta spriteDataStart + 2 * 64,x
+  sta spriteDataStart + 3 * 64,x
+  sta spriteDataStart + 4 * 64,x
+  sta spriteDataStart + 5 * 64,x
+  sta spriteDataStart + 6 * 64,x
+  sta spriteDataStart + 7 * 64,x
   dex
   bpl clearData
   sta cursorPosition
@@ -319,7 +280,7 @@ charOffsetHi:
   !byte b.hiBytes(charAddresses)
 
 ; address in sprite data for each typing position
-!let spriteAddresses = js.spriteAddresses(spriteData)
+!let spriteAddresses = js.spriteAddresses(spriteDataStart)
 
 spriteAddrLo:
   !byte b.loBytes(spriteAddresses)

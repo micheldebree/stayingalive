@@ -42,7 +42,7 @@ res/%-frames.petmate: res/%-frames
 .PHONY: test
 test: main.run
 
-main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
+main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
 	./res/heart2-frames.petmate.gen.asm \
 	./res/dance1-frames.petmate.gen.asm \
 	./res/walking-frames.petmate.gen.asm \
@@ -50,7 +50,8 @@ main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js \
 	./res/runner-frames.petmate.gen.asm \
 	./res/dancemove1-frames.petmate.gen.asm \
 	./res/banana-frames.petmate.gen.asm \
-	./res/iloveu-frames.petmate.gen.asm
+	./res/iloveu-frames.petmate.gen.asm \
+	./res/heartspin-black-frames.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg

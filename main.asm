@@ -3,17 +3,21 @@
 !include "lib/vic.asm"
 !include "lib/debug.asm"
 !include "lib/irq.asm"
-!use "lib/vic.js" as vic
+!include "lib/bytes.asm"
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
+
+!let debugging = 1
 
 ; TODO
 ; - [ ] Heartbeat intro
 ; - [ ] Staying alive logo
 ; - [ ] > 256 bytes of text in typer
 ; - [ ] Animation speed control
+; - [ ] Animation reset (for heart)
 ; - [ ] Different text themes in typer (position, size)
 ; - [ ] Transition effects in typer (bounce, slide, put in border?)
+; - [X] Variable pauses -> obsolete because of playlist
 
 !let screenMatrix = $400
 
@@ -27,9 +31,11 @@
   music2: $fe
 }
 
-!segment code(start=$0801, end=$3dff)
-!segment sprites(start=$3e00, end=$3fff) ; sprites for the typer
-!segment data(start=$4000, end=$cfff)
+!let spriteDataStart = $2000
+!let spriteDataEnd = spriteDataStart + $40 * 8
+!segment code(start=$0801, end=spriteDataStart-1)
+!segment sprites(start=spriteDataStart, end=spriteDataEnd-1) ; sprites for the typer
+!segment data(start=spriteDataEnd, end=$cfff)
 !segment musicSegment(start=$e000, end=$ffff)
 
 ; N.B. c64 debugger seems to only support breakpoints in the first
@@ -77,9 +83,9 @@ start: { ; set raster interrupt and init
 }
 
 init: {
-  +vicmacro::selectBank(0)
+  +vic::selectBank(0)
 
-  lda #vic.color.orange
+  lda #vic::js.color.orange
   sta $d020
   sta $d021
 
@@ -108,33 +114,41 @@ init: {
 ;   bne loop
 ; }
 ;
-  lda #vic.initD011({})
+  lda #vic::js.initD011({})
   sta $d011
 
-  lda #vic.initD018({})
+  lda #vic::js.initD018({})
   sta $d018
 
-  lda #vic.initD016({})
+  lda #vic::js.initD016({})
   sta $d016
 
   jsr drawRandomJunk
-  +toggles::on(toggles::WIPE)
   jsr typer::setupSprites
   lda #0
   jsr music.init
+  ; +toggles::on(toggles::TYPER)
 
   rts
 }
 
 mainIrq:  {
+  jsr music.play
   +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi, 0)
   +animation::play(animation::runner::nr, animation::runner::framesLo, animation::runner::framesHi, 1)
   +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi, 1)
   +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi, 1)
   +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi, 1)
+  +animation::play(animation::heartspin::nr, animation::heartspin::framesLo, animation::heartspin::framesHi, 1)
   +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
-  jsr music.play
-  jsr typer::type
+  jsr typer::cursor
+  +toggles::jsrWhenOn(toggles::TYPER, typer::type)
+  jsr toggles::tick
+
+  !if (debugging) {
+    jsr toggles::showPlayhead
+  }
+
 
 ; ack and return
   asl $d019

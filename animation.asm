@@ -1,9 +1,8 @@
 !filescope animation
 
-!let nrAnimations = 5
-!let initialFramerates = [2,2,2,2,2]
-
-!segment code
+!let nrAnimations = 6
+!let initialFramerates = [2,2,2,2,2,2]
+!let initialFrames = [0,1,0,0,0,0]
 
 ; loop = 1 = loop, 0 = do not loop
 !macro play(nr, framesLo, framesHi, loop) {
@@ -25,7 +24,7 @@ checkFrameDelay:
   sta frameDelay
 
 getFrameIndex:
-  ldy #0 ; first frame is keyframe, only visit once
+  ldy #initialFrames[nr]
   lda framesLo,y 
   sta frameCall + 1
   lda framesHi,y
@@ -81,4 +80,9 @@ banana: {
 iloveu: {
   !let nr = 4
   !include "res/iloveu-frames.petmate.gen.asm"
+}
+
+heartspin: {
+  !let nr = 5
+  !include "res/heartspin-black-frames.petmate.gen.asm"
 }
