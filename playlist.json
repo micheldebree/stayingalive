@@ -1,37 +1,10 @@
 [
-  {
-    "tick": "0010",
-    "cmd": "toggle",
-    "arg": "5"
-  },
-  {
-    "tick": "0100",
-    "cmd": "bgcolor",
-    "arg": "5"
-  },
-  {
-    "tick": "0200",
-    "cmd": "toggle",
-    "arg": "5"
-  },
-  {
-    "tick": "0201",
-    "cmd": "toggle",
-    "arg": "7"
-  },
-  {
-    "tick": "0220",
-    "cmd": "toggle",
-    "arg": "0"
-  },
-  {
-    "tick": "02c0",
-    "cmd": "toggle",
-    "arg": "6"
-  },
-  {
-    "tick": "0300",
-    "cmd": "toggle",
-    "arg": "1"
-  }
+  { "tick": "0130", "cmd": "toggle", "arg": "heart" },
+  { "tick": "0300", "cmd": "toggle", "arg": "music" },
+  { "tick": "00ff", "cmd": "reset", "arg": "heart" },
+  { "tick": "0200", "cmd": "toggle", "arg": "dancemove1" },
+  { "tick": "0300", "cmd": "toggle", "arg": "dancemove1" },
+  { "tick": "0300", "cmd": "toggle", "arg": "heartspin" },
+  { "tick": "0400", "cmd": "toggle", "arg": "heartspin" },
+  { "tick": "0400", "cmd": "toggle", "arg": "banana" }
 ]

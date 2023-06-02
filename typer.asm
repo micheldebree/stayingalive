@@ -29,6 +29,7 @@
 }
 
 text:
+  !byte b.screencode("i'm alive! alive!"), char.newline, char.pause
   !byte b.screencode("ok bro, let's get you"), char.newline, b.screencode("movin'")
   !byte char.pause
   !byte char.clear
@@ -122,12 +123,12 @@ loop:
 
 spriteCoordsBig:
 !for i in range(8) {
-  !byte 24 + i * 48, 51
+  !byte 24 + i * 48, 50
 }
 
 spriteCoordsSmall:
 !for i in range(8) {
-  !byte 24 + i * 24, 51
+  !byte 24 + i * 24, 50
 }
 
 !segment code

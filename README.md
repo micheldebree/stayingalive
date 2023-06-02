@@ -1,6 +1,11 @@
 # Staying alive
 
 
+Heartbeat = 16 lines temp 3 4 2 2
+
+= 4 x 4 + 3 + 2 + 2 = 44 frames
+
+
 ## TODO
 
 - [ ] Crop GIFs when extracting to 320x200

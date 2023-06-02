@@ -1,8 +1,8 @@
 !filescope animation
 
-!let nrAnimations = 6
-!let initialFramerates = [2,2,2,2,2,2]
-!let initialFrames = [0,1,0,0,0,0]
+!let nrAnimations = 7
+!let initialFramerates = [2,2,2,2,2,2,2]
+!let initialFrames = [0,1,0,0,0,0,0]
 
 ; loop = 1 = loop, 0 = do not loop
 !macro play(nr, framesLo, framesHi, loop) {
@@ -14,7 +14,6 @@
   ; make sure the last frame is the same as the first for this to work
   ; TODO: unneccesary optimization?
   !let nrFrames = framesLo - framesHi
-  !let frameIndex = getFrameIndex + 1
   !let frameDelay = checkFrameDelay + 1
 
 checkFrameDelay:
@@ -24,7 +23,7 @@ checkFrameDelay:
   sta frameDelay
 
 getFrameIndex:
-  ldy #initialFrames[nr]
+  ldy frameIndices + nr
   lda framesLo,y 
   sta frameCall + 1
   lda framesHi,y
@@ -32,14 +31,14 @@ getFrameIndex:
 
 frameCall:
   jsr $ffff
-  inc frameIndex
-  lda frameIndex
+  inc frameIndices + nr
+  lda frameIndices + nr
   cmp #nrFrames - 1 + loop ; when not looping, stop before the last frame
                            ; because the last frame is a delta 
                            ; frame for the first frame
   bne return
     lda #1; loop to the second frame to skip keyframe
-    sta frameIndex
+    sta frameIndices + nr
     !if (loop < 1) {
       +toggles::toggle(nr)
     }
@@ -51,6 +50,12 @@ skip:
 }
 
 !segment data
+
+frameIndices:
+  !for i in range(nrAnimations) {
+    !byte initialFrames[i]
+  }
+
 
 frameRates:
   !for i in range(nrAnimations) {
@@ -79,10 +84,15 @@ banana: {
 
 iloveu: {
   !let nr = 4
-  !include "res/iloveu-frames.petmate.gen.asm"
+  ; !include "res/iloveu-frames.petmate.gen.asm"
 }
 
 heartspin: {
   !let nr = 5
   !include "res/heartspin-black-frames.petmate.gen.asm"
+}
+
+logo: {
+  !let nr = 6
+  !include "res/stayingalive.petmate.gen.asm"
 }

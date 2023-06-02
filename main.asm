@@ -10,11 +10,12 @@
 !let debugging = 1
 
 ; TODO
+; - [ ] Command to change tune
 ; - [ ] Heartbeat intro
-; - [ ] Staying alive logo
+; - [X] Staying alive logo
 ; - [ ] > 256 bytes of text in typer
 ; - [ ] Animation speed control
-; - [ ] Animation reset (for heart)
+; - [X] Animation reset (for heart)
 ; - [ ] Different text themes in typer (position, size)
 ; - [ ] Transition effects in typer (bounce, slide, put in border?)
 ; - [X] Variable pauses -> obsolete because of playlist
@@ -22,7 +23,7 @@
 !let screenMatrix = $400
 
 !let music = sid("res/staying.sid")
-!let firstRasterY = $ff
+!let firstRasterY = $f8
 !let frameRate = 2
 
 !let zp = { ; zero page addresses in use for various things
@@ -56,6 +57,7 @@ codeStart:
 !include "animation.asm"
 !include "transition.asm"
 !include "typer.asm"
+!include "bouncer.asm"
 
 !segment code
 
@@ -84,10 +86,6 @@ start: { ; set raster interrupt and init
 
 init: {
   +vic::selectBank(0)
-
-  lda #vic::js.color.orange
-  sta $d020
-  sta $d021
 
 ; initColorRam: {
 ;   ldx #0
@@ -125,25 +123,28 @@ init: {
 
   jsr drawRandomJunk
   jsr typer::setupSprites
-  lda #0
+  lda #1
   jsr music.init
-  ; +toggles::on(toggles::TYPER)
 
   rts
 }
 
 mainIrq:  {
   jsr music.play
-  +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi, 0)
+  ; +animation::play(animation::iloveu::nr, animation::iloveu::framesLo, animation::iloveu::framesHi, 0)
   +animation::play(animation::runner::nr, animation::runner::framesLo, animation::runner::framesHi, 1)
   +animation::play(animation::heart::nr, animation::heart::framesLo, animation::heart::framesHi, 1)
   +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi, 1)
   +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi, 1)
   +animation::play(animation::heartspin::nr, animation::heartspin::framesLo, animation::heartspin::framesHi, 1)
+  +animation::play(animation::logo::nr, animation::logo::framesLo, animation::logo::framesHi, 0)
   +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
   jsr typer::cursor
   +toggles::jsrWhenOn(toggles::TYPER, typer::type)
   jsr toggles::tick
+  ; jsr bouncer::bounce
+
+  +toggles::jsrWhenOn(toggles::MUSIC, startMusic)
 
   !if (debugging) {
     jsr toggles::showPlayhead
@@ -154,6 +155,12 @@ mainIrq:  {
   asl $d019
 return:
   rti
+}
+
+startMusic: {
+  lda #0
+  jsr music.init
+  +toggles::toggle(toggles::MUSIC)
 }
 
 initRandom: {

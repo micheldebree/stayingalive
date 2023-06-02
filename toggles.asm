@@ -21,10 +21,12 @@
 !let BANANA=3
 !let ILOVEU=4
 !let HEARTSPIN=5
-!let TYPER=6
-!let WIPE=7
+!let LOGO=6
+!let TYPER=7
+!let WIPE=8
+!let MUSIC=9
 
-!let nrToggles = WIPE + 1
+!let nrToggles = MUSIC + 1
 
 !segment code
 
@@ -80,6 +82,8 @@ commandToggle:
   !byte js.commandTypes["toggle"] ^ %11110000
 commandBackground:
   !byte js.commandTypes["bgcolor"] ^ %11110000
+commandReset:
+  !byte js.commandTypes["reset"] ^ %11110000
 
 playlistLo:
   !byte playlist.ticksLower
@@ -154,10 +158,19 @@ tick: {
         jmp done
 checkBackground:
       bit commandBackground
-      bne done
+      bne checkReset
         and #$0f
         sta $d020
         sta $d021
+        jmp done
+checkReset:
+      bit commandReset
+      bne done
+        and #$0f
+        tax
+        lda #0
+        sta animation::frameIndices, x
+
 
 done:
   +bytes::incW(ticker)

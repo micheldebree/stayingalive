@@ -6,6 +6,7 @@ EXOMIZER=/usr/local/bin/exomizer
 BIN=./node_modules/.bin
 
 SRC_ASM=$(shell find . -name "*.asm")
+SRC_JS=$(ls *.js)
 LIB_JS=$(shell find . -name "./lib/*.js")
 RES=$(shell find ./res -name "*.bin" )
 PETMATE=$(shell find ./res -name "*.petmate")
@@ -42,7 +43,7 @@ res/%-frames.petmate: res/%-frames
 .PHONY: test
 test: main.run
 
-main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
+main.prg: $(SRC_ASM) $(SRC_JS) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
 	./res/heart2-frames.petmate.gen.asm \
 	./res/dance1-frames.petmate.gen.asm \
 	./res/walking-frames.petmate.gen.asm \
@@ -51,7 +52,8 @@ main.prg: $(SRC_ASM) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
 	./res/dancemove1-frames.petmate.gen.asm \
 	./res/banana-frames.petmate.gen.asm \
 	./res/iloveu-frames.petmate.gen.asm \
-	./res/heartspin-black-frames.petmate.gen.asm
+	./res/heartspin-black-frames.petmate.gen.asm \
+	./res/stayingalive.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg
