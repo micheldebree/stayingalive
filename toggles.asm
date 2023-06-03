@@ -73,7 +73,7 @@ showPlayhead: {
   rts
 }
 
-!segment data
+; !segment data
 
 ticker:
   !byte 0,0

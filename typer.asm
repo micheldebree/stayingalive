@@ -29,7 +29,12 @@
 }
 
 text:
-  !byte b.screencode("i'm alive! alive!"), char.newline, char.pause
+  !byte b.screencode("hello x!"), char.pause
+  !byte b.screencode(" some people"), char.newline, b.screencode("think i am dead..."), char.pause
+  !byte char.clear
+  !byte b.screencode("but you know better"), char.newline
+  !byte b.screencode("you still love me"), char.pause
+
   !byte b.screencode("ok bro, let's get you"), char.newline, b.screencode("movin'")
   !byte char.pause
   !byte char.clear
@@ -75,9 +80,9 @@ setPointer:
   inx
   cpx #nrSprites
   bne setPointer
-  lda #vic::js.color.black
+  lda #vic::js.color.lightBlue
   jsr setColor
-  jsr setSmall
+  jsr setBig
   rts
 }
 

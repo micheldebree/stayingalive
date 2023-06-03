@@ -44,6 +44,7 @@ res/%-frames.petmate: res/%-frames
 test: main.run
 
 main.prg: $(SRC_ASM) $(SRC_JS) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
+	./res/staying.sid \
 	./res/heart2-frames.petmate.gen.asm \
 	./res/dance1-frames.petmate.gen.asm \
 	./res/walking-frames.petmate.gen.asm \
