@@ -49,7 +49,19 @@
   { "tick": "1800", "cmd": "toggle", "arg": "typer" },
   { "tick": "1801", "cmd": "toggle", "arg": "wipe" },
   { "tick": "18c0", "cmd": "toggle", "arg": "banana" },
-  { "tick": "1980", "cmd": "toggle", "arg": "typer" },
-  { "tick": "1a00", "cmd": "toggle", "arg": "typer" },
-  { "tick": "1b00", "cmd": "toggle", "arg": "typer" }
+  { "tick": "1940", "cmd": "toggle", "arg": "typer" },
+
+  { "tick": "1b80", "cmd": "toggle", "arg": "typer" },
+  { "tick": "1b81", "cmd": "toggle", "arg": "banana" },
+  { "tick": "1b82", "cmd": "toggle", "arg": "wipe" },
+  { "tick": "1cfe", "cmd": "toggle", "arg": "typer" },
+  { "tick": "1cff", "cmd": "reset", "arg": "heartspin" },
+  { "tick": "1d00", "cmd": "toggle", "arg": "heartspin" },
+  { "tick": "1f20", "cmd": "toggle", "arg": "heartspin" },
+  { "tick": "1f21", "cmd": "toggle", "arg": "logo" },
+  { "tick": "1f22", "cmd": "toggle", "arg": "cursor" },
+  { "tick": "1f23", "cmd": "toggle", "arg": "typer" },
+  { "tick": "20ff", "cmd": "reset", "arg": "heartspin" },
+  { "tick": "2100", "cmd": "toggle", "arg": "heartspin" }
+
 ]

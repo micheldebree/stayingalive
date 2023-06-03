@@ -7,7 +7,7 @@
 !use "lib/bytes.js" as b
 !use "lib/sid.js" as sid
 
-!let debugging = 1
+!let debugging = 0
 
 ; TODO
 ; - [ ] Command to change tune

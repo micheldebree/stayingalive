@@ -64,11 +64,7 @@ text:
   !byte char.clear
   !byte b.screencode("i "),char.heart, b.screencode(" you"),char.pause
   !byte char.clear
-  !byte b.screencode("and our bromance"), char.newline
-  !byte b.screencode("will stay alive!"), char.pause
-
-
-
+  !byte char.pause
 
 !segment code
 
@@ -257,10 +253,13 @@ doIt:
   lda randomDelays,y ; 
   sta typeDelay
 
-!let textPosition = * + 1
-  ldx #0
-  inc textPosition
-  lda text,x
+
+textPosition:
+  lda text
+  inc textPosition + 1
+  bne noOverflow
+  inc textPosition + 2
+noOverflow:
   cmp #char.newline
   beq newLine
   cmp #char.pause
