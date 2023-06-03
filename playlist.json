@@ -3,19 +3,53 @@
   { "tick": "0250", "cmd": "toggle", "arg": "pulse" },
   { "tick": "0420", "cmd": "toggle", "arg": "heart" },
   { "tick": "0420", "cmd": "toggle", "arg": "pulse" },
-  { "tick": "0420", "cmd": "toggle", "arg": "music" },
-  { "tick": "0420", "cmd": "toggle", "arg": "logo" },
+  { "tick": "0421", "cmd": "toggle", "arg": "music" },
+  { "tick": "0422", "cmd": "toggle", "arg": "logo" },
   { "tick": "0600", "cmd": "toggle", "arg": "wipe" },
+  { "tick": "0610", "cmd": "toggle", "arg": "cursor" },
+  { "tick": "0610", "cmd": "toggle", "arg": "pulse" },
   { "tick": "0780", "cmd": "toggle", "arg": "typer" },
   { "tick": "0900", "cmd": "toggle", "arg": "typer" },
-  { "tick": "0a80", "cmd": "toggle", "arg": "typer" },
+  { "tick": "0a60", "cmd": "toggle", "arg": "typer" },
+  { "tick": "0a7f", "cmd": "toggle", "arg": "typer" },
   { "tick": "0a80", "cmd": "bgcolor", "arg": "8" },
+  { "tick": "0a81", "cmd": "style", "arg": "1" },
+
+  { "tick": "0b7f", "cmd": "toggle", "arg": "pulse" },
   { "tick": "0b80", "cmd": "toggle", "arg": "heartspin" },
 
-  { "tick": "00ff", "cmd": "reset", "arg": "heart" },
-  { "tick": "0200", "cmd": "toggle", "arg": "dancemove1" },
-  { "tick": "0300", "cmd": "toggle", "arg": "dancemove1" },
-  { "tick": "0300", "cmd": "toggle", "arg": "heartspin" },
-  { "tick": "0400", "cmd": "toggle", "arg": "heartspin" },
-  { "tick": "0400", "cmd": "toggle", "arg": "banana" }
+  { "tick": "0c40", "cmd": "toggle", "arg": "typer" },
+  { "tick": "0e00", "cmd": "toggle", "arg": "typer" },
+
+  { "tick": "0eaf", "cmd": "toggle", "arg": "heartspin" },
+  { "tick": "0eb0", "cmd": "toggle", "arg": "wipe" },
+  { "tick": "0ed6", "cmd": "reset", "arg": "heart" },
+  { "tick": "0ed8", "cmd": "toggle", "arg": "heart" },
+
+  { "tick": "107d", "cmd": "toggle", "arg": "cursor" },
+  { "tick": "107e", "cmd": "toggle", "arg": "typer" },
+  { "tick": "107f", "cmd": "toggle", "arg": "heart" },
+  { "tick": "1080", "cmd": "toggle", "arg": "logo" },
+  { "tick": "11a0", "cmd": "toggle", "arg": "wipe" },
+
+  { "tick": "11ff", "cmd": "toggle", "arg": "cursor" },
+  { "tick": "1200", "cmd": "toggle", "arg": "typer" },
+  { "tick": "12f0", "cmd": "toggle", "arg": "runner" },
+  { "tick": "13c0", "cmd": "toggle", "arg": "typer" },
+
+  { "tick": "147f", "cmd": "reset", "arg": "heart" },
+  { "tick": "1490", "cmd": "toggle", "arg": "heart" },
+
+  { "tick": "15ff", "cmd": "toggle", "arg": "heart" },
+  { "tick": "1650", "cmd": "toggle", "arg": "dancemove1" },
+  { "tick": "1651", "cmd": "toggle", "arg": "typer" },
+
+  { "tick": "17fe", "cmd": "toggle", "arg": "runner" },
+  { "tick": "17ff", "cmd": "toggle", "arg": "dancemove1" },
+  { "tick": "1800", "cmd": "toggle", "arg": "typer" },
+  { "tick": "1801", "cmd": "toggle", "arg": "wipe" },
+  { "tick": "18c0", "cmd": "toggle", "arg": "banana" },
+  { "tick": "1980", "cmd": "toggle", "arg": "typer" },
+  { "tick": "1a00", "cmd": "toggle", "arg": "typer" },
+  { "tick": "1b00", "cmd": "toggle", "arg": "typer" }
 ]

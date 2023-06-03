@@ -23,7 +23,6 @@
 
 !segment data
 
-
 !macro toggle(nr) {
   !byte nr | %10000000
 }
@@ -31,25 +30,45 @@
 text:
   !byte b.screencode("hello x!"), char.pause
   !byte b.screencode(" some people"), char.newline, b.screencode("think i am dead..."), char.pause
-  !byte char.clear
+  !byte char.clear,char.pause
   !byte b.screencode("but you know better"), char.newline
-  !byte b.screencode("you still love me"), char.pause
+  !byte b.screencode("you still "),char.heart, b.screencode(" me!"), char.pause
+  !byte char.clear
+  !byte b.screencode("and i still "), char.heart, b.screencode(" you!"), char.pause
+  !byte char.clear
+  !byte b.screencode("so keep that heart"), char.newline
+  !byte b.screencode("beating for me!")
+  !byte char.pause
+  !byte char.clear
+  !byte char.pause
+  !byte b.screencode("take care, go out")
+  !byte char.newline
+  !byte b.screencode("and keep movin'")
+  !byte char.pause
+  !byte char.clear
+  !byte b.screencode("keep that commodore")
+  !byte char.newline
+  !byte char.heart
+  !byte b.screencode(" beating!")
+  !byte char.pause
+  !byte b.screencode(" bro")
+  !byte char.pause
+  !byte char.clear
+  !byte b.screencode("eat your veggies"), char.newline
+  !byte b.screencode("and your fruit"), char.pause
+  !byte char.clear
+  !byte b.screencode("listen to rob"), char.newline
+  !byte b.screencode("and stop smoking!"), char.pause
+  !byte char.clear
+  !byte b.screencode("because remember..."), char.pause
+  !byte char.clear
+  !byte b.screencode("i "),char.heart, b.screencode(" you"),char.pause
+  !byte char.clear
+  !byte b.screencode("and our bromance"), char.newline
+  !byte b.screencode("will stay alive!"), char.pause
 
-  !byte b.screencode("ok bro, let's get you"), char.newline, b.screencode("movin'")
-  !byte char.pause
-  !byte char.clear
-  !byte b.screencode("if you are too shy to"),char.newline
-  !byte b.screencode("dance, try this")
-  !byte char.clear
-  !byte b.screencode("hey! y'all keep movin'"),char.newline
-  !byte b.screencode("now!")
-  !byte char.pause
-  !byte char.clear
-  !byte b.screencode("a banana a day,"),char.newline
-  !byte b.screencode("keeps the doctor away!")
-  !byte char.pause
-  !byte char.pause
-  !byte char.pause
+
+
 
 !segment code
 
@@ -110,20 +129,37 @@ loop:
   rts
 }
 
-setSmall: {
-  lda #0
-  sta vic::js.sprites.doubleHeight
-  sta vic::js.sprites.doubleWidth
-  sta vic::js.sprites.xHibits
-  ldx #7 * 2
-loop:
-  lda spriteCoordsSmall,x
-  sta $d000,x
-  dex
-  bpl loop
+setStyle: {
+  ldy #7 * 2
+loopY:
+  lda styleY,x
+  sta $d001,y
+  dey
+  dey
+  bpl loopY
+  lda styleColor,x
+  ldy #7
+loopColor:
+  sta vic::js.sprites.color(0),y
+  dey
+  bpl loopColor
   rts
 }
 
+; setSmall: {
+;   lda #0
+;   sta vic::js.sprites.doubleHeight
+;   sta vic::js.sprites.doubleWidth
+;   sta vic::js.sprites.xHibits
+;   ldx #7 * 2
+; loop:
+;   lda spriteCoordsSmall,x
+;   sta $d000,x
+;   dex
+;   bpl loop
+;   rts
+; }
+;
 !segment data
 
 spriteCoordsBig:
@@ -131,10 +167,16 @@ spriteCoordsBig:
   !byte 24 + i * 48, 50
 }
 
-spriteCoordsSmall:
-!for i in range(8) {
-  !byte 24 + i * 24, 50
-}
+styleColor:
+  !byte 14,10,7
+
+styleY:
+  !byte 50,250-2*16, 84
+
+; spriteCoordsSmall:
+; !for i in range(8) {
+;   !byte 24 + i * 24, 50
+; }
 
 !segment code
 

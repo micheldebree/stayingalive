@@ -25,6 +25,7 @@
 !let TYPER=js.toggleTypes.typer
 !let WIPE=js.toggleTypes.wipe
 !let MUSIC=js.toggleTypes.music
+!let CURSOR=js.toggleTypes.cursor
 
 !let nrToggles = MUSIC + 1
 
@@ -84,6 +85,8 @@ commandBackground:
   !byte js.commandTypes["bgcolor"] ^ %11110000
 commandReset:
   !byte js.commandTypes["reset"] ^ %11110000
+commandStyle:
+  !byte js.commandTypes["style"] ^ %11110000
 
 playlistLo:
   !byte playlist.ticksLower
@@ -165,12 +168,18 @@ checkBackground:
         jmp done
 checkReset:
       bit commandReset
-      bne done
+      bne checkStyle
         and #$0f
         tax
         lda #0
         sta animation::frameIndices, x
-
+        jmp done
+checkStyle:
+      bit commandStyle
+      bne done
+        and #$0f
+        tax
+        jsr typer::setStyle
 
 done:
   +bytes::incW(ticker)

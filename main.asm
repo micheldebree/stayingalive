@@ -137,10 +137,10 @@ mainIrq:  {
   +animation::play(animation::dancemove1::nr, animation::dancemove1::framesLo, animation::dancemove1::framesHi, 1)
   +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi, 1)
   +animation::play(animation::heartspin::nr, animation::heartspin::framesLo, animation::heartspin::framesHi, 1)
-  +animation::play(animation::logo::nr, animation::logo::framesLo, animation::logo::framesHi, 0)
   +animation::play(animation::pulse::nr, animation::pulse::framesLo, animation::pulse::framesHi, 1)
+  +animation::play(animation::logo::nr, animation::logo::framesLo, animation::logo::framesHi, 0)
   +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
-  jsr typer::cursor
+  +toggles::jsrWhenOn(toggles::CURSOR, typer::cursor)
   +toggles::jsrWhenOn(toggles::TYPER, typer::type)
   jsr toggles::tick
   ; jsr bouncer::bounce
