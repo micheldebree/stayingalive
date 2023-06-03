@@ -3,8 +3,9 @@
 
 Heartbeat = 16 lines temp 3 4 2 2
 
-= 4 x 4 + 3 + 2 + 2 = 44 frames
+= 4 x 4 + 3 + 2 + 2 = 44 frames, speed 2 = 22 frames
 
+Or 4 * (5 + 4 + 3 + 3) = 60. Speed 2 = 30 frames
 
 ## TODO
 

@@ -138,6 +138,7 @@ mainIrq:  {
   +animation::play(animation::banana::nr, animation::banana::framesLo, animation::banana::framesHi, 1)
   +animation::play(animation::heartspin::nr, animation::heartspin::framesLo, animation::heartspin::framesHi, 1)
   +animation::play(animation::logo::nr, animation::logo::framesLo, animation::logo::framesHi, 0)
+  +animation::play(animation::pulse::nr, animation::pulse::framesLo, animation::pulse::framesHi, 1)
   +toggles::jsrWhenOn(toggles::WIPE, transition::wipe)
   jsr typer::cursor
   +toggles::jsrWhenOn(toggles::TYPER, typer::type)

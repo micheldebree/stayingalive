@@ -16,9 +16,9 @@ const colorMem = 0xd800
 // const borderColor = 0xd020
 
 // add a few spaces
-function pad (buffer: number[], nrBytes: number) {
+function pad (buffer: number[], padValue: number, nrBytes: number) {
   for (let i = 0; i < nrBytes; i++) {
-    buffer.push(space)
+    buffer.push(padValue)
   }
 }
 
@@ -27,7 +27,7 @@ function pad (buffer: number[], nrBytes: number) {
 // color) so this can be used for both screencodes and colors
 // Pads the frame to fill cols x rows
 // TODO: return write operations?
-function getMatrix (frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): number[] {
+function getMatrix (frame: FrameBuf, padValue: number, cellToByte: (cell: ScreenCell) => number): number[] {
   const horSpace: number = cols - frame.width
   const verSpace: number = rows - frame.height
   const paddingLeft: number = Math.max(horSpace >> 1, 0)
@@ -36,13 +36,13 @@ function getMatrix (frame: FrameBuf, cellToByte: (cell: ScreenCell) => number): 
   const paddingBottom: number = verSpace - paddingTop
 
   const result: number[] = []
-  pad(result, paddingTop)
+  pad(result, padValue, paddingTop)
   frame.framebuf.forEach(row => {
-    pad(result, paddingLeft)
+    pad(result, padValue, paddingLeft)
     row.forEach(cell => result.push(cellToByte(cell)))
-    pad(result, paddingRight)
+    pad(result, padValue, paddingRight)
   })
-  pad(result, paddingBottom)
+  pad(result, padValue, paddingBottom)
   return result
 }
 
@@ -140,8 +140,8 @@ async function convert (filename: string) {
   let codeResult = ''
 
   frames.forEach((frame: FrameBuf, frameNr: number) => {
-    const screenMatrix: number[] = getMatrix(frame, cell => cell.code)
-    const colorMatrix: number[] = getMatrix(frame, cell => cell.color)
+    const screenMatrix: number[] = getMatrix(frame, space, cell => cell.code)
+    const colorMatrix: number[] = getMatrix(frame, firstFrameBackgroundColor, cell => cell.color)
 
     // encode the first frame as run lenght encoded data
     if (rleEncodeFirstFrame && frameNr === 0) {

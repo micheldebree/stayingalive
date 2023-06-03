@@ -1,8 +1,11 @@
 const commandTypes = { toggle: 0x00, bgcolor: 0x80, reset: 0x40, nop: 0x20 }
-const toggleTypes = { runner: 0, heart: 1, dancemove1: 2, banana: 3, iloveu: 4, heartspin: 5, typer: 7, logo: 6, wipe: 8, music: 9 }
+// make sure the animations are first, as the index is used
+// also for animation data tables
+const toggleTypes = { runner: 0, heart: 1, dancemove1: 2, banana: 3, iloveu: 4, heartspin: 5, logo: 6, pulse: 7, typer: 10, wipe: 12, music: 13 }
 
 module.exports = {
   commandTypes,
+  toggleTypes,
   playlist: ({ readFileSync, resolveRelative }, filename) => {
     const data = readFileSync(resolveRelative(filename))
     const playlist = JSON.parse(data)

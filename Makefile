@@ -53,7 +53,8 @@ main.prg: $(SRC_ASM) $(SRC_JS) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json
 	./res/banana-frames.petmate.gen.asm \
 	./res/iloveu-frames.petmate.gen.asm \
 	./res/heartspin-black-frames.petmate.gen.asm \
-	./res/stayingalive.petmate.gen.asm
+	./res/stayingalive.petmate.gen.asm \
+	./res/pulse.green.petmate.gen.asm
 
 .PRECIOUS: %.exe.prg
 %.exe.prg: %.prg

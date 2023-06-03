@@ -15,16 +15,16 @@
 !let ON =  %01000000
 !let OFF = %00111111
 
-!let RUNNER=0
-!let HEART=1
-!let DANCEMOVE1=2
-!let BANANA=3
-!let ILOVEU=4
-!let HEARTSPIN=5
-!let LOGO=6
-!let TYPER=7
-!let WIPE=8
-!let MUSIC=9
+!let RUNNER=js.toggleTypes.runner
+!let HEART=js.toggleTypes.heart
+!let DANCEMOVE1=js.toggleTypes.dancemove1
+!let BANANA=js.toggleTypes.dancemove1
+!let ILOVEU=js.toggleTypes.iloveu
+!let HEARTSPIN=js.toggleTypes.heartspin
+!let LOGO=js.toggleTypes.logo
+!let TYPER=js.toggleTypes.typer
+!let WIPE=js.toggleTypes.wipe
+!let MUSIC=js.toggleTypes.music
 
 !let nrToggles = MUSIC + 1
 

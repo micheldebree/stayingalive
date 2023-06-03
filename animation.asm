@@ -1,8 +1,8 @@
 !filescope animation
 
-!let nrAnimations = 7
-!let initialFramerates = [2,2,2,2,2,2,2]
-!let initialFrames = [0,1,0,0,0,0,0]
+!let nrAnimations = 8
+!let initialFramerates = [2,2,2,2,2,2,2,2]
+!let initialFrames = [0,1,0,0,0,0,0,0]
 
 ; loop = 1 = loop, 0 = do not loop
 !macro play(nr, framesLo, framesHi, loop) {
@@ -95,4 +95,9 @@ heartspin: {
 logo: {
   !let nr = 6
   !include "res/stayingalive.petmate.gen.asm"
+}
+
+pulse: {
+  !let nr = 7
+  !include "res/pulse.green.petmate.gen.asm"
 }
