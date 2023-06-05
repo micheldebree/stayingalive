@@ -1,9 +1,12 @@
 BUILT=./built
 
 .PHONY: all
-all:
+all: node_modules
 	./node_modules/.bin/tsc
 	cp characters.901225-01.bin $(BUILT)
+
+node_modules: package.json yarn.lock
+	yarn install
 
 .PHONY: clean
 clean:
