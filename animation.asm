@@ -62,6 +62,8 @@ frameRates:
     !byte initialFramerates[i]
   }
 
+!segment animations
+
 runner: {
   !let nr = 0
   !include "res/runner-frames.petmate.gen.asm"
@@ -82,11 +84,6 @@ banana: {
   !include "res/banana-frames.petmate.gen.asm"
 }
 
-iloveu: {
-  !let nr = 4
-  ; !include "res/iloveu-frames.petmate.gen.asm"
-}
-
 heartspin: {
   !let nr = 5
   !include "res/heartspin-black-frames.petmate.gen.asm"
@@ -101,3 +98,5 @@ pulse: {
   !let nr = 7
   !include "res/pulse.green.petmate.gen.asm"
 }
+
++debug::registerRange("animations", runner)

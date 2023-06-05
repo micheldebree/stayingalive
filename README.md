@@ -1,38 +1,24 @@
-# Staying alive
+# Staying alive, a Commodore 64 demo
 
+Released at [https://csdb.dk/event/?id=3187](https://csdb.dk/event/?id=3187)
 
-Heartbeat = 16 lines temp 3 4 2 2
+[Binaries](https://csdb.dk/release/?id=232978)
 
-= 4 x 4 + 3 + 2 + 2 = 44 frames, speed 2 = 22 frames
+[Youtube](https://www.youtube.com/watch?v=5j-Yj2VKB5c)
 
-Or 4 * (5 + 4 + 3 + 3) = 60. Speed 2 = 30 frames
+## Building
 
-## TODO
+### Prerequisites
 
-- [ ] Crop GIFs when extracting to 320x200
-- [ ] Optimized format (not code) as alternative, use for keyframe
-- [ ] store nrOfFrames with generated code
+- [Node.js](https://nodejs.org/) 17 or higher
+- [Yarn](https://yarnpkg.com/) 1.22 or higher
+- GNU make
 
+### Build
 
-### Optimized format
-
-Black-and-white: 
-
-- 128 character set
-- msb is used as skip count, so 255 means 'skip 128 bytes'
-    :
-Color:
-
-- pack nibbles
-
-
-### Ideas
-
-- Treat key frame differently (run-length encoded)
-- Skip random writes -> glitches, less memory
-- Only use delta frames
-- match luminance instead of pixels
-
-
-https://github.com/veltman/gifs
-https://superuser.com/questions/48532/convert-animated-svg-to-movie
+```sh
+cd bin
+make 
+cd ..
+make main.prg
+```

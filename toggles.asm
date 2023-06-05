@@ -74,11 +74,12 @@ showPlayhead: {
   rts
 }
 
-; !segment data
+!segment data
 
-ticker:
+ticker: ; the position in the timeline
   !byte 0,0
 
+; bit patterns used to trigger different commands
 commandToggle:
   !byte js.commandTypes["toggle"] ^ %11110000
 commandBackground:
@@ -89,28 +90,22 @@ commandStyle:
   !byte js.commandTypes["style"] ^ %11110000
 
 playlistLo:
-  !byte playlist.ticksLower
+  !byte playlist.ticksLower ; lower byte off address of playlist position
 playlistHi:
-  !byte playlist.ticksUpper
+  !byte playlist.ticksUpper ; upper byte off address of playlist position
 playlistCommand:
-  !byte playlist.commands
+  !byte playlist.commands ; the command to execute at the playlist position
 
 +debug::registerRange("playlist", playlistLo)
 
-toggles:
+toggles: ; value (ON/OFF) for each toggle
   !for i in range(nrToggles) { !byte OFF }
 
+; call a subroutine when a toggle is on
 !macro jsrWhenOn(index, label) {
   bit toggles + index
   bvc skip
   jsr label
-skip:
-}
-
-!macro rtsWhenOff(index) {
-  bit toggles + index
-  bvs skip
-  rts
 skip:
 }
 
@@ -140,36 +135,44 @@ skip:
    rts
 }
 
+!segment code
+
+; advance time ticker and execute command if position
+; matches a playlist entry
 tick: {
 
 !let keyFrame = * + 1
 
-  ldx #0
+  ldx #0 ; the position off the next command in the playlist
   lda playlistLo,x
   cmp ticker
   bne done
     lda playlistHi,x
     cmp ticker + 1
     bne done
-      inc keyFrame
-      lda playlistCommand,x
+      ; ticker matches timestamp of next playlist entry
+      inc keyFrame ; advance playlist position
+      lda playlistCommand,x ; load the current command
       bit commandToggle
       bne checkBackground
-        and #$0f
+        ; the command is a toggle command
+        and #$0f ; low nibble is the number of the toggle to toggle
         tax
         +toggleX()
         jmp done
 checkBackground:
       bit commandBackground
       bne checkReset
-        and #$0f
+        ; the command is a change background color command
+        and #$0f ; low nibble is the color
         sta $d020
         sta $d021
         jmp done
 checkReset:
       bit commandReset
       bne checkStyle
-        and #$0f
+        ; the command is an animation reset command
+        and #$0f ; low nibble is the animation nr to reset
         tax
         lda #0
         sta animation::frameIndices, x
@@ -177,11 +180,12 @@ checkReset:
 checkStyle:
       bit commandStyle
       bne done
-        and #$0f
+        ; the command is a style command for the typer
+        and #$0f ; low nibble is the nr of the style to apply
         tax
         jsr typer::setStyle
 
 done:
-  +bytes::incW(ticker)
+  +bytes::incW(ticker) ; advance the time ticker
   rts
 }

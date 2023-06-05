@@ -36,23 +36,15 @@ GENASM=$(PETMATE:.petmate=.petmate.gen.asm)
 res/%-frames: res/%.gif
 	./res/extract-gif.sh "$<" "$@"
 
-.PRECIOUS: res/%-frames.petmate
-res/%-frames.petmate: res/%-frames
-	node ./bin/built/png2petscii.js "$<"
-
 .PHONY: test
 test: main.run
 
 main.prg: $(SRC_ASM) $(SRC_JS) $(LIB_JS) $(RES) $(GENASM) typer.js playlist.json \
 	./res/staying.sid \
-	./res/heart2-frames.petmate.gen.asm \
-	./res/dance1-frames.petmate.gen.asm \
-	./res/walking-frames.petmate.gen.asm \
 	./res/lbs-heart.petmate.gen.asm \
 	./res/runner-frames.petmate.gen.asm \
 	./res/dancemove1-frames.petmate.gen.asm \
 	./res/banana-frames.petmate.gen.asm \
-	./res/iloveu-frames.petmate.gen.asm \
 	./res/heartspin-black-frames.petmate.gen.asm \
 	./res/stayingalive.petmate.gen.asm \
 	./res/pulse.green.petmate.gen.asm
